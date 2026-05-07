@@ -131,7 +131,14 @@ body{
 }
 
 
-
+/* CSS for savedLocations.html */
+.location_card {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    background-color: rgb(158, 158, 158);
+    margin: 20px;
+    padding: 10px;
+}
 
 /* For mobile */
  @media screen and (max-width: 600px)
