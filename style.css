@@ -23,7 +23,118 @@ body{
     padding: 0%;
 }
 
-@media screen and (max-width: 600px)
+.container{
+    display: grid;
+    height: 100vh;
+    grid-template-rows: 10vh 80vh 10vh;
+}
+
+.icon{
+    width: 40px;
+    height: auto;
+}
+
+.header{
+    display: grid;
+    grid-row: 1 / span 1;
+    background-color: rgb(227, 227, 227);
+}
+
+.header_container{
+    display: grid;
+    width: 100vw;
+    height: 10vh;
+    grid-template-rows: 10vh;
+    grid-template-columns: 25vw 25vw 25vw 25vw;
+}
+
+.profile_button{
+    grid-row: 1 / span 1;
+    grid-column: 4 / span 1;
+    justify-self: center;
+    align-self: center;
+}
+
+.profile_icon{
+    width: 60px;
+    height: auto;
+}
+
+.recipe_icon{
+    width: 60px;
+    height: auto;
+}
+
+.map_icon{
+    width: 40px;
+    height: auto;
+}
+
+.ingredients_icon{
+    width: 60px;
+    height: auto;
+}
+
+.footer{
+    display: grid;
+    grid-row: 3 / span 1;
+    background-color: rgb(227, 227, 227);
+}
+
+
+.footer-container{
+    display: grid;
+    width: 100vw;
+    height: 10vh;
+    grid-template-columns: 33.5vw 33vw 33.5vw;
+    grid-template-rows: 10vh;
+}
+
+.recipe_button{
+    grid-row: 1 / span 1;
+    grid-column: 1 / span 1;
+}
+
+.map_button{
+    grid-row: 1 / span 1;
+    grid-column: 2 / span 1;
+}
+
+.ingredients_button{
+    grid-row: 1 / span 1;
+    grid-column: 3 / span 1;
+}
+
+.main{
+    grid-row: 2 / span 1;
+    overflow-y: auto;
+}
+
+
+
+/* CSS for savedRecipes.html */
+
+.recipe_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 30px;
+}
+
+.recipe_card {
+    aspect-ratio: 1 / 1;
+    background-color: rgb(220, 220, 220);
+    border: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+
+
+
+/* For mobile */
+ @media screen and (max-width: 600px)
 {
     .container{
         display: grid;
