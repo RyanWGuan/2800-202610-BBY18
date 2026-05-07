@@ -19,7 +19,10 @@ app.get('/profile', (req,res) => {
 });
 
 app.get('/map', (req,res) => {
-    res.render('map');
+    res.render('map', {
+        cssFiles: ['style'],
+        mapboxToken: process.env.MAPBOX_TOKEN
+    });
 });
 
 app.get('/ingredients', (req,res) => {
