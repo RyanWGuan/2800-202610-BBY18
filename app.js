@@ -14,12 +14,17 @@ app.get('/', (req, res) => {
     });
 });
 
+app.get('/profile', (req,res) => {
+    res.render('profile');
+});
 
+app.get('/map', (req,res) => {
+    res.render('map');
+});
 
-
-
-
-
+app.get('/ingredients', (req,res) => {
+    res.render('ingredients');
+});
 
 // 404
 app.use((req,res) => {
