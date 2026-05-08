@@ -1,10 +1,88 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 #map {
-    flex: 1;
-    width: 100%;
+  flex: 1;
+  width: 100%;
+}
+
+/* ── Retractable radius panel ── */
+#radius-panel {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+}
+
+/* Arrow tab */
+#radius-toggle {
+  background: gray;
+  color: #fff;
+  border: none;
+  padding: 0.9em 0.5em;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+/* Sliding content drawer */
+#radius-content {
+  background: gray;
+  color: #fff;
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75em;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* Open state — mobile */
+#radius-panel.open #radius-content {
+  width: 45vw;
+  padding: 1em 0.875em;
+}
+
+#radius-content label {
+  font-size: 0.75rem;
+  color: #ccc;
+  display: block;
+  margin-bottom: 0.25em;
+}
+
+#radius-input {
+  width: 100%;
+  padding: 0.5em 0.625em;
+  border: 0.0625rem solid #555;
+  background: #1c1c1c;
+  color: #fff;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+#radius-input:focus {
+  outline: none;
+  border-color: blue;
+}
+
+#radius-apply {
+  padding: 0.55em 0;
+  background: blue;
+  color: #fff;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
 }
