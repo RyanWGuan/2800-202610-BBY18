@@ -17,7 +17,6 @@ const geolocate = new mapboxgl.GeolocateControl({
 
 map.addControl(geolocate);
 
-// Automatically go to user location once the map loads
 map.on('load', () => {
     geolocate.trigger();
 });
