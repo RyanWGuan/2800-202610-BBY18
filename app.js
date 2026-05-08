@@ -18,19 +18,22 @@ app.get('/', (req, res) => {
 
 app.get('/login', (req, res) => {
     res.render('login', {
-        cssFiles: ['login']
+        cssFiles: ['login'],
+        jsFiles: ['login']
     });
 });
 
 app.get('/profile', (req,res) => {
     res.render('profile', {
-        cssFiles: ['style']
+        cssFiles: ['style'],
+        jsFiles: ['profile']
     });
 });
 
 app.get('/map', (req,res) => {
     res.render('map', {
         cssFiles: ['style'],
+        jsFiles: ['map'],
         mapboxToken: process.env.MAPBOX_TOKEN
     });
 });
@@ -40,20 +43,26 @@ app.get('/ingredients', (req,res) => {
 });
 
 app.get("/savedLocations", (req, res) => {
-    res.render("savedLocations", { cssFiles: ["style"] });
+    res.render("savedLocations", { 
+        cssFiles: ["style"],
+        jsFiles: []
+    });
 });
 
 app.get("/savedRecipes", (req, res) => {
-    res.render("savedRecipes", { cssFiles: ["style"] });
+    res.render("savedRecipes", { 
+        cssFiles: ["style"],
+        jsFiles: []
+    });
 });
 
 // 404
 app.use((req,res) => {
-	res.status(404);
-	res.send("Page not found - 404");
+    res.status(404);
+    res.send("Page not found - 404");
 });
 
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
-});
+}); 
