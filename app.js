@@ -11,19 +11,29 @@ app.use(express.static('public'));
 // Index
 app.get('/', (req, res) => {
     res.render('recipes', {
-        cssFiles: ['style']
+        cssFiles: ['style', 'recipe'],
+        jsFiles: ['recipe']
+    });
+});
+
+app.get('/login', (req, res) => {
+    res.render('login', {
+        cssFiles: ['login'],
+        jsFiles: ['login']
     });
 });
 
 app.get('/profile', (req,res) => {
     res.render('profile', {
-        cssFiles: ['style']
+        cssFiles: ['style'],
+        jsFiles: ['profile']
     });
 });
 
 app.get('/map', (req,res) => {
     res.render('map', {
         cssFiles: ['style'],
+        jsFiles: ['map'],
         mapboxToken: process.env.MAPBOX_TOKEN
     });
 });
@@ -33,11 +43,17 @@ app.get('/ingredients', (req,res) => {
 });
 
 app.get("/savedLocations", (req, res) => {
-    res.render("savedLocations", { cssFiles: ["style"] });
+    res.render("savedLocations", { 
+        cssFiles: ["style"],
+        jsFiles: []
+    });
 });
 
 app.get("/savedRecipes", (req, res) => {
-    res.render("savedRecipes", { cssFiles: ["style"] });
+    res.render("savedRecipes", { 
+        cssFiles: ["style"],
+        jsFiles: []
+    });
 });
 
 // 404
