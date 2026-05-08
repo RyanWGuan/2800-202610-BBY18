@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,11 +16,16 @@ app.get('/', (req, res) => {
 });
 
 app.get('/profile', (req,res) => {
-    res.render('profile');
+    res.render('profile', {
+        cssFiles: ['style']
+    });
 });
 
 app.get('/map', (req,res) => {
-    res.render('map');
+    res.render('map', {
+        cssFiles: ['style'],
+        mapboxToken: process.env.MAPBOX_TOKEN
+    });
 });
 
 app.get('/ingredients', (req,res) => {
