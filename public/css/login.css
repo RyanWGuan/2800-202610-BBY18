@@ -1,0 +1,230 @@
+* {
+    color: black;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+html {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+body {
+    margin: 0%;
+    background-color: white;
+}
+
+.container {
+    display: grid;
+    height: 100vh;
+    grid-template-rows: 10vh 80vh 10vh;
+}
+
+/* Header */
+.header {
+    display: grid;
+    grid-row: 1 / span 1;
+    background-color: rgb(227, 227, 227);
+}
+
+.header_container {
+    display: grid;
+    width: 100vw;
+    height: 10vh;
+    grid-template-rows: 10vh;
+    grid-template-columns: 25vw 25vw 25vw 25vw;
+}
+
+.icon {
+    width: 40px;
+    height: auto;
+}
+
+.profile_button {
+    grid-row: 1 / span 1;
+    grid-column: 4 / span 1;
+    justify-self: center;
+    align-self: center;
+}
+
+.profile_icon {
+    width: 60px;
+    height: auto;
+}
+
+.button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    justify-self: center;
+    align-self: center;
+    width: min-content;
+    height: min-content;
+    padding: 0%;
+}
+
+/* Main / login area */
+.main {
+    grid-row: 2 / span 1;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.body_container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 90vw;
+    max-width: 390px;
+    background-color: rgb(227, 227, 227);
+    padding: 32px 24px;
+    border-radius: 8px;
+}
+
+#signup_container {
+    display: none;
+}
+
+.edit_details {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 6px;
+}
+
+.info {
+    align-self: center;
+    margin-left: 2%;
+    margin-top: 8px;
+}
+
+.login_input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    outline: none;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.login_input:focus {
+    outline: 1px solid #aaa;
+}
+
+.login_input::placeholder {
+    color: #aaa;
+}
+
+.signout {
+    width: 60%;
+    height: 52px;
+    cursor: pointer;
+    border: none;
+    background-color: rgb(200, 200, 200);
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.signout:hover {
+    background-color: rgb(180, 180, 180);
+}
+
+.switch_text {
+    text-align: center;
+    font-size: 14px;
+}
+
+.switch_link {
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.switch_link:hover {
+    color: #555;
+}
+
+/* Footer */
+.footer {
+    display: grid;
+    grid-row: 3 / span 1;
+    background-color: rgb(227, 227, 227);
+}
+
+.footer-container {
+    display: grid;
+    width: 100vw;
+    height: 10vh;
+    grid-template-columns: 33.5vw 33vw 33.5vw;
+    grid-template-rows: 10vh;
+}
+
+.recipe_button {
+    grid-row: 1 / span 1;
+    grid-column: 1 / span 1;
+}
+
+.map_button {
+    grid-row: 1 / span 1;
+    grid-column: 2 / span 1;
+}
+
+.ingredients_button {
+    grid-row: 1 / span 1;
+    grid-column: 3 / span 1;
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: rgb(227, 227, 227);
+    padding: 32px 28px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.recipe_icon { width: 60px; height: auto; }
+.map_icon { width: 40px; height: auto; }
+.ingredients_icon { width: 60px; height: auto; }
+
+@media screen and (max-width: 600px) {
+    .container {
+        display: grid;
+        height: 100vh;
+        grid-template-rows: 10vh 80vh 10vh;
+    }
+
+    .header_container {
+        grid-template-columns: 25vw 25vw 25vw 25vw;
+    }
+
+    .footer-container {
+        grid-template-columns: 33.5vw 33vw 33.5vw;
+    }
+
+    .body_container {
+        width: 95vw;
+        padding: 24px 16px;
+    }
+}

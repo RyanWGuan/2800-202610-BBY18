@@ -1,0 +1,62 @@
+<%- include("partials/header", { cssFiles: ["style"] }) %>
+
+<main class="main">
+    <div class="location_grid">
+
+        <div class="location_card">
+            <div class="location_text">
+                <h2>Location Name1</h2>
+                <p>Description</p>
+            </div>
+            <div class="location_image">Image</div>
+        </div>
+
+        <div class="location_card">
+            <div class="location_text">
+                <h2>Location Name2</h2>
+                <p>Description</p>
+            </div>
+            <div class="location_image">Image</div>
+        </div>
+
+        <div class="location_card">
+            <div class="location_text">
+                <h2>Location Name3</h2>
+                <p>Description</p>
+            </div>
+            <div class="location_image">Image</div>
+        </div>
+
+        <div class="location_card">
+            <div class="location_text">
+                <h2>Location Name4</h2>
+                <p>Description</p>
+            </div>
+            <div class="location_image">Image</div>
+        </div>
+
+        <div class="location_card">
+            <div class="location_text">
+                <h2>Location Name5</h2>
+                <p>Description</p>
+            </div>
+            <div class="location_image">Image</div>
+        </div>
+
+    </div>
+</main>
+
+<div id="savedLocationsPopup" style="display: none;" class="popup-overlay">
+    <div class="popup-content">
+        <h2>Saved Locations Page</h2>
+        <p>
+            Here, you can view the locations you saved, including the location name,
+            description, and image.
+        </p>
+        <button id="closeSavedLocationsPopup">Got It!</button>
+    </div>
+</div>
+
+<script src="/js/savedLocations.js"></script>
+
+<%- include("partials/footer") %>

@@ -1,0 +1,59 @@
+<%- include("partials/header", { cssFiles: ["style"] }) %>
+
+<main class="main">
+
+    <div class="recipe_grid">
+
+        <button class="recipe_card">
+            Recipe1
+        </button>
+
+        <button class="recipe_card">
+            Recipe2
+        </button>
+
+        <button class="recipe_card">
+            Recipe3
+        </button>
+
+        <button class="recipe_card">
+            Recipe4
+        </button>
+
+        <button class="recipe_card">
+            Recipe5
+        </button>
+
+        <button class="recipe_card">
+            Recipe6
+        </button>
+
+        <button class="recipe_card">
+            Recipe7
+        </button>
+
+        <button class="recipe_card">
+            Recipe8
+        </button>
+
+        <button class="recipe_card">
+            Recipe9
+        </button>
+
+    </div>
+
+</main>
+
+<div id="savedRecipesPopup" style="display: none;" class="popup-overlay">
+    <div class="popup-content">
+        <h2>Saved Recipes Page</h2>
+        <p>
+            Here, you can view the recipes you saved and quickly access them later.
+        </p>
+        <button id="closeSavedRecipesPopup">Got It!</button>
+    </div>
+</div>
+
+<script src="/js/savedRecipes.js"></script>
+
+<%- include("partials/footer") %>

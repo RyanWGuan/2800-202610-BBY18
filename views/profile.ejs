@@ -1,0 +1,57 @@
+<%- include('partials/header') %>
+
+<main class="body">
+                <div class="body_container">
+                    <div class="edit_details">
+                        <span class="info">Username</span>
+                        <button type="button" class="edit_button">
+                            Edit
+                        </button>
+
+                        <span class="info">Password</span>
+                        <button type="button" class="edit_button">
+                            Edit
+                        </button>
+                        
+                        <span class="info">Email</span>
+                        <button type="button" class="edit_button">
+                            Edit
+                        </button>
+                        
+                        <span class="info">Phone Number</span>
+                        <button type="button" class="edit_button">
+                            Edit
+                        </button>
+                </div>
+
+                    <div class="saved_data">
+                        <img src="./images/bookmark.png" alt="bookmarked_recipes" class="bookmark_icon">
+                        <span class="saved_info"> Saved Recipes</span>
+                        <button type="button" class="edit_button button" onclick="window.location.href='/savedRecipes'"> 
+                            <img src="./images/rightArrow.png" alt="rightArrow" class="arrow_icon">
+                        </button>
+
+                        <img src="./images/bookmark.png" alt="bookmarked_recipes" class="bookmark_icon">
+                        <span class="saved_info">Saved Locations</span>
+                        <button type="button" class="edit_button button" onclick="window.location.href='/savedLocations'"">
+                            <img src="./images/rightArrow.png" alt="rightArrow" class="arrow_icon">
+                        </button>
+                    </div>
+                    
+                    <button class="signout">
+                        Sign Out
+                    </button>
+                </div>
+</main>
+
+<div id="firstTimePopup" style="display: none;" class="popup-overlay">
+    <div class="popup-content">
+        <h2>Profile Page</h2>
+        <p>Here, you can edit your user data, as well as view your saved recipes, and locations.</p>
+        <button id="closePopup">Got It!</button>
+    </div>
+</div>
+
+<script src="/profile.js"></script>
+
+<%- include('partials/footer') %>
