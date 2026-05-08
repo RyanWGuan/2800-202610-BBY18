@@ -200,3 +200,23 @@
     font-weight: 400;
 }
  
+
+/* Popup for Recipe */
+.popup-overlay{
+    position: fixed;
+    width: 50%;
+    height: 40%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    justify-self: center;
+    z-index: 1000;
+    margin-top: 25%;
+}
+
+.popup-content{
+    background-color: rgb(233, 230, 230);
+    padding: 2px;
+    border-radius: 5px;
+    text-align: center;
+}
