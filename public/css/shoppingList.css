@@ -1,0 +1,130 @@
+/* AI ASSISTED CSS PAGE */
+
+html,
+body {
+  overflow-y: auto;
+}
+
+.main {
+  background-color: white;
+  min-height: 80vh;
+  width: 100vw;
+}
+
+.shopping-list {
+  font-family: "Georgia", serif;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 1rem;
+  background: white;
+}
+
+.shopping-list h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
+  margin: 0 0 1.5rem;
+}
+
+.recipe-group {
+  margin-bottom: 2rem;
+}
+
+.recipe-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #ddd;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    padding-left 0.15s;
+}
+
+.ingredient-item:last-child {
+  border-bottom: none;
+}
+
+.ingredient-item:hover {
+  background: #ece9e1;
+  border-radius: 6px;
+  padding-left: 0.4rem;
+}
+
+.ingredient-item input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #999;
+  border-radius: 4px;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.ingredient-item input[type="checkbox"]:checked {
+  background: #2a2a2a;
+  border-color: #2a2a2a;
+}
+
+.ingredient-item input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 8px;
+  height: 5px;
+  border-left: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(-45deg);
+}
+
+.ingredient-item label {
+  font-size: 1rem;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: color 0.2s;
+  line-height: 1.4;
+}
+
+.ingredient-item input[type="checkbox"]:checked + label {
+  color: #aaa;
+  text-decoration: line-through;
+}
+
+.clear-btn {
+  display: block;
+  width: calc(100% - 2rem);
+  padding: 0.75rem;
+  background: #ddd;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.clear-btn:hover {
+  background: #c8c8c8;
+  color: #1a1a1a;
+}
