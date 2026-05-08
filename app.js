@@ -61,12 +61,23 @@ app.get("/savedRecipes", (req, res) => {
 });
 
 // 404
+<<<<<<< HEAD
 app.use((req, res) => {
   res.status(404);
   res.send("Page not found - 404");
+=======
+app.use((req,res) => {
+    res.status(404);
+    res.send("Page not found - 404");
+>>>>>>> f398d29babfbcd7128964eb13d751eb373f7bb3c
 });
 
 // Start the server
 app.listen(port, () => {
+<<<<<<< HEAD
   console.log(`Server is running on http://localhost:${port}`);
 });
+=======
+    console.log(`Server is running on http://localhost:${port}`);
+}); 
+>>>>>>> f398d29babfbcd7128964eb13d751eb373f7bb3c

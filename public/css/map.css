@@ -1,10 +1,198 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 #map {
-    flex: 1;
-    width: 100%;
+  flex: 1;
+  width: 100%;
+}
+
+/* ── Retractable radius panel ── */
+#radius-panel {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+}
+
+/* Arrow tab — mobile first (small screens) */
+#radius-toggle {
+  background: #2e2e2e;
+  color: #fff;
+  border: none;
+  padding: 0.9em 0.5em;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 0.5em 0 0 0.5em;
+  box-shadow: -0.2em 0 0.5em rgba(0, 0, 0, 0.35);
+  transition: background 0.2s;
+  user-select: none;
+}
+
+#radius-toggle:hover {
+  background: #444;
+}
+
+/* Sliding content drawer */
+#radius-content {
+  background: rgba(40, 40, 40, 0.93);
+  color: #fff;
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.75em;
+  padding: 0;
+  white-space: nowrap;
+}
+
+/* Open state — mobile */
+#radius-panel.open #radius-content {
+  width: 45vw;
+  padding: 1em 0.875em;
+}
+
+#radius-content label {
+  font-size: 0.75rem;
+  color: #ccc;
+  display: block;
+  margin-bottom: 0.25em;
+}
+
+#radius-input {
+  width: 100%;
+  padding: 0.5em 0.625em;
+  border-radius: 0.375em;
+  border: 0.0625rem solid #555;
+  background: #1c1c1c;
+  color: #fff;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+
+#radius-input:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+#radius-apply {
+  padding: 0.55em 0;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 0.375em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#radius-apply:hover {
+  background: #43a047;
+}
+
+/* ── Tablet (48em / 768px and up) ── */
+@media (min-width: 48em) {
+  #radius-toggle {
+    font-size: 1.1rem;
+  }
+
+  #radius-panel.open #radius-content {
+    width: 30vw;
+    padding: 1.25em 1em;
+  }
+
+  #radius-content label {
+    font-size: 0.8rem;
+  }
+
+  #radius-input,
+  #radius-apply {
+    font-size: 0.85rem;
+  }
+}
+
+/* ── Desktop (64em / 1024px and up) ── */
+@media (min-width: 64em) {
+  #radius-toggle {
+    font-size: 1.4rem;
+  }
+
+  #radius-panel.open #radius-content {
+    width: 22vw;
+    padding: 1.25em 1em;
+  }
+
+  #radius-content label {
+    font-size: 0.875rem;
+  }
+
+  #radius-input,
+  #radius-apply {
+    font-size: 0.9rem;
+  }
+}
+
+/* ── First-time map popup ── */
+.popup-overlay {
+  position: fixed;
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  justify-self: center;
+  z-index: 1000;
+  margin-top: 25%;
+}
+
+.popup-content {
+  background-color: rgb(233, 230, 230);
+  padding: 1em 1.5em;
+  border-radius: 0.375em;
+  text-align: center;
+}
+
+.popup-content h2 {
+  margin: 0 0 0.5em 0;
+  font-size: 1.1rem;
+}
+
+.popup-content p {
+  font-size: 0.875rem;
+  margin: 0 0 0.75em 0;
+}
+
+.popup-content ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1em 0;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.popup-content ul li {
+  margin-bottom: 0.4em;
+}
+
+#closeMapPopup {
+  padding: 0.5em 1.25em;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 0.375em;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#closeMapPopup:hover {
+  background: #43a047;
 }
