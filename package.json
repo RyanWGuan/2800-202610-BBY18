@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/RyanWGuan/2800-202610-BBY18#readme",
   "dependencies": {
+    "dotenv": "^17.4.2",
     "ejs": "^5.0.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",

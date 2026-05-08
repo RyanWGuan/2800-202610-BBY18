@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,21 +11,50 @@ app.use(express.static("public"));
 // Index
 app.get("/", (req, res) => {
   res.render("recipes", {
-    cssFiles: ["style"],
+    cssFiles: ["style", "recipe"],
+    jsFiles: ["recipe"],
+  });
+});
+
+app.get("/login", (req, res) => {
+  res.render("login", {
+    cssFiles: ["login"],
+    jsFiles: ["login"],
   });
 });
 
 app.get("/profile", (req, res) => {
-  res.render("profile");
+  res.render("profile", {
+    cssFiles: ["style"],
+    jsFiles: ["profile"],
+  });
 });
 
 app.get("/map", (req, res) => {
-  res.render("map");
+  res.render("map", {
+    cssFiles: ["style"],
+    jsFiles: ["map"],
+    mapboxToken: process.env.MAPBOX_TOKEN,
+  });
 });
 
 app.get("/ingredients", (req, res) => {
   res.render("ingredients", {
     title: "Ingredients",
+    cssFiles: ["style"],
+    jsFiles: [],
+  });
+});
+
+app.get("/savedLocations", (req, res) => {
+  res.render("savedLocations", {
+    cssFiles: ["style"],
+    jsFiles: [],
+  });
+});
+
+app.get("/savedRecipes", (req, res) => {
+  res.render("savedRecipes", {
     cssFiles: ["style"],
     jsFiles: [],
   });

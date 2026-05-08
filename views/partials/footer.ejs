@@ -3,16 +3,18 @@
                     <button type="button" class="button recipe_button" onclick="window.location.href='/'">
                         <img src="/images/recipe.png" class="recipe_icon" alt="Recipe">
                     </button>
-                    <button type="button" class="button map_button" onclick="window.location.href='map'">
+                    <button type="button" class="button map_button" onclick="window.location.href='/map'">
                         <img src="/images/location.png" class="map_icon" alt="Map">
                     </button>
-                    <button type="button" class="button ingredients_button" onclick="window.location.href='ingredients'">
+                    <button type="button" class="button ingredients_button" onclick="window.location.href='/ingredients'">
                         <img src="/images/ingredients.png" class="ingredients_icon" alt="ingredients">
                     </button>
                 </div>
             </footer>
             
         </div>
-        <script type="module"></script>
+        <%(jsFiles || []).forEach(file => { %>
+        <script src="/js/<%= file%>.js"></script>
+    <% }) %>
     </body>
 </html>

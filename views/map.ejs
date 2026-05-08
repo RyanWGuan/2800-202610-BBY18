@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+
+<link
+    href="https://api.mapbox.com/mapbox-gl-js/v3.13.0/mapbox-gl.css"
+    rel="stylesheet"
+/>
+
+<link rel="stylesheet" href="/css/map.css">
+
+<div id="map"></div>
+
+<script>
+    const MAPBOX_TOKEN = "<%= mapboxToken %>";
+</script>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.13.0/mapbox-gl.js"></script>
+
+<script src="/map.js"></script>
+
+<%- include('partials/footer') %>
