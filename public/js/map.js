@@ -1,6 +1,5 @@
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-const radiusCalc = 180;
 const map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
@@ -22,8 +21,8 @@ map.on("load", () => {
   geolocate.trigger();
 });
 
-// Radius panel state
-let pingRadius = 5;
+// --- Radius panel state ---
+let pingRadius = 5; // km (default)
 let currentMarkers = [];
 let lastKnownLon = null;
 let lastKnownLat = null;
@@ -33,25 +32,24 @@ function clearMarkers() {
   currentMarkers = [];
 }
 
-// Returns distance in km between two lat/lon points AI assisted.
+// Returns distance in km between two lat/lon points
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / radiusCalc;
-  const dLon = ((lon2 - lon1) * Math.PI) / radiusCalc;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
     Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / radiusCalc) *
-      Math.cos((lat2 * Math.PI) / radiusCalc) *
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
       Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// AI assisted to get store fetching logic working with new Mapbox Search API endpoint.
 function fetchGroceryStores(lon, lat) {
   clearMarkers();
 
   fetch(
-    `https://api.mapbox.com/search/searchbox/v1/category/grocery?proximity=${lon},${lat}&limit=25&access_token=${MAPBOX_TOKEN}`,
+    `https://api.mapbox.com/search/searchbox/v1/category/grocery?proximity=${lon},${lat}&limit=10&access_token=${MAPBOX_TOKEN}`,
   )
     .then((res) => res.json())
     .then((data) => {
@@ -91,7 +89,7 @@ geolocate.on("geolocate", (e) => {
   fetchGroceryStores(lastKnownLon, lastKnownLat);
 });
 
-// radius panel toggle and logic ussing buttons.
+// --- Radius panel UI logic ---
 const panel = document.getElementById("radius-panel");
 const toggleBtn = document.getElementById("radius-toggle");
 const applyBtn = document.getElementById("radius-apply");
@@ -102,7 +100,6 @@ toggleBtn.addEventListener("click", () => {
   toggleBtn.textContent = panel.classList.contains("open") ? "›" : "‹";
 });
 
-// field validation and applying new radius value.
 applyBtn.addEventListener("click", () => {
   const val = parseFloat(radiusInput.value);
   if (!isNaN(val) && val > 0) {
@@ -113,4 +110,17 @@ applyBtn.addEventListener("click", () => {
     panel.classList.remove("open");
     toggleBtn.textContent = "‹";
   }
+});
+
+// --- First-time popup ---
+const mapPopup = document.getElementById("mapFirstTimePopup");
+const closeBtn = document.getElementById("closeMapPopup");
+
+if (!localStorage.getItem("hasVisitedMap")) {
+  mapPopup.style.display = "flex";
+}
+
+closeBtn.addEventListener("click", () => {
+  mapPopup.style.display = "none";
+  localStorage.setItem("hasVisitedMap", "true");
 });
