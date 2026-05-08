@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Recipe Quest</title>
+        <script type="module"></script>
+        <link rel="stylesheet" href="/css/style.css"/>
+    </head>
+    <body>
+        <div class="container">
+            <header class="header">
+                <div class="header_container">
+                    <button type="button" class="button profile_button" onclick="window.location.href='profile.html'">
+                        <img src="./images/profile.png" class="profile_icon" alt="Profile">
+                    </button>
+                </div>  
+            </header>
+
+            <main class="body">
+                <div class="body_container">
+                    <div class="edit_details">
+                        <span class="info">Username</span>
+                        <button type="button">
+                            Edit
+                        </button>
+
+                        <span class="info">Password</span>
+                        <button type="button">
+                            Edit
+                        </button>
+                        
+                        <span class="info">Email</span>
+                        <button type="button">
+                            Edit
+                        </button>
+                        
+                        <span class="info">Phone Number</span>
+                        <button type="button">
+                            Edit
+                        </button>
+                    </div>
+
+                    <div class="saved_data">
+                        <span>Saved Recipes</span>
+                        <span>Saved Locations</span>
+                    </div>
+
+                    <button class="signout">
+                        Sign Out
+                    </button>
+                </div>
+            </main>
+            
+            <footer class="footer">
+                <div class="footer-container">
+                    <button type="button" class="button recipe_button" onclick="window.location.href='recipe.html'">
+                        <img src="./images/recipe.png" class="recipe_icon" alt="Recipe">
+                    </button>
+                    <button type="button" class="button map_button" onclick="window.location.href='map.html'">
+                        <img src="./images/location.png" class="map_icon" alt="Map">
+                    </button>
+                    <button type="button" class="button ingredients_button" onclick="window.location.href='ingredients.html'">
+                        <img src="./images/ingredients.png" class="ingredients_icon" alt="ingredients">
+                    </button>
+                </div>
+            </footer>
+            
+        </div>
+        <script type="module"></script>
+    </body>
+</html>
