@@ -15,6 +15,12 @@ app.get('/', (req, res) => {
     });
 });
 
+app.get('/login', (req, res) => {
+    res.render('login', {
+        cssFiles: ['login']
+    });
+});
+
 app.get('/profile', (req,res) => {
     res.render('profile', {
         cssFiles: ['style']
