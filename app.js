@@ -11,7 +11,8 @@ app.use(express.static('public'));
 // Index
 app.get('/', (req, res) => {
     res.render('recipes', {
-        cssFiles: ['style']
+        cssFiles: ['style', 'recipe'],
+        jsFiles: ['recipe']
     });
 });
 
