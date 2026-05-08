@@ -1,5 +1,6 @@
 *{
     color: black;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
 }
 
 html{
@@ -58,6 +59,64 @@ body{
 .profile_icon{
     width: 60px;
     height: auto;
+}
+
+.body_container{
+    display: grid;
+    width: 100vw;
+    height: 80vh;
+    grid-template-rows: 40vh 30vh 10vh;
+}
+
+.edit_details{
+    display: grid;
+    width: 100vw;
+    height: 40vh;
+    grid-template-columns: 70vw 30vw;
+    grid-template-rows: 10vh 10vh 10vh 10vh;
+}
+
+.edit_button{
+    width: 50%;
+    height: 50%;
+    justify-self: center;
+    align-self: center;
+}
+
+.info{
+    align-self: center;
+    margin-left: 5%;
+}
+
+.saved_data{
+    display: grid;
+    height: 30vh;
+    grid-template-rows: 15vh 15vh;
+    grid-template-columns: 10vw 60vw 30vw;
+    align-content: center;
+}
+
+.saved_info{
+    align-self: center;
+}
+
+.bookmark_icon{
+    height: 30px;
+    width: auto;
+    align-self: center;
+    justify-self: center;
+}
+
+.arrow_icon{
+    width: 30px;
+    height: auto;
+}
+
+.signout{
+    width: 50%;
+    height: 50%;
+    justify-self: center;
+    align-self: center;
 }
 
 .recipe_icon{
