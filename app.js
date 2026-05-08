@@ -38,6 +38,14 @@ app.get('/ingredients', (req,res) => {
     res.render('ingredients');
 });
 
+app.get("/savedLocations", (req, res) => {
+    res.render("savedLocations", { cssFiles: ["style"] });
+});
+
+app.get("/savedRecipes", (req, res) => {
+    res.render("savedRecipes", { cssFiles: ["style"] });
+});
+
 // 404
 app.use((req,res) => {
 	res.status(404);
