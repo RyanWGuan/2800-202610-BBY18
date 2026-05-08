@@ -58,11 +58,11 @@ app.get("/savedRecipes", (req, res) => {
 
 // 404
 app.use((req,res) => {
-	res.status(404);
-	res.send("Page not found - 404");
+    res.status(404);
+    res.send("Page not found - 404");
 });
 
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
-});
+}); 
