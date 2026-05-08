@@ -6,9 +6,6 @@ function showSignup() {
 function showLogin() {
     document.getElementById('signup_container').style.display = 'none';
     document.getElementById('login_container').style.display = 'flex';
-<<<<<<< HEAD
-}
-=======
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -26,4 +23,3 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('loginVisited', 'true');
     });
 });
->>>>>>> RyanGuan_SignUp
