@@ -38,12 +38,8 @@ app.get("/map", (req, res) => {
   });
 });
 
-app.get("/shoppingList", (req, res) => {
-  res.render("shoppingList", {
-    title: "Ingredients",
-    cssFiles: ["shoppingList", "style"],
-    jsFiles: [],
-  });
+app.get('/ingredients', (req,res) => {
+    res.render('ingredients');
 });
 
 app.get("/savedLocations", (req, res) => {
@@ -61,23 +57,12 @@ app.get("/savedRecipes", (req, res) => {
 });
 
 // 404
-<<<<<<< HEAD
-app.use((req, res) => {
-  res.status(404);
-  res.send("Page not found - 404");
-=======
 app.use((req,res) => {
-    res.status(404);
-    res.send("Page not found - 404");
->>>>>>> f398d29babfbcd7128964eb13d751eb373f7bb3c
+	res.status(404);
+	res.send("Page not found - 404");
 });
 
 // Start the server
 app.listen(port, () => {
-<<<<<<< HEAD
-  console.log(`Server is running on http://localhost:${port}`);
-});
-=======
     console.log(`Server is running on http://localhost:${port}`);
-}); 
->>>>>>> f398d29babfbcd7128964eb13d751eb373f7bb3c
+});
