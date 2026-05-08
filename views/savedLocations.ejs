@@ -1,4 +1,4 @@
-<%- include("partials/header") %>
+<%- include("partials/header", { cssFiles: ["style"] }) %>
 
 <main class="main">
     <div class="location_grid">
@@ -50,8 +50,8 @@
     <div class="popup-content">
         <h2>Saved Locations Page</h2>
         <p>
-            Here, you can view the locations you saved, including the
-            location name, description, and image.
+            Here, you can view the locations you saved, including the location name,
+            description, and image.
         </p>
         <button id="closeSavedLocationsPopup">Got It!</button>
     </div>
