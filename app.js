@@ -38,8 +38,12 @@ app.get("/map", (req, res) => {
   });
 });
 
-app.get("/ingredients", (req, res) => {
-  res.render("ingredients");
+app.get("/shoppingList", (req, res) => {
+  res.render("shoppingList", {
+    title: "Ingredients",
+    cssFiles: ["shoppingList", "style"],
+    jsFiles: [],
+  });
 });
 
 app.get("/savedLocations", (req, res) => {

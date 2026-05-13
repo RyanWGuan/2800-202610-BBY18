@@ -72,13 +72,33 @@ function fetchGroceryStores(lon, lat) {
 
           const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
             <div style="font-family: sans-serif; padding: 4px;">
-              <strong style="font-size: 14px;">
-                ${name}
-              </strong>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                
+                <strong style="font-size: 14px;">
+                  ${name}
+                </strong>
+
+                <button 
+                  onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'
+                  style="
+                    background-color: green;
+                    color: white;
+                    border: none;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                  "
+                >
+                  Save
+                </button>
+
+              </div>
 
               <p style="font-size: 12px; margin: 4px 0 0 0; color: black;">
                 ${address}
               </p>
+
             </div>
           `);
 
@@ -92,10 +112,27 @@ function fetchGroceryStores(lon, lat) {
     });
 }
 
-// When the user's location is obtained or updated,
-//  fetch nearby grocery stores and transit stops based on
-//  their last known locations and the selected radius.
-geolocate.on("geolocate", (e) => {
+// Function to save location
+function saveLocation(name, address)
+{
+  let savedLocations =
+    JSON.parse(localStorage.getItem("savedLocations")) || [];
+
+  savedLocations.push({
+    name: name,
+    address: address,
+  });
+
+  localStorage.setItem(
+    "savedLocations",
+    JSON.stringify(savedLocations)
+  );
+
+  alert("Location saved!");
+}
+
+geolocate.on("geolocate", (e) => 
+{
   lastKnownLon = e.coords.longitude;
   lastKnownLat = e.coords.latitude;
   fetchGroceryStores(lastKnownLon, lastKnownLat);
@@ -135,17 +172,16 @@ toggleBtn.addEventListener("click", () =>
 
 // the logic to update the radius and refetch data when the user applies a new radius.
 // also validates the input.
-applyBtn.addEventListener("click", () => 
-{
+applyBtn.addEventListener("click", () => {
   const val = parseFloat(radiusInput.value);
-  if (!isNaN(val) && val > 0) 
-  {
+  if (!isNaN(val) && val > 0) {
     pingRadius = val;
-    if (lastKnownLon !== null && lastKnownLat !== null) 
-    {
+    if (lastKnownLon !== null && lastKnownLat !== null) {
       fetchGroceryStores(lastKnownLon, lastKnownLat);
-      fetchBusStops(lastKnownLon, lastKnownLat);
-      fetchSkytrainStops(lastKnownLon, lastKnownLat);
+      if (transitEnabled) {                              
+        fetchBusStops(lastKnownLon, lastKnownLat);
+        fetchSkytrainStops(lastKnownLon, lastKnownLat);
+      }                                                 
     }
     panel.classList.remove("open");
     toggleBtn.textContent = "‹";

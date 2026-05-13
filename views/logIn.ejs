@@ -1,51 +1,58 @@
 <%- include('partials/header') %>
 
-<main class="main">
+  <main class="main">
 
     <div class="body_container login_card" id="login_container">
-        <div class="edit_details">
-            <span class="info">Username</span>
-            <input type="text" class="login_input" placeholder="Username" name="username" />
+      <div class="edit_details">
+        <span class="info">Username</span>
+        <input type="text" class="login_input" placeholder="Username" name="username" />
 
-            <span class="info">Password</span>
-            <input type="password" class="login_input" placeholder="Password" name="password" />
-        </div>
+        <span class="info">Password</span>
+        <input type="password" class="login_input" placeholder="Password" name="password" />
+      </div>
 
-        <button class="signout login_button">
-            Log In
-        </button>
+      <button class="signout login_button">
+        Log In
+      </button>
 
-        <p class="switch_text">
-            Don't have an account? 
-            <span class="switch_link" onclick="showSignup()">Sign Up</span>
-        </p>
+      <p class="switch_text">
+        Don't have an account?
+        <span class="switch_link" onclick="showSignup()">Sign Up</span>
+      </p>
     </div>
 
     <div class="body_container login_card" id="signup_container" style="display: none;">
-        <div class="edit_details">
-            <span class="info">Username</span>
-            <input type="text" class="login_input" placeholder="Username" name="username" />
+      <div class="edit_details">
+        <span class="info">Username</span>
+        <input type="text" class="login_input" placeholder="Username" name="username" />
 
-            <span class="info">Email</span>
-            <input type="email" class="login_input" placeholder="Email" name="email" />
+        <span class="info">Email</span>
+        <input type="email" class="login_input" placeholder="Email" name="email" />
 
-            <span class="info">Password</span>
-            <input type="password" class="login_input" placeholder="Password" name="password" />
+        <span class="info">Password</span>
+        <input type="password" class="login_input" placeholder="Password" name="password" />
 
-        </div>
+      </div>
 
-        <button class="signout login_button">
-            Sign Up
-        </button>
+      <button class="signout login_button">
+        Sign Up
+      </button>
 
-        <p class="switch_text">
-            Already have an account? 
-            <span class="switch_link" onclick="showLogin()">Log In</span>
-        </p>
+      <p class="switch_text">
+        Already have an account?
+        <span class="switch_link" onclick="showLogin()">Log In</span>
+      </p>
     </div>
+  </main>
 
-</main>
+  <div id="firstTimePopup" style="display: none;" class="popup-overlay">
+    <div class="popup-content">
+      <h2>Welcome!</h2>
+      <p>Log in or create an account to save recipes and locations.</p>
+      <button id="closePopup">Got It!</button>
+    </div>
+  </div>
 
-<script src="/login.js"></script>
+  <script src="/login.js"></script>
 
-<%- include('partials/footer') %>
+  <%- include('partials/footer') %>
