@@ -76,13 +76,33 @@ function fetchGroceryStores(lon, lat) {
           const popup = new mapboxgl.Popup({ offset: 25 }).setHTML
           (`
             <div style="font-family: sans-serif; padding: 4px;">
-              <strong style="font-size: 14px;">
-                ${name}
-              </strong>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                
+                <strong style="font-size: 14px;">
+                  ${name}
+                </strong>
+
+                <button 
+                  onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'
+                  style="
+                    background-color: green;
+                    color: white;
+                    border: none;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                  "
+                >
+                  Save
+                </button>
+
+              </div>
 
               <p style="font-size: 12px; margin: 4px 0 0 0; color: black;">
                 ${address}
               </p>
+
             </div>
           `);
 
@@ -94,6 +114,25 @@ function fetchGroceryStores(lon, lat) {
           currentMarkers.push(marker);
         });
     });
+}
+
+// Function to save location
+function saveLocation(name, address)
+{
+  let savedLocations =
+    JSON.parse(localStorage.getItem("savedLocations")) || [];
+
+  savedLocations.push({
+    name: name,
+    address: address,
+  });
+
+  localStorage.setItem(
+    "savedLocations",
+    JSON.stringify(savedLocations)
+  );
+
+  alert("Location saved!");
 }
 
 geolocate.on("geolocate", (e) => 
