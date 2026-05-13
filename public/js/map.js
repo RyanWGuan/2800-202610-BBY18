@@ -1,6 +1,7 @@
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-const map = new mapboxgl.Map({
+const map = new mapboxgl.Map
+({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
   center: [0, 0],
@@ -9,7 +10,8 @@ const map = new mapboxgl.Map({
 
 map.addControl(new mapboxgl.NavigationControl());
 
-const geolocate = new mapboxgl.GeolocateControl({
+const geolocate = new mapboxgl.GeolocateControl
+({
   positionOptions: { enableHighAccuracy: true },
   trackUserLocation: true,
   showUserHeading: true,
@@ -17,22 +19,24 @@ const geolocate = new mapboxgl.GeolocateControl({
 
 map.addControl(geolocate);
 
-map.on("load", () => {
+map.on("load", () => 
+{
   geolocate.trigger();
 });
 
-// --- Radius panel state ---
+// Radius panel state
 let pingRadius = 5; // km (default)
 let currentMarkers = [];
 let lastKnownLon = null;
 let lastKnownLat = null;
 
-function clearMarkers() {
+function clearMarkers() 
+{
   currentMarkers.forEach((m) => m.remove());
   currentMarkers = [];
 }
 
-// Returns distance in km between two lat/lon points
+// Returns distance in km between two lat/lon points AI assited to write this fucntion's formula.
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -45,6 +49,9 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// AI assited to figure the logic of this function.
+// This function fetches grocery stores from Mapbox API based on the user's location
+// and the specified radius, then adds markers for those stores on the map.
 function fetchGroceryStores(lon, lat) {
   clearMarkers();
 
@@ -66,12 +73,18 @@ function fetchGroceryStores(lon, lat) {
             store.properties.place_formatted ||
             "Address unavailable";
 
-          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-                    <div style="font-family: sans-serif; padding: 4px;">
-                        <strong style="font-size: 14px;">${name}</strong>
-                        <p style="font-size: 12px; margin: 4px 0 0 0; color: gray;">${address}</p>
-                    </div>
-                `);
+          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML
+          (`
+            <div style="font-family: sans-serif; padding: 4px;">
+              <strong style="font-size: 14px;">
+                ${name}
+              </strong>
+
+              <p style="font-size: 12px; margin: 4px 0 0 0; color: black;">
+                ${address}
+              </p>
+            </div>
+          `);
 
           const marker = new mapboxgl.Marker({ color: "green" })
             .setLngLat([storeLon, storeLat])
@@ -83,7 +96,8 @@ function fetchGroceryStores(lon, lat) {
     });
 }
 
-geolocate.on("geolocate", (e) => {
+geolocate.on("geolocate", (e) => 
+{
   lastKnownLon = e.coords.longitude;
   lastKnownLat = e.coords.latitude;
   fetchGroceryStores(lastKnownLon, lastKnownLat);
@@ -95,16 +109,20 @@ const toggleBtn = document.getElementById("radius-toggle");
 const applyBtn = document.getElementById("radius-apply");
 const radiusInput = document.getElementById("radius-input");
 
-toggleBtn.addEventListener("click", () => {
+toggleBtn.addEventListener("click", () => 
+{
   panel.classList.toggle("open");
   toggleBtn.textContent = panel.classList.contains("open") ? "›" : "‹";
 });
 
-applyBtn.addEventListener("click", () => {
+applyBtn.addEventListener("click", () => 
+{
   const val = parseFloat(radiusInput.value);
-  if (!isNaN(val) && val > 0) {
+  if (!isNaN(val) && val > 0) 
+  {
     pingRadius = val;
-    if (lastKnownLon !== null && lastKnownLat !== null) {
+    if (lastKnownLon !== null && lastKnownLat !== null) 
+    {
       fetchGroceryStores(lastKnownLon, lastKnownLat);
     }
     panel.classList.remove("open");
@@ -112,15 +130,17 @@ applyBtn.addEventListener("click", () => {
   }
 });
 
-// --- First-time popup ---
+// First time popup logic
 const mapPopup = document.getElementById("mapFirstTimePopup");
 const closeBtn = document.getElementById("closeMapPopup");
 
-if (!localStorage.getItem("hasVisitedMap")) {
+if (!localStorage.getItem("hasVisitedMap")) 
+{
   mapPopup.style.display = "flex";
 }
 
-closeBtn.addEventListener("click", () => {
+closeBtn.addEventListener("click", () => 
+{
   mapPopup.style.display = "none";
   localStorage.setItem("hasVisitedMap", "true");
 });
