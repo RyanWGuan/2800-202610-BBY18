@@ -14,7 +14,9 @@
   <button id="radius-toggle" title="Filter radius">&#x2039;</button>
   <div id="radius-content">
     <div>
-      <label for="radius-input"> Ping Radius (km) </label>
+      <label for="radius-input">
+         Ping Radius (km) 
+      </label>
       <input
         id="radius-input"
         type="number"
@@ -24,6 +26,12 @@
         value="5"
         placeholder="example: 10"
       />
+    </div>
+    <div>
+      <label for="transit-toggle"> 
+        Enable Transit Ping
+      </label>
+      <input id="transit-toggle" type="checkbox" checked />
     </div>
     <button id="radius-apply">Apply and Rescan</button>
   </div>
@@ -38,6 +46,7 @@
       <li>Green markers are stores near you</li>
       <li>Tap a marker for the store name and address</li>
       <li>Use the arrow panel on the right to set how far to scan</li>
+      <li>Blue markers are transit options within your area</li>
     </ul>
     <button id="closeMapPopup">Got It!</button>
   </div>

@@ -1,7 +1,6 @@
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
-const map = new mapboxgl.Map
-({
+const map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
   center: [0, 0],
@@ -10,8 +9,7 @@ const map = new mapboxgl.Map
 
 map.addControl(new mapboxgl.NavigationControl());
 
-const geolocate = new mapboxgl.GeolocateControl
-({
+const geolocate = new mapboxgl.GeolocateControl({
   positionOptions: { enableHighAccuracy: true },
   trackUserLocation: true,
   showUserHeading: true,
@@ -19,8 +17,7 @@ const geolocate = new mapboxgl.GeolocateControl
 
 map.addControl(geolocate);
 
-map.on("load", () => 
-{
+map.on("load", () => {
   geolocate.trigger();
 });
 
@@ -30,13 +27,13 @@ let currentMarkers = [];
 let lastKnownLon = null;
 let lastKnownLat = null;
 
-function clearMarkers() 
-{
+function clearMarkers() {
   currentMarkers.forEach((m) => m.remove());
   currentMarkers = [];
 }
 
-// Returns distance in km between two lat/lon points AI assited to write this fucntion's formula.
+// Returns distance in km between two
+// lat/lon points AI assited to write this function's formula.
 function haversineKm(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -73,8 +70,7 @@ function fetchGroceryStores(lon, lat) {
             store.properties.place_formatted ||
             "Address unavailable";
 
-          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML
-          (`
+          const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
             <div style="font-family: sans-serif; padding: 4px;">
               <strong style="font-size: 14px;">
                 ${name}
@@ -96,34 +92,55 @@ function fetchGroceryStores(lon, lat) {
     });
 }
 
-geolocate.on("geolocate", (e) => 
-{
+// When the user's location is obtained or updated,
+//  fetch nearby grocery stores and transit stops based on
+//  their last known locations and the selected radius.
+geolocate.on("geolocate", (e) => {
   lastKnownLon = e.coords.longitude;
   lastKnownLat = e.coords.latitude;
   fetchGroceryStores(lastKnownLon, lastKnownLat);
+  if (transitEnabled) 
+  {
+    fetchBusStops(lastKnownLon, lastKnownLat);
+    fetchSkytrainStops(lastKnownLon, lastKnownLat);
+  }
 });
 
-// --- Radius panel UI logic ---
+// the arrow pop up for radius selection logic
 const panel = document.getElementById("radius-panel");
 const toggleBtn = document.getElementById("radius-toggle");
 const applyBtn = document.getElementById("radius-apply");
+const transitToggle = document.getElementById("transit-toggle");
 const radiusInput = document.getElementById("radius-input");
 
-toggleBtn.addEventListener("click", () => 
-{
+let transitEnabled = true;
+
+transitToggle.addEventListener("change", () => {
+  transitEnabled = transitToggle.checked;
+  if (!transitEnabled) {
+    clearBusMarkers();
+    clearSkytrainMarkers();
+  } else if (lastKnownLon !== null) {
+    fetchBusStops(lastKnownLon, lastKnownLat);
+    fetchSkytrainStops(lastKnownLon, lastKnownLat);
+  }
+});
+
+toggleBtn.addEventListener("click", () => {
   panel.classList.toggle("open");
   toggleBtn.textContent = panel.classList.contains("open") ? "›" : "‹";
 });
 
-applyBtn.addEventListener("click", () => 
-{
+// the logic to update the radius and refetch data when the user applies a new radius.
+// also validates the input.
+applyBtn.addEventListener("click", () => {
   const val = parseFloat(radiusInput.value);
-  if (!isNaN(val) && val > 0) 
-  {
+  if (!isNaN(val) && val > 0) {
     pingRadius = val;
-    if (lastKnownLon !== null && lastKnownLat !== null) 
-    {
+    if (lastKnownLon !== null && lastKnownLat !== null) {
       fetchGroceryStores(lastKnownLon, lastKnownLat);
+      fetchBusStops(lastKnownLon, lastKnownLat);
+      fetchSkytrainStops(lastKnownLon, lastKnownLat);
     }
     panel.classList.remove("open");
     toggleBtn.textContent = "‹";
@@ -134,13 +151,89 @@ applyBtn.addEventListener("click", () =>
 const mapPopup = document.getElementById("mapFirstTimePopup");
 const closeBtn = document.getElementById("closeMapPopup");
 
-if (!localStorage.getItem("hasVisitedMap")) 
-{
+if (!localStorage.getItem("hasVisitedMap")) {
   mapPopup.style.display = "flex";
 }
 
-closeBtn.addEventListener("click", () => 
-{
+closeBtn.addEventListener("click", () => {
   mapPopup.style.display = "none";
   localStorage.setItem("hasVisitedMap", "true");
 });
+
+let busMarkers = [];
+let skytrainMarkers = [];
+
+function clearBusMarkers() {
+  busMarkers.forEach((m) => m.remove());
+  busMarkers = [];
+}
+function clearSkytrainMarkers() {
+  skytrainMarkers.forEach((m) => m.remove());
+  skytrainMarkers = [];
+}
+
+function fetchBusStops(lon, lat) {
+  clearBusMarkers();
+  fetch("/data/busStops.json")
+    .then((res) => res.json())
+    .then((stops) => {
+      stops
+        .filter(
+          (stop) => haversineKm(lat, lon, stop.lat, stop.lon) <= pingRadius,
+        )
+        .forEach((stop) => {
+          const routeLines = Object.entries(stop.routes)
+            .map(
+              ([routeName, schedule]) => `
+              <div style="margin-top: 6px;">
+                <strong>Route ${routeName}</strong><br>${schedule.join("<br>")}
+              </div>`,
+            )
+            .join("");
+          const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "280px" })
+            .setHTML(`
+            <div style="font-family: sans-serif; padding: 4px; max-height: 200px; overflow-y: auto;">
+              <strong style="font-size: 14px;">${stop.name}</strong>${routeLines}
+            </div>`);
+          busMarkers.push(
+            new mapboxgl.Marker({ color: "blue" })
+              .setLngLat([stop.lon, stop.lat])
+              .setPopup(popup)
+              .addTo(map),
+          );
+        });
+    });
+}
+
+function fetchSkytrainStops(lon, lat) {
+  clearSkytrainMarkers();
+  fetch("/data/skytrainStops.json")
+    .then((res) => res.json())
+    .then((stops) => {
+      stops
+        .filter(
+          (stop) => haversineKm(lat, lon, stop.lat, stop.lon) <= pingRadius,
+        )
+        .forEach((stop) => {
+          const routeLines = Object.entries(stop.routes)
+            .map(
+              ([routeName, schedule]) => `
+              <div style="margin-top: 6px;">
+                <strong>Route ${routeName}</strong><br>${schedule.join("<br>")}
+              </div>`,
+            )
+            .join("");
+          const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "280px" })
+            .setHTML(`
+            <div style="font-family: sans-serif; padding: 4px; max-height: 200px; overflow-y: auto;">
+              <strong style="font-size: 14px;">${stop.name}</strong>${routeLines}
+            </div>`);
+          skytrainMarkers.push(
+            new mapboxgl.Marker({ color: "blue" })
+              .setLngLat([stop.lon, stop.lat])
+              .setPopup(popup)
+              .addTo(map),
+          );
+        });
+    });
+}
