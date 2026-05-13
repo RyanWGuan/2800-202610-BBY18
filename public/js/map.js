@@ -22,7 +22,7 @@ map.on("load", () => {
 });
 
 // Radius panel state
-let pingRadius = 5; // km (default)
+let pingRadius = 5; // km 
 let currentMarkers = [];
 let lastKnownLon = null;
 let lastKnownLat = null;
@@ -115,7 +115,8 @@ const radiusInput = document.getElementById("radius-input");
 
 let transitEnabled = true;
 
-transitToggle.addEventListener("change", () => {
+transitToggle.addEventListener("change", () => 
+{
   transitEnabled = transitToggle.checked;
   if (!transitEnabled) {
     clearBusMarkers();
@@ -126,18 +127,22 @@ transitToggle.addEventListener("change", () => {
   }
 });
 
-toggleBtn.addEventListener("click", () => {
+toggleBtn.addEventListener("click", () => 
+{
   panel.classList.toggle("open");
   toggleBtn.textContent = panel.classList.contains("open") ? "›" : "‹";
 });
 
 // the logic to update the radius and refetch data when the user applies a new radius.
 // also validates the input.
-applyBtn.addEventListener("click", () => {
+applyBtn.addEventListener("click", () => 
+{
   const val = parseFloat(radiusInput.value);
-  if (!isNaN(val) && val > 0) {
+  if (!isNaN(val) && val > 0) 
+  {
     pingRadius = val;
-    if (lastKnownLon !== null && lastKnownLat !== null) {
+    if (lastKnownLon !== null && lastKnownLat !== null) 
+    {
       fetchGroceryStores(lastKnownLon, lastKnownLat);
       fetchBusStops(lastKnownLon, lastKnownLat);
       fetchSkytrainStops(lastKnownLon, lastKnownLat);
@@ -151,7 +156,8 @@ applyBtn.addEventListener("click", () => {
 const mapPopup = document.getElementById("mapFirstTimePopup");
 const closeBtn = document.getElementById("closeMapPopup");
 
-if (!localStorage.getItem("hasVisitedMap")) {
+if (!localStorage.getItem("hasVisitedMap")) 
+{
   mapPopup.style.display = "flex";
 }
 
