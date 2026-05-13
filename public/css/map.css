@@ -8,8 +8,7 @@
   flex: 1;
   width: 100%;
 }
-
-/* ── Retractable radius panel ── */
+/* radius adjustment panel */
 #radius-panel {
   position: fixed;
   right: 0;
@@ -20,16 +19,14 @@
   z-index: 100;
 }
 
-/* Arrow tab — mobile first (small screens) */
 #radius-toggle {
-  background: #2e2e2e;
+  background: gray;
   color: #fff;
   border: none;
   padding: 0.9em 0.5em;
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
-  border-radius: 0.5em 0 0 0.5em;
   box-shadow: -0.2em 0 0.5em rgba(0, 0, 0, 0.35);
   transition: background 0.2s;
   user-select: none;
@@ -39,9 +36,9 @@
   background: #444;
 }
 
-/* Sliding content drawer */
+/* sliding content drawer */
 #radius-content {
-  background: rgba(40, 40, 40, 0.93);
+  background: gray;
   color: #fff;
   width: 0;
   overflow: hidden;
@@ -54,7 +51,6 @@
   white-space: nowrap;
 }
 
-/* Open state — mobile */
 #radius-panel.open #radius-content {
   width: 45vw;
   padding: 1em 0.875em;
@@ -70,7 +66,6 @@
 #radius-input {
   width: 100%;
   padding: 0.5em 0.625em;
-  border-radius: 0.375em;
   border: 0.0625rem solid #555;
   background: #1c1c1c;
   color: #fff;
@@ -78,70 +73,17 @@
   box-sizing: border-box;
 }
 
-#radius-input:focus {
-  outline: none;
-  border-color: #4caf50;
-}
-
 #radius-apply {
   padding: 0.55em 0;
   background: #4caf50;
   color: #fff;
   border: none;
-  border-radius: 0.375em;
   font-size: 0.8rem;
-  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-#radius-apply:hover {
-  background: #43a047;
-}
-
-/* ── Tablet (48em / 768px and up) ── */
-@media (min-width: 48em) {
-  #radius-toggle {
-    font-size: 1.1rem;
-  }
-
-  #radius-panel.open #radius-content {
-    width: 30vw;
-    padding: 1.25em 1em;
-  }
-
-  #radius-content label {
-    font-size: 0.8rem;
-  }
-
-  #radius-input,
-  #radius-apply {
-    font-size: 0.85rem;
-  }
-}
-
-/* ── Desktop (64em / 1024px and up) ── */
-@media (min-width: 64em) {
-  #radius-toggle {
-    font-size: 1.4rem;
-  }
-
-  #radius-panel.open #radius-content {
-    width: 22vw;
-    padding: 1.25em 1em;
-  }
-
-  #radius-content label {
-    font-size: 0.875rem;
-  }
-
-  #radius-input,
-  #radius-apply {
-    font-size: 0.9rem;
-  }
-}
-
-/* ── First-time map popup ── */
+/*First-time map popup*/
 .popup-overlay {
   position: fixed;
   width: 50%;
@@ -187,12 +129,7 @@
   background: #4caf50;
   color: #fff;
   border: none;
-  border-radius: 0.375em;
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-}
-
-#closeMapPopup:hover {
-  background: #43a047;
 }
