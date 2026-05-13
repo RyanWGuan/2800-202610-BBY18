@@ -10,25 +10,52 @@ document.addEventListener("DOMContentLoaded", () => {
         popup.style.display = "none";
     });
 
-    const savedLocations = JSON.parse(localStorage.getItem("savedLocations")) || [];
+    const savedLocations =
+        JSON.parse(localStorage.getItem("savedLocations")) || [];
 
     if (savedLocations.length === 0) {
         container.innerHTML = "<p>No saved locations yet.</p>";
         return;
     }
 
-    savedLocations.forEach((location) => {
+    savedLocations.forEach((location, index) => {
         const card = document.createElement("div");
         card.classList.add("location_card");
 
         card.innerHTML = `
             <div class="location_text">
                 <h2>${location.name}</h2>
+
                 <p>${location.address}</p>
+
+                <button
+                    class="delete_button"
+                    onclick="deleteLocation(${index})"
+                >
+                    Delete
+                </button>
             </div>
-            <div class="location_image">Image</div>
+
+            <div class="location_image">
+                Image
+            </div>
         `;
 
         container.appendChild(card);
     });
 });
+
+function deleteLocation(index)
+{
+    const savedLocations =
+        JSON.parse(localStorage.getItem("savedLocations")) || [];
+
+    savedLocations.splice(index, 1);
+
+    localStorage.setItem(
+        "savedLocations",
+        JSON.stringify(savedLocations)
+    );
+
+    location.reload();
+}
