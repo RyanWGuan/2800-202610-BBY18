@@ -72,21 +72,6 @@ app.get("/login", (req, res) => {
   });
 });
 
-<<<<<<< HEAD
-app.get('/profile', (req,res) => {
-    const user = {
-        username: "Jobless John",
-        email: "jobless987@gmail.com",
-        phone: "604-729-6767"
-    };
-
-
-    res.render('profile', {
-        user: user,
-        cssFiles: ['profile'],
-        jsFiles: ['profile']
-    });
-=======
 app.post("/loginSubmit", async (req, res) => {
     const { email, password } = req.body;
 
@@ -150,7 +135,6 @@ app.get("/profile", (req, res) => {
     cssFiles: ["style"],
     jsFiles: ["profile"],
   });
->>>>>>> RyanGuan_Session
 });
 
 app.get("/map", (req, res) => {
