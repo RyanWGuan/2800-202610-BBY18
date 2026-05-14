@@ -23,11 +23,27 @@ app.get("/login", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 app.get("/profile", (req, res) => {
   res.render("profile", {
     cssFiles: ["style"],
     jsFiles: ["profile"],
   });
+=======
+app.get('/profile', (req,res) => {
+    const user = {
+        username: "Jobless John",
+        email: "jobless987@gmail.com",
+        phone: "604-729-6767"
+    };
+
+
+    res.render('profile', {
+        user: user,
+        cssFiles: ['profile'],
+        jsFiles: ['profile']
+    });
+>>>>>>> devan-lam/websiteStyling&profileFunctionality
 });
 
 app.get("/map", (req, res) => {
