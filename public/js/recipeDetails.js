@@ -1,33 +1,33 @@
 const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
  
-// Pull meal ID from ?id=XXXXX in the URL
+// Pull meal ID from url
 function getMealUrlID() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("id");
+    const params = new URLSearchParams(window.location.search);
+    return params.get("id");
 }
  
-  // Extract ingredients and measures from meal object
-  function getIngredients(meal) {
+// Extract ingredients and measures from meal object
+function getIngredients(meal) {
     const items = [];
     for (let i = 1; i <= 20; i++) {
-      const name    = meal[`strIngredient${i}`];
-      const measure = meal[`strMeasure${i}`];
-      if (name && name.trim()) {
-        items.push({ name: name.trim(), measure: measure ? measure.trim() : "" });
-      }
+        const name    = meal[`strIngredient${i}`];
+        const measure = meal[`strMeasure${i}`];
+        if (name && name.trim()) {
+            items.push({ name: name.trim(), measure: measure ? measure.trim() : "" });
+        }
     }
     return items;
   }
  
-  // Convert a YouTube watch URL to an embed URL
-  function toEmbedUrl(youtubeUrl) {
+// Convert a YouTube watch URL to an embed URL
+function toEmbedUrl(youtubeUrl) {
     if (!youtubeUrl) return null;
     const match = youtubeUrl.match(/[?&]v=([^&]+)/);
     return match ? `https://www.youtube.com/embed/${match[1]}` : null;
   }
  
-  // Split instructions into steps on newlines / double-newlines
-  function parseInstructions(text) {
+// Split instructions into steps on newlines / double-newlines
+function parseInstructions(text) {
     if (!text) return [];
     return text
       .split(/\r?\n\r?\n|\r?\n/)
@@ -35,21 +35,21 @@ function getMealUrlID() {
       .filter(Boolean);
   }
  
-  // Build tags from area, category, and strTags
-  function buildTags(meal) {
+// Build tags from area, category, and strTags
+function buildTags(meal) {
     const tags = [];
     if (meal.strArea)     tags.push(meal.strArea);
     if (meal.strCategory) tags.push(meal.strCategory);
     if (meal.strTags) {
-      meal.strTags.split(",").forEach(t => {
-        const trimmed = t.trim();
-        if (trimmed) tags.push(trimmed);
+        meal.strTags.split(",").forEach(t => {
+            const trimmed = t.trim();
+            if (trimmed) tags.push(trimmed);
       });
     }
     return [...new Set(tags)]; // deduplicate
-  }
+}
  
-  function renderRecipe(meal) {
+ function renderRecipe(meal) {
     const page         = document.getElementById("detail-page");
     const tags         = buildTags(meal);
     const ingredients  = getIngredients(meal);
