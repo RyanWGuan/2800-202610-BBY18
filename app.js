@@ -167,6 +167,13 @@ app.get("/savedRecipes", (req, res) => {
   });
 });
 
+app.get("/recipeDetails", (req, res) => {
+  res.render("recipes", {
+    cssFiles: ["style", "recipeDetails"],
+    jsFiles: ["recipeDetails"],
+  });
+});
+
 // 404
 app.use((req, res) => {
   res.status(404);
