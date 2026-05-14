@@ -3,22 +3,22 @@
 <main class="body">
                 <div class="body_container">
                     <div class="edit_details">
-                        <span class="info">Username</span>
+                        <span class="info">Username: <strong><%= user.username %></strong></span>
                         <button type="button" class="edit_button">
                             Edit
                         </button>
 
-                        <span class="info">Password</span>
+                        <span class="info">Password: <strong>********</strong></span>
                         <button type="button" class="edit_button">
                             Edit
                         </button>
                         
-                        <span class="info">Email</span>
+                        <span class="info">Email: <strong><%= user.email %></strong></span>
                         <button type="button" class="edit_button">
                             Edit
                         </button>
                         
-                        <span class="info">Phone Number</span>
+                        <span class="info">Phone Number: <strong><%= user.phone || 'Not Set' %></strong></span>
                         <button type="button" class="edit_button">
                             Edit
                         </button>
