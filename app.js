@@ -23,13 +23,6 @@ app.get("/login", (req, res) => {
   });
 });
 
-<<<<<<< HEAD
-app.get("/profile", (req, res) => {
-  res.render("profile", {
-    cssFiles: ["style"],
-    jsFiles: ["profile"],
-  });
-=======
 app.get('/profile', (req,res) => {
     const user = {
         username: "Jobless John",
@@ -43,7 +36,6 @@ app.get('/profile', (req,res) => {
         cssFiles: ['profile'],
         jsFiles: ['profile']
     });
->>>>>>> devan-lam/websiteStyling&profileFunctionality
 });
 
 app.get("/map", (req, res) => {
