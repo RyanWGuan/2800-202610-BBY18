@@ -168,7 +168,7 @@ app.get("/savedRecipes", (req, res) => {
 });
 
 app.get("/recipeDetails", (req, res) => {
-  res.render("recipes", {
+  res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
     jsFiles: ["recipeDetails"],
   });

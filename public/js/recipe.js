@@ -16,7 +16,7 @@ async function fetchMealById(id) {
     return data.meals ? data.meals[0] : null;
 }
 
-// based on Lab03
+// loadMeals based on Lab03
 var offset = 0;
 var loading = false;
 var current = FIRST_MEAL_ID;
@@ -29,13 +29,16 @@ async function loadMeals() {
         let meal = await fetchMealById(i);
         if (!meal) continue;
 
-        results.innerHTML += `<div class="card">
-                        <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
-                        <div class="card-meta">
-                            <h3 class="card-title">${meal.strMeal}</h3>
-                            <span class="price-label">$10.49</span>
+        results.innerHTML += `
+                    <a href="/recipeDetails?id=${meal.idMeal}" class="card-link">
+                        <div class="card">
+                            <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
+                            <div class="card-meta">
+                                <h3 class="card-title">${meal.strMeal}</h3>
+                                <span class="price-label">$10.49</span>
+                            </div>
                         </div>
-                    </div>`;   
+                    <a/>`;   
                     
         current++;
     };
