@@ -1,0 +1,17 @@
+<%- include('partials/header') %>
+
+  <main class="main">
+    <div class="body_container" id="signup_container">
+      <h2 style="margin: 0; font-size: 20px; text-align: center;">Sign Up Failed</h2>
+
+      <p style="margin: 0; text-align: center; font-size: 14px;">
+        <%= message || "Something went wrong. Please try again." %>
+      </p>
+
+      <button class="signout login_button" onclick="window.location.href='/login'">
+        Back to Sign Up
+      </button>
+    </div>
+  </main>
+
+<%- include('partials/footer') %>
