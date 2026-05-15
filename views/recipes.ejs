@@ -1,218 +1,150 @@
 <%- include('partials/header') %>
 <main class="main">
-
-    <!-- <div class="filterbox">
-        <div class="dropdown">
-            <button onclick="myFunction()" class="dropbtn">Dropdown</button>
-            <div id="myDropdown" class="dropdown-content">
-                <a href="#">Link 1</a>
-                <a href="#">Link 2</a>
-                <a href="#">Link 3</a>
-            </div>
-        </div>
+  <div class="filterbox">
+    <div class="dropdown">
+      <button onclick="myFunction()" class="dropbtn">Dropdown</button>
+      <div id="myDropdown" class="dropdown-content">
+        <a href="#">Link 1</a>
+        <a href="#">Link 2</a>
+        <a href="#">Link 3</a>
+      </div>
     </div>
+  </div>
 
-    
+  <div class="recipebox"></div>
 
-
-    <div class="recipebox">
-
-
-    </div> -->
-
-    <div id="firstTimePopupRecipe" style="display: none;" class="popup-overlay">
-        <div class="popup-content">
-            <h2>Recipe Page</h2>
-            <p>Here you can view recipes based on filter and search settings, such as if they within a certain price range, or if they match the ingredients within your wishlist!</p>
-            <button id="closePopup">Got It!</button>
-        </div>
+  <div id="firstTimePopupRecipe" style="display: none" class="popup-overlay">
+    <div class="popup-content">
+      <h2>Recipe Page</h2>
+      <p>
+        Here you can view recipes based on filter and search settings, such as
+        if they within a certain price range, or if they match the ingredients
+        within your wishlist!
+      </p>
+      <button id="closePopup">Got It!</button>
     </div>
+  </div>
 
-      <br/>
- <!-- AI assisted toolbar -->
+  <br />
+  <!-- AI assisted toolbar -->
   <div class="toolbar">
     <!-- Filter button -->
     <div class="filter-wrapper">
       <button class="filter-btn" id="filterBtn" onclick="toggleDropdown()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <line x1="4" y1="6" x2="20" y2="6" />
+          <line x1="8" y1="12" x2="16" y2="12" />
+          <line x1="11" y1="18" x2="13" y2="18" />
+        </svg>
         Filter
-        <svg class="chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        <svg
+          class="chevron"
+          width="13"
+          height="13"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
       </button>
- 
+
       <div class="dropdown" id="dropdown">
- 
         <!-- Wishlist toggle -->
         <div class="dd-label">Wishlist</div>
         <div class="toggle-row">
           <span>
-            <i class="ti ti-heart" aria-hidden="true" style="font-size:16px;color:#ccc"></i>
+            <i
+              class="ti ti-heart"
+              aria-hidden="true"
+              style="font-size: 16px; color: #ccc"
+            ></i>
             Wishlisted only
           </span>
           <label class="toggle">
-            <input type="checkbox" id="wishlistToggle" onchange="applyFilters()">
+            <input
+              type="checkbox"
+              id="wishlistToggle"
+              onchange="applyFilters()"
+            />
             <span class="slider"></span>
           </label>
         </div>
- 
+
         <div class="divider"></div>
- 
+
         <!-- Price cap toggle -->
         <div class="dd-label">Price cap</div>
         <div class="toggle-row">
           <span>
-            <i class="ti ti-tag" aria-hidden="true" style="font-size:16px;color:#ccc"></i>
+            <i
+              class="ti ti-tag"
+              aria-hidden="true"
+              style="font-size: 16px; color: #ccc"
+            ></i>
             Enable price cap
           </span>
           <label class="toggle">
-            <input type="checkbox" id="priceToggle" onchange="togglePriceField()">
+            <input
+              type="checkbox"
+              id="priceToggle"
+              onchange="togglePriceField()"
+            />
             <span class="slider"></span>
           </label>
         </div>
- 
+
         <!-- Price input (shown when toggle is on) -->
-        <div class="price-row" id="priceRow" style="display:none">
+        <div class="price-row" id="priceRow" style="display: none">
           <span>Max price</span>
           <div class="price-field">
             <span>$</span>
-            <input type="number" id="priceInput" min="0" step="0.01" placeholder="0.00" oninput="applyFilters()" aria-label="Maximum price" />
+            <input
+              type="number"
+              id="priceInput"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              oninput="applyFilters()"
+              aria-label="Maximum price"
+            />
           </div>
         </div>
       </div>
     </div>
- 
+
     <!-- Search bar -->
     <div class="search-wrapper">
-      <i class="ti ti-search" aria-hidden="true" style="font-size:16px;color:#bbb"></i>
-      <input type="text" placeholder="Search items…" id="searchInput" oninput="applyFilters()" aria-label="Search items" />
+      <i
+        class="ti ti-search"
+        aria-hidden="true"
+        style="font-size: 16px; color: #bbb"
+      ></i>
+      <input
+        type="text"
+        placeholder="Search items…"
+        id="searchInput"
+        oninput="applyFilters()"
+        aria-label="Search items"
+      />
     </div>
   </div>
- 
-  <!-- AI assisted grid -->
+
   <!-- Items grid -->
-  <div class="results" id="results">
- 
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
-
-    <div class="card" data-name="apple" data-price="1.20">
-      Burger
-      <div class="card-meta">
-        <span class="price-label">$10.49</span>
-      </div>
-    </div>
- 
-  </div>
-
-
-
+  <div class="results" id="results"></div>
 </main>
 <%- include('partials/footer') %>
