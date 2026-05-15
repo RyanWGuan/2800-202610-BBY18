@@ -1,5 +1,5 @@
 const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
- 
+
 // Pull meal ID from url
 function getMealUrlID() {
     const params = new URLSearchParams(window.location.search);
@@ -55,11 +55,15 @@ function buildTags(meal) {
     const ingredients  = getIngredients(meal);
     const steps        = parseInstructions(meal.strInstructions);
     const embedUrl     = toEmbedUrl(meal.strYoutube);
- 
+
+    // Declare these before they're used in nutritionSection
+    const mealName       = meal.strMeal;
+    const ingredientList = ingredients.map(i => i.name).join(", ");
+
     const tagHTML = tags
       .map(t => `<span class="detail-tag">${t}</span>`)
       .join("");
- 
+
     const ingredientHTML = ingredients
       .map(ing => `
         <li>
@@ -67,11 +71,11 @@ function buildTags(meal) {
           <span class="ing-measure">${ing.measure}</span>
         </li>`)
       .join("");
- 
+
     const stepsHTML = steps
       .map(step => `<li>${step}</li>`)
       .join("");
- 
+
     const videoSection = embedUrl ? `
       <section class="detail-section">
         <div class="detail-section-header">
@@ -86,10 +90,26 @@ function buildTags(meal) {
           </iframe>
         </div>
       </section>` : "";
- 
+
+    const nutritionSection = `
+      <section class="detail-section" id="nutrition-section">
+        <div class="detail-section-header">
+          <h2>Nutritional Facts</h2>
+        </div>
+        <div id="nutrition-content">
+          <button
+            id="btn-nutrition"
+            data-meal="${mealName}"
+            data-ingredients="${ingredientList}"
+          >
+            Generate Nutritional Facts
+          </button>
+        </div>
+      </section>`;
+
     page.innerHTML = `
       <h1 class="detail-title">${meal.strMeal}</h1>
- 
+
       <div class="detail-hero">
         <img
           class="detail-image"
@@ -98,7 +118,7 @@ function buildTags(meal) {
         />
         <div class="detail-tags">${tagHTML}</div>
       </div>
- 
+
       <section class="detail-section">
         <div class="detail-section-header">
           <h2>Ingredients</h2>
@@ -111,18 +131,24 @@ function buildTags(meal) {
         </div>
         <ul class="ingredient-list">${ingredientHTML}</ul>
       </section>
- 
+
       <section class="detail-section">
         <div class="detail-section-header">
           <h2>Instructions</h2>
         </div>
         <ol class="instructions-list">${stepsHTML}</ol>
       </section>
- 
+
       ${videoSection}
+      ${nutritionSection}
     `;
- 
-    // Favourite toggle
+
+    // Event listeners go after page.innerHTML is set
+    document.getElementById("btn-nutrition").addEventListener("click", (e) => {
+        const btn = e.currentTarget;
+        loadNutrition(btn.dataset.meal, btn.dataset.ingredients);
+    });
+
     const favBtn = document.getElementById("btn-fav");
     const favKey = `fav_${meal.idMeal}`;
     if (localStorage.getItem(favKey)) favBtn.classList.add("active");
@@ -132,7 +158,7 @@ function buildTags(meal) {
         ? localStorage.setItem(favKey, "1")
         : localStorage.removeItem(favKey);
     });
-  }
+}
  
   async function loadRecipeDetail() {
     const page = document.getElementById("detail-page");
@@ -159,5 +185,36 @@ function buildTags(meal) {
       page.innerHTML = `<div class="detail-error">Failed to load recipe. ${err.message}</div>`;
     }
   }
+
+  // AI generated nutrition facts
+async function loadNutrition(mealName, ingredients) {
+  const content = document.getElementById("nutrition-content");
+  content.innerHTML = "<p>Analysing recipe…</p>";
+
+  console.log("Sending:", { mealName, ingredients }); // check values
+
+  try {
+    const response = await fetch("/api/nutrition", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mealName, ingredients }),
+    });
+
+    console.log("Response status:", response.status); // check if route is hit
+
+    const data = await response.json();
+
+    if (!response.ok || data.error) {
+        content.innerHTML = `<p class="detail-error">Failed to load nutrition info: ${data.error ?? "Unknown error"}</p>`;
+        return;
+    }
+
+
+    content.innerHTML = `<div class="nutrition-result">${data.result.replace(/\n/g, "<br>")}</div>`;
+  } catch (err) {
+    console.error("Nutrition fetch error:", err);
+    content.innerHTML = `<p class="detail-error">Failed to load nutrition info.</p>`;
+  }
+}
  
-  loadRecipeDetail();
+loadRecipeDetail();

@@ -28,6 +28,42 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(__dirname + '/public'));
 
+// AI generated AI nutrition facts server side
+app.post("/api/nutrition", async (req, res) => {
+  console.log("Route hit, body:", req.body); // check if request arrives
+  const { mealName, ingredients } = req.body;
+
+  // Dynamic import works inside CommonJS
+  const { GoogleGenAI } = await import("@google/genai");
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+  const prompt = `Give concise nutritional facts for the recipe "${mealName}" 
+                  with these ingredients: ${ingredients}. 
+                  Include estimated calories, protein, carbs, fat, and 2-3 health notes. 
+                  Keep it brief and friendly.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
+    res.json({ result: response.text });
+  } catch (err) {
+    let message = err.message;
+    try {
+      const parsed = JSON.parse(err.message);
+      if (parsed.error?.status === "RESOURCE_EXHAUSTED") {
+        message = "Gemini API quota exceeded. Please try again later.";
+      } else {
+        message = parsed.error?.message ?? message;
+      }
+    } catch (_) {
+      // err.message wasn't JSON, use as-is
+    }
+    res.status(500).json({ error: message });
+  }
+});
+
 app.set("view engine", "ejs");
 
 var mongoStore = MongoStore.create({
