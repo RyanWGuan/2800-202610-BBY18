@@ -23,6 +23,7 @@ const { MongoClient } = require('mongodb');
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
 const database = new MongoClient(atlasURI, {});
 const userCollection = database.db(mongodb_database).collection('users');
+const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -146,7 +147,7 @@ app.get("/", (req, res) => {
 
 app.get("/login", (req, res) => {
   res.render("login", {
-    cssFiles: ["login"],
+    cssFiles: ["style", "login"],
     jsFiles: ["login"],
   });
 });
@@ -178,9 +179,14 @@ app.post("/loginSubmit", async (req, res) => {
     if (await bcrypt.compare(password, result[0].password)) {
         req.session.authenticated = true;
         req.session.name = result[0].name;
+        req.session.email = result[0].email;
+        req.session.phone = result[0].phone || null;
         res.redirect('/profile');
     } else {
-        res.render("loginSubmit", { cssFiles: ['login'], jsFiles: []  });
+        res.render("loginSubmit", 
+          { cssFiles: ['login'], 
+            jsFiles: []  
+          });
     }
 });
 
@@ -205,15 +211,71 @@ app.post("/signupSubmit", async (req, res) => {
 
     req.session.authenticated = true;
     req.session.name = name;
+    req.session.email = email;
+    req.session.phone = null;
 
-    res.redirect('/profile');
+    res.redirect('/');
 });
 
-app.get("/profile", (req, res) => {
+app.get("/profile", sessionValidation, (req, res) => {
   res.render("profile", {
-    cssFiles: ["style"],
+    user: {
+      name: req.session.name,
+      email: req.session.email,
+      phone: req.session.phone
+    },
+
+    cssFiles: ["style", "profile"],
     jsFiles: ["profile"],
   });
+});
+
+
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("ERROR DESTROYING SESSION:", err);
+      return res.redirect('/profile');
+    }
+    res.clearCookie('connect.sid');
+    res.redirect('/login');
+  });
+});
+
+app.post("/updateUser", sessionValidation, async (req, res) => {
+  const {field, value, currentPassword} = req.body;
+  const oldEmail = req.session.email;
+
+  const user = await userCollection.findOne({email: oldEmail});
+
+  const passwordsMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!passwordsMatch) {
+    return res.send("Incorrect current password. Update Failed");
+  }
+
+  let updateValue = value;
+
+  if (field === 'password') {
+        if (value.length < 8) {
+            return res.send("New password must be at least 8 characters.");
+        }
+        updateValue = await bcrypt.hash(value, saltRounds);
+    }
+
+  const updateData = {};
+  updateData[field] = value;
+
+  try {
+    await userCollection.updateOne({ email: oldEmail}, {$set: updateData});
+
+    if (field === 'name') req.session.name = value;
+    if (field === 'email') req.session.email = value;
+    if (field === 'phone') req.session.phone = value;
+
+    res.redirect('/');
+  } catch (err) {
+    res.status(500).send("Error updating profile.");
+  }
 });
 
 app.get("/map", (req, res) => {
@@ -239,11 +301,15 @@ app.get("/savedLocations", (req, res) => {
   });
 });
 
-app.get("/savedRecipes", (req, res) => {
-  res.render("savedRecipes", {
-    cssFiles: ["style"],
-    jsFiles: [],
-  });
+app.get("/savedRecipes", async (req, res) => {
+
+    const savedRecipes = await savedRecipesCollection.find().toArray();
+
+    res.render("savedRecipes", {
+        cssFiles: ["style", "recipe"],
+        jsFiles: [],
+        savedRecipes: savedRecipes
+    });
 });
 
 app.get("/recipeDetails", (req, res) => {
@@ -253,7 +319,43 @@ app.get("/recipeDetails", (req, res) => {
   });
 });
 
-// AI generated for AI challenge
+app.post("/saveRecipe", async (req, res) => {
+
+    const { id, name, image } = req.body;
+
+    const existingRecipe = await savedRecipesCollection.findOne({ id });
+
+    if (existingRecipe) {
+        return res.json({
+            message: "Recipe already saved!"
+        });
+    }
+
+    await savedRecipesCollection.insertOne({
+        id,
+        name,
+        image
+    });
+
+    res.json({
+        message: "Recipe saved successfully!"
+    });
+});
+
+app.delete("/deleteSavedRecipe/:id", async (req, res) => {
+
+    const recipeId = req.params.id;
+
+    await savedRecipesCollection.deleteOne({
+        _id: new ObjectId(recipeId)
+    });
+
+    res.json({
+        message: "Recipe deleted successfully!"
+    });
+});
+
+//AI generated for AI challenge
 app.get("/api/meal/:id", async (req, res) => {
   try {
     const response = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${req.params.id}`);

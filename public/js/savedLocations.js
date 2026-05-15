@@ -36,9 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 </button>
             </div>
 
-            <div class="location_image">
-                Image
-            </div>
         `;
 
         container.appendChild(card);
