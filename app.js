@@ -23,6 +23,7 @@ const { MongoClient } = require('mongodb');
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
 const database = new MongoClient(atlasURI, {});
 const userCollection = database.db(mongodb_database).collection('users');
+const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -257,11 +258,15 @@ app.get("/savedLocations", (req, res) => {
   });
 });
 
-app.get("/savedRecipes", (req, res) => {
-  res.render("savedRecipes", {
-    cssFiles: ["style"],
-    jsFiles: [],
-  });
+app.get("/savedRecipes", async (req, res) => {
+
+    const savedRecipes = await savedRecipesCollection.find().toArray();
+
+    res.render("savedRecipes", {
+        cssFiles: ["style", "recipe"],
+        jsFiles: [],
+        savedRecipes: savedRecipes
+    });
 });
 
 app.get("/recipeDetails", (req, res) => {
@@ -269,6 +274,42 @@ app.get("/recipeDetails", (req, res) => {
     cssFiles: ["style", "recipeDetails"],
     jsFiles: ["recipeDetails"],
   });
+});
+
+app.post("/saveRecipe", async (req, res) => {
+
+    const { id, name, image } = req.body;
+
+    const existingRecipe = await savedRecipesCollection.findOne({ id });
+
+    if (existingRecipe) {
+        return res.json({
+            message: "Recipe already saved!"
+        });
+    }
+
+    await savedRecipesCollection.insertOne({
+        id,
+        name,
+        image
+    });
+
+    res.json({
+        message: "Recipe saved successfully!"
+    });
+});
+
+app.delete("/deleteSavedRecipe/:id", async (req, res) => {
+
+    const recipeId = req.params.id;
+
+    await savedRecipesCollection.deleteOne({
+        _id: new ObjectId(recipeId)
+    });
+
+    res.json({
+        message: "Recipe deleted successfully!"
+    });
 });
 
 //AI generated for AI challenge
