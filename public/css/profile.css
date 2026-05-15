@@ -1,73 +1,3 @@
-*{
-    color: black;
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
-}
-
-html{
-    overflow-x: hidden;
-    overflow-y: hidden;
-}
-
-body{
-    margin: 0%;
-    background-color: white;
-}
-
-.button{
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    justify-self: center;
-    align-self: center;
-    width: min-content;
-    height: min-content;
-    padding: 0%;
-}
-
-.container{
-    display: grid;
-    height: 100vh;
-    grid-template-rows: 10vh 80vh 10vh;
-}
-
-.icon{
-    width: 40px;
-    height: auto;
-}
-
-.header{
-    display: grid;
-    grid-row: 1 / span 1;
-    background-color: #015982;
-}
-
-.header_container{
-    display: grid;
-    width: 100vw;
-    height: 10vh;
-    grid-template-rows: 10vh;
-    grid-template-columns: 25vw 25vw 25vw 25vw;
-}
-
-.profile_button{
-    grid-row: 1 / span 1;
-    grid-column: 4 / span 1;
-    justify-self: center;
-    align-self: center;
-}
-
-.profile_icon{
-    width: 60px;
-    height: auto;
-}
-
-.logo_icon{
-    width: 100px;
-    height: auto;
-    justify-self: center;
-    align-self: center;
-}
-
 .body_container{
     display: grid;
     width: 100vw;
@@ -126,55 +56,6 @@ body{
     align-self: center;
 }
 
-.recipe_icon{
-    width: 60px;
-    height: auto;
-}
-
-.map_icon{
-    width: 40px;
-    height: auto;
-}
-
-.ingredients_icon{
-    width: 60px;
-    height: auto;
-}
-
-.footer{
-    display: grid;
-    grid-row: 3 / span 1;
-    background-color: #015982;
-}
-
-.footer-container{
-    display: grid;
-    width: 100vw;
-    height: 10vh;
-    grid-template-columns: 33.5vw 33vw 33.5vw;
-    grid-template-rows: 10vh;
-}
-
-.recipe_button{
-    grid-row: 1 / span 1;
-    grid-column: 1 / span 1;
-}
-
-.map_button{
-    grid-row: 1 / span 1;
-    grid-column: 2 / span 1;
-}
-
-.ingredients_button{
-    grid-row: 1 / span 1;
-    grid-column: 3 / span 1;
-}
-
-.main{
-    grid-row: 2 / span 1;
-    overflow-y: auto;
-}
-
 /* Popup for Profile */
 .popup-overlay{
     position: fixed;
@@ -195,87 +76,89 @@ body{
     text-align: center;
 }
 
+/* Dark Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
 
-/* For mobile */
- @media screen and (max-width: 600px)
-{
-    .container{
-        display: grid;
-        height: 100vh;
-        grid-template-rows: 10vh 80vh 10vh;
-    }
+/* Modal Box */
+.modal-content {
+    background: rgb(227, 227, 227);;
+    color: #f2f3f5;
+    padding: 24px;
+    border-radius: 8px;
+    width: 440px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
 
-    .icon{
-        width: 40px;
-        height: auto;
-    }
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-    .header{
-        display: grid;
-        grid-row: 1 / span 1;
-    }
+.modal-header h2 { margin: 0; font-size: 24px; }
 
-    .header_container{
-        display: grid;
-        width: 100vw;
-        height: 10vh;
-        grid-template-rows: 10vh;
-        grid-template-columns: 25vw 25vw 25vw 25vw;
-    }
+.close-x {
+    background: none; 
+    border: none; 
+    color:black;
+    font-size: 28px; 
+    cursor: pointer;
+}
 
-    .profile_button{
-        grid-row: 1 / span 1;
-        grid-column: 4 / span 1;
-        justify-self: center;
-        align-self: center;
-    }
+.modal-subtitle { 
+    color: black; 
+    margin: 8px 0 20px 0; 
+    font-size: 14px; }
 
-    .profile_icon{
-        width: 60px;
-        height: auto;
-    }
+/* Inputs */
+.input-group { margin-bottom: 20px; }
 
-    .recipe_icon{
-        width: 60px;
-        height: auto;
-    }
+.input-group label {
+    display: block;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+    color: black;
+    margin-bottom: 8px;
+}
 
-    .map_icon{
-        width: 60px;
-        height: auto;
-    }
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    border: none;
+    border-radius: 4px;
+    color: black;
+    box-sizing: border-box;
+}
 
-    .ingredients_icon{
-        width: 60px;
-        height: auto;
-    }
+.input-hint { font-size: 12px; color: #b5bac1; margin-top: 4px; }
 
-    .footer{
-        display: grid;
-        grid-row: 3 / span 1;
-    }
+/* Buttons */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+}
 
+.btn-cancel { background: none; border: none; color: black; cursor: pointer; }
 
-    .footer-container{
-        display: grid;
-        width: 100vw;
-        height: 10vh;
-        grid-template-columns: 33.5vw 33vw 33.5vw;
-        grid-template-rows: 10vh;
-    }
-
-    .recipe_button{
-        grid-row: 1 / span 1;
-        grid-column: 1 / span 1;
-    }
-
-    .map_button{
-        grid-row: 1 / span 1;
-        grid-column: 2 / span 1;
-    }
-
-    .ingredients_button{
-        grid-row: 1 / span 1;
-        grid-column: 3 / span 1;
-    }
+.btn-done {
+    background:  rgb(200, 200, 200); 
+    color: black;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
 }
