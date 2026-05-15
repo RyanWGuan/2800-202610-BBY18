@@ -118,7 +118,7 @@ async function getAISuggestion() {
             // Render a card linking to the real recipe page
             output.innerHTML = `
                 <a href="/recipeDetails?id=${data.id}" class="card-link">
-                    <div class="ai-card">
+                    <div class="card">
                         <img src="${data.image}" alt="${data.name}" class="card-img"/>
                         <div class="card-meta">
                             <h3 class="card-title">${data.name}</h3>
@@ -132,8 +132,7 @@ async function getAISuggestion() {
         } else {
             // Fallback if MealDB didn't find a match
             output.innerHTML = `
-                <div class="ai-card">
-                    <div class="ai-card-thumb">🍽️</div>
+                <div class="card">
                     <div class="card-meta" style="padding: 10px 14px;">
                         <h3 class="card-title">${data.name}</h3>
                         <span class="price-label">Not found in database</span>
