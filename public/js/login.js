@@ -23,3 +23,4 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('loginVisited', 'true');
     });
 });
+

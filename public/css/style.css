@@ -38,7 +38,7 @@ body{
 .header{
     display: grid;
     grid-row: 1 / span 1;
-    background-color: rgb(227, 227, 227);
+    background-color: #015982;
 }
 
 .header_container{
@@ -61,60 +61,9 @@ body{
     height: auto;
 }
 
-.body_container{
-    display: grid;
-    width: 100vw;
-    height: 80vh;
-    grid-template-rows: 40vh 30vh 10vh;
-}
-
-.edit_details{
-    display: grid;
-    width: 100vw;
-    height: 40vh;
-    grid-template-columns: 70vw 30vw;
-    grid-template-rows: 10vh 10vh 10vh 10vh;
-}
-
-.edit_button{
-    width: 50%;
-    height: 50%;
-    justify-self: center;
-    align-self: center;
-}
-
-.info{
-    align-self: center;
-    margin-left: 5%;
-}
-
-.saved_data{
-    display: grid;
-    height: 30vh;
-    grid-template-rows: 15vh 15vh;
-    grid-template-columns: 10vw 60vw 30vw;
-    align-content: center;
-}
-
-.saved_info{
-    align-self: center;
-}
-
-.bookmark_icon{
-    height: 30px;
-    width: auto;
-    align-self: center;
-    justify-self: center;
-}
-
-.arrow_icon{
-    width: 30px;
+.logo_icon{
+    width: 100px;
     height: auto;
-}
-
-.signout{
-    width: 50%;
-    height: 50%;
     justify-self: center;
     align-self: center;
 }
@@ -137,7 +86,7 @@ body{
 .footer{
     display: grid;
     grid-row: 3 / span 1;
-    background-color: rgb(227, 227, 227);
+    background-color: #015982;
 }
 
 .footer-container{
@@ -168,25 +117,7 @@ body{
     overflow-y: auto;
 }
 
-/* Popup for Profile */
-.popup-overlay{
-    position: fixed;
-    width: 50%;
-    height: 25%;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    justify-self: center;
-    z-index: 1000;
-    margin-top: 25%;
-}
 
-.popup-content{
-    background-color: rgb(233, 230, 230);
-    padding: 2px;
-    border-radius: 5px;
-    text-align: center;
-}
 
 /* CSS for savedRecipes.html */
 
@@ -216,7 +147,57 @@ body{
     padding: 10px;
 }
 
+.recipe-action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
+.save_recipe_button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #0b5f86;
+    color: white;
+    cursor: pointer;
+}
+
+.saved_recipe_image {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.delete_recipe_button {
+    margin-top: 8px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 6px;
+    background-color: #b91c1c;
+    color: white;
+    cursor: pointer;
+}
+
+.card-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ADD THESE */
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
 
 /* For mobile */
  @media screen and (max-width: 600px)
@@ -235,7 +216,6 @@ body{
     .header{
         display: grid;
         grid-row: 1 / span 1;
-        background-color: rgb(227, 227, 227);
     }
 
     .header_container{
@@ -264,7 +244,7 @@ body{
     }
 
     .map_icon{
-        width: 40px;
+        width: 60px;
         height: auto;
     }
 
@@ -276,7 +256,6 @@ body{
     .footer{
         display: grid;
         grid-row: 3 / span 1;
-        background-color: rgb(227, 227, 227);
     }
 
 

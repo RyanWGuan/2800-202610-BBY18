@@ -1,0 +1,136 @@
+[
+  {
+    "name": "Surrey Food Bank Depot (Guildford)",
+    "address": "10330 144th St, Surrey, BC V3T 4V3",
+    "phone": "604-581-5443",
+    "website": "https://surreyfoodbank.org/about-us/alternate-distribution-centres/",
+    "hours": "Mon–Fri: 9:00 AM – 4:00 PM (hours vary by depot)",
+    "provides": ["Pantry staples", "Canned foods", "Fresh produce", "Bread", "Dairy items", "Frozen foods", "Donation-based grocery support"],
+    "lat": 49.1906307,
+    "lon": -122.8227744
+  },
+  {
+    "name": "Surrey Food Bank",
+    "address": "13478 78 Ave, Surrey, BC V3W 8J6",
+    "phone": "604-581-5443",
+    "website": "https://surreyfoodbank.org/",
+    "hours": "Mon–Fri: 9:00 AM – 4:00 PM",
+    "provides": ["Pantry staples", "Canned foods", "Fresh produce", "Bread", "Dairy items", "Frozen foods", "Donation-based grocery support"],
+    "lat": 49.1440242,
+    "lon": -122.8497039
+  },
+  {
+    "name": "Friends in Need – Pitt Meadows Food Bank",
+    "address": "12240 Harris Rd, Pitt Meadows, BC V3Y 2E9",
+    "phone": "604-460-4619",
+    "website": "https://www.friendsneedfood.com/getting-help",
+    "hours": "Mon–Fri: Morning to afternoon distribution hours",
+    "provides": ["Weekly food hampers", "Fresh produce", "Dairy", "Bread", "Meat", "Non-perishable pantry staples"],
+    "lat": 49.225116,
+    "lon": -122.689087
+  },
+  {
+    "name": "Surrey Food Bank Depot (Cloverdale)",
+    "address": "5950 179th St, Surrey, BC V3S 4J9",
+    "phone": "604-581-5443",
+    "website": "https://surreyfoodbank.org/about-us/alternate-distribution-centres/",
+    "hours": "Mon–Fri: 9:00 AM – 4:00 PM (hours vary by depot)",
+    "provides": ["Pantry staples", "Canned foods", "Fresh produce", "Bread", "Dairy items", "Frozen foods", "Donation-based grocery support"],
+    "lat": 49.1103306,
+    "lon": -122.7263093
+  },
+  {
+    "name": "Surrey Food Bank Depot (North Delta)",
+    "address": "11300 84th Ave, Delta, BC V4C 2L8",
+    "phone": "604-581-5443",
+    "website": "https://surreyfoodbank.org/about-us/alternate-distribution-centres/",
+    "hours": "Mon–Fri: 9:00 AM – 4:00 PM (hours vary by depot)",
+    "provides": ["Pantry staples", "Canned foods", "Fresh produce", "Bread", "Dairy items", "Frozen foods", "Donation-based grocery support"],
+    "lat": 49.1557778,
+    "lon": -122.9095404
+  },
+  {
+    "name": "SHARE Food Bank",
+    "address": "2615 Clarke St, Port Moody, BC V3H 1Z4",
+    "phone": "604-931-2451",
+    "website": "https://sharesociety.ca/share-food-bank",
+    "hours": "Mon–Fri: Standard daytime hours",
+    "provides": ["Milk", "Eggs", "Formula", "Diapers", "Baby food", "Cereal", "Pasta", "Canned vegetables & fruits", "Tuna and canned meats", "Oatmeal", "Olive oil"],
+    "lat": 49.2775033,
+    "lon": -122.8535336
+  },
+  {
+    "name": "Greater Vancouver Food Bank Society",
+    "address": "8345 Winston St, Burnaby, BC V5A 2H3",
+    "phone": "604-876-3601",
+    "website": "https://foodbank.bc.ca/",
+    "hours": "Mon–Fri: Distribution and pickup hours vary by program",
+    "provides": ["Fresh fruits and vegetables", "Bread", "Yogurt", "Eggs", "Milk", "Rice and pasta", "Sauces and oatmeal", "Peanut butter", "Canned foods and soups", "Tuna and canned chicken"],
+    "specialPrograms": ["Newborn food packs", "Baby Steps packs", "Preschooler packs", "Grade Schooler packs", "Seniors' packs"],
+    "lat": 49.2493862,
+    "lon": -122.9219879
+  },
+  {
+    "name": "Sources Langley Food Bank",
+    "address": "5492 Production Blvd, Surrey, BC V3S 8P5",
+    "phone": "604-532-5290",
+    "website": "https://www.sourcesbc.ca/our-services/sources-langley-food-bank/",
+    "email": "foodbank@sourcesbc.ca",
+    "hours": "Mon–Fri: Daytime service hours",
+    "provides": ["Food hampers", "Family essentials", "Seasonal produce", "Baby supplies", "Formula", "Diapers"],
+    "lat": 49.1021309,
+    "lon": -122.6812638
+  },
+  {
+    "name": "Ridge Meadows Seniors Food Bank",
+    "address": "12150 224th St, Maple Ridge, BC V2X 3N8",
+    "phone": "604-380-0516",
+    "website": "https://www.friendsneedfood.com/getting-help",
+    "hours": "Weekly scheduled pickup/distribution days",
+    "provides": ["Senior grocery hampers", "Pantry staples", "Fresh produce", "Bread and dairy support"],
+    "lat": 49.2233331,
+    "lon": -122.6002128
+  },
+  {
+    "name": "Friends in Need Food Bank",
+    "address": "22726 Dewdney Trunk Road, Maple Ridge, BC V2X 3K3",
+    "phone": "604-466-3663",
+    "website": "https://www.friendsneedfood.com/",
+    "hours": "Mon–Fri: Morning to afternoon distribution hours",
+    "provides": ["Weekly food hampers", "Fresh produce", "Dairy", "Bread", "Meat", "Non-perishable pantry staples"],
+    "lat": 49.219307,
+    "lon": -122.592946
+  },
+  {
+    "name": "Sources White Rock/South Surrey Food Bank",
+    "address": "2343 156 St, Surrey, BC V4A 4V5",
+    "phone": "604-531-8168",
+    "website": "https://www.sourcesbc.ca/our-services/sources-white-rock-south-surrey-food-bank/",
+    "email": "foodbank@sourcesbc.ca",
+    "hours": "Mon–Fri: Daytime service hours",
+    "provides": ["Food hampers", "Family essentials", "Seasonal produce", "Baby supplies", "Formula", "Diapers"],
+    "lat": 49.0445316,
+    "lon": -122.7905259
+  },
+  {
+    "name": "South Delta Food Bank",
+    "address": "5545 Ladner Trunk Rd, Ladner, BC V4K 1X1",
+    "phone": "604-946-1967",
+    "website": "https://sites.google.com/ladnerlife.com/southdeltafoodbank/about",
+    "hours": "Wednesdays: 8:30 AM – 11:00 AM",
+    "provides": ["Pasta", "Soup", "Canned vegetables", "Fresh produce", "Meat", "Dairy", "Bread and bakery items"],
+    "lat": 49.0909776,
+    "lon": -123.0695681
+  },
+  {
+    "name": "Richmond Food Bank Society",
+    "address": "5800 Cedarbridge Way, Richmond, BC V6X 2A7",
+    "phone": "604-271-5609",
+    "website": "https://rfbs.org/",
+    "email": "info@rfbs.org",
+    "hours": "Multiple weekday distribution times depending on program",
+    "provides": ["Canned meats and fish", "Beans and soups", "Rice and pasta", "Cereal and peanut butter", "Bread and dairy products", "Fresh produce", "Frozen meats", "Vegetarian protein substitutes", "Grocery gift cards", "Toiletries and household essentials"],
+    "lat": 49.1729289,
+    "lon": -123.1417249
+  }
+]

@@ -1,10 +1,12 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const popup = document.getElementById("savedRecipesPopup");
-    const closeBtn = document.getElementById("closeSavedRecipesPopup");
+async function deleteSavedRecipe(recipeId) {
 
-    popup.style.display = "flex";
-
-    closeBtn.addEventListener("click", () => {
-        popup.style.display = "none";
+    const response = await fetch(`/deleteSavedRecipe/${recipeId}`, {
+        method: "DELETE"
     });
-});
+
+    const result = await response.json();
+
+    alert(result.message);
+
+    location.reload();
+}

@@ -19,21 +19,6 @@ body {
     grid-template-rows: 10vh 80vh 10vh;
 }
 
-/* Header */
-.header {
-    display: grid;
-    grid-row: 1 / span 1;
-    background-color: rgb(227, 227, 227);
-}
-
-.header_container {
-    display: grid;
-    width: 100vw;
-    height: 10vh;
-    grid-template-rows: 10vh;
-    grid-template-columns: 25vw 25vw 25vw 25vw;
-}
-
 .icon {
     width: 40px;
     height: auto;
@@ -151,35 +136,6 @@ body {
     color: #555;
 }
 
-/* Footer */
-.footer {
-    display: grid;
-    grid-row: 3 / span 1;
-    background-color: rgb(227, 227, 227);
-}
-
-.footer-container {
-    display: grid;
-    width: 100vw;
-    height: 10vh;
-    grid-template-columns: 33.5vw 33vw 33.5vw;
-    grid-template-rows: 10vh;
-}
-
-.recipe_button {
-    grid-row: 1 / span 1;
-    grid-column: 1 / span 1;
-}
-
-.map_button {
-    grid-row: 1 / span 1;
-    grid-column: 2 / span 1;
-}
-
-.ingredients_button {
-    grid-row: 1 / span 1;
-    grid-column: 3 / span 1;
-}
 
 .popup-overlay {
     position: fixed;
