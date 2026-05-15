@@ -38,7 +38,7 @@ async function loadMeals() {
                                 <span class="price-label">$10.49</span>
                             </div>
                         </div>
-                    <a/>`;   
+                    </a>`;   
                     
         current++;
     };

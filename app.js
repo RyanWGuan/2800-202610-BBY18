@@ -18,11 +18,13 @@ const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 
+
 const { MongoClient } = require('mongodb');
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
 const database = new MongoClient(atlasURI, {});
 const userCollection = database.db(mongodb_database).collection('users');
+const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -196,10 +198,13 @@ app.get("/savedLocations", (req, res) => {
   });
 });
 
-app.get("/savedRecipes", (req, res) => {
+app.get("/savedRecipes", async (req, res) => {
+  const savedRecipes = await savedRecipesCollection.find({}).toArray();
+
   res.render("savedRecipes", {
     cssFiles: ["style"],
-    jsFiles: [],
+    jsFiles: ["savedRecipes"],
+    savedRecipes: savedRecipes,
   });
 });
 
@@ -208,6 +213,42 @@ app.get("/recipeDetails", (req, res) => {
     cssFiles: ["style", "recipeDetails"],
     jsFiles: ["recipeDetails"],
   });
+});
+
+
+app.post("/saveRecipe", async (req, res) => {
+  const { id, name, image } = req.body;
+
+  const alreadySaved = await savedRecipesCollection.findOne({ id: id });
+
+  if (alreadySaved) {
+    return res.json({
+      success: false,
+      message: "Recipe already saved!"
+    });
+  }
+
+  await savedRecipesCollection.insertOne({
+    id: id,
+    name: name,
+    image: image,
+    createdAt: new Date()
+  });
+
+  res.json({
+    success: true,
+    message: "Recipe saved!"
+  });
+});
+
+app.delete("/deleteSavedRecipe/:id", async (req, res) => {
+  const recipeId = req.params.id;
+
+  await savedRecipesCollection.deleteOne({
+    _id: new ObjectId(recipeId)
+  });
+
+  res.json({ success: true });
 });
 
 // 404

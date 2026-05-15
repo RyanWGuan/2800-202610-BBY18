@@ -122,12 +122,22 @@ function buildTags(meal) {
       <section class="detail-section">
         <div class="detail-section-header">
           <h2>Ingredients</h2>
-          <button class="btn-fav" id="btn-fav" title="Save to favourites" aria-label="Favourite">
+
+          <div class="recipe-action-buttons">
+            <button class="btn-fav" id="btn-fav" title="Save to favourites" aria-label="Favourite">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"
                 stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
             </svg>
+            </button>
+
+            <button 
+              class="save_recipe_button"
+              id="save_recipe_button"
+            >
+              Save
           </button>
+          </div>
         </div>
         <ul class="ingredient-list">${ingredientHTML}</ul>
       </section>
@@ -157,6 +167,26 @@ function buildTags(meal) {
       favBtn.classList.contains("active")
         ? localStorage.setItem(favKey, "1")
         : localStorage.removeItem(favKey);
+    });
+
+    const saveRecipeBtn = document.getElementById("save_recipe_button");
+
+    saveRecipeBtn.addEventListener("click", async () => {
+    const response = await fetch("/saveRecipe", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id: meal.idMeal,
+            name: meal.strMeal,
+            image: meal.strMealThumb
+        })
+    });
+
+    const result = await response.json();
+
+      alert(result.message);
     });
 }
  
