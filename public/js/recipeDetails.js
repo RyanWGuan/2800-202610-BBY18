@@ -1,4 +1,4 @@
-const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
+const MEALDB_LOOKUP = "/api/meal/";
 
 // Pull meal ID from url
 function getMealUrlID() {
@@ -50,6 +50,7 @@ function buildTags(meal) {
 }
  
  function renderRecipe(meal) {
+    console.log("renderRecipe called"); // check how many times this logs
     const page         = document.getElementById("detail-page");
     const tags         = buildTags(meal);
     const ingredients  = getIngredients(meal);
@@ -124,13 +125,6 @@ function buildTags(meal) {
           <h2>Ingredients</h2>
 
           <div class="recipe-action-buttons">
-            <button class="btn-fav" id="btn-fav" title="Save to favourites" aria-label="Favourite">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 21C12 21 3 14.5 3 8.5C3 5.42 5.42 3 8.5 3C10.24 3 11.91 3.81 13 5.08C14.09 3.81 15.76 3 17.5 3C20.58 3 23 5.42 23 8.5C23 14.5 12 21 12 21Z"
-                stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-            </svg>
-            </button>
-
             <button 
               class="save_recipe_button"
               id="save_recipe_button"
@@ -155,20 +149,12 @@ function buildTags(meal) {
 
     // Event listeners go after page.innerHTML is set
     document.getElementById("btn-nutrition").addEventListener("click", (e) => {
+        console.log("button clicked"); // how many times does this log on one click?
         const btn = e.currentTarget;
         loadNutrition(btn.dataset.meal, btn.dataset.ingredients);
     });
 
-    const favBtn = document.getElementById("btn-fav");
-    const favKey = `fav_${meal.idMeal}`;
-    if (localStorage.getItem(favKey)) favBtn.classList.add("active");
-    favBtn.addEventListener("click", () => {
-      favBtn.classList.toggle("active");
-      favBtn.classList.contains("active")
-        ? localStorage.setItem(favKey, "1")
-        : localStorage.removeItem(favKey);
-    });
-
+    
     const saveRecipeBtn = document.getElementById("save_recipe_button");
 
     saveRecipeBtn.addEventListener("click", async () => {
