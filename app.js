@@ -117,7 +117,7 @@ app.get("/api/recipes", async (req, res) => {
 
 app.get("/login", (req, res) => {
   res.render("login", {
-    cssFiles: ["login"],
+    cssFiles: ["style", "login"],
     jsFiles: ["login"],
   });
 });
@@ -149,6 +149,8 @@ app.post("/loginSubmit", async (req, res) => {
   if (await bcrypt.compare(password, result[0].password)) {
     req.session.authenticated = true;
     req.session.name = result[0].name;
+    req.session.email = result[0].email;
+    req.session.phone = result[0].phone || null;
     res.redirect("/profile");
   } else {
     res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
@@ -176,15 +178,70 @@ app.post("/signupSubmit", async (req, res) => {
 
   req.session.authenticated = true;
   req.session.name = name;
+  req.session.email = email;
+  req.session.phone = null;
 
-  res.redirect("/profile");
+  res.redirect("/");
 });
 
-app.get("/profile", (req, res) => {
+app.get("/profile", sessionValidation, (req, res) => {
   res.render("profile", {
+    user: {
+      name: req.session.name,
+      email: req.session.email,
+      phone: req.session.phone,
+    },
+
     cssFiles: ["style", "profile"],
     jsFiles: ["profile"],
   });
+});
+
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("ERROR DESTROYING SESSION:", err);
+      return res.redirect("/profile");
+    }
+    res.clearCookie("connect.sid");
+    res.redirect("/login");
+  });
+});
+
+app.post("/updateUser", sessionValidation, async (req, res) => {
+  const { field, value, currentPassword } = req.body;
+  const oldEmail = req.session.email;
+
+  const user = await userCollection.findOne({ email: oldEmail });
+
+  const passwordsMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!passwordsMatch) {
+    return res.send("Incorrect current password. Update Failed");
+  }
+
+  let updateValue = value;
+
+  if (field === "password") {
+    if (value.length < 8) {
+      return res.send("New password must be at least 8 characters.");
+    }
+    updateValue = await bcrypt.hash(value, saltRounds);
+  }
+
+  const updateData = {};
+  updateData[field] = value;
+
+  try {
+    await userCollection.updateOne({ email: oldEmail }, { $set: updateData });
+
+    if (field === "name") req.session.name = value;
+    if (field === "email") req.session.email = value;
+    if (field === "phone") req.session.phone = value;
+
+    res.redirect("/");
+  } catch (err) {
+    res.status(500).send("Error updating profile.");
+  }
 });
 
 app.get("/map", (req, res) => {
@@ -206,14 +263,14 @@ app.get("/shoppingList", (req, res) => {
 app.get("/savedLocations", (req, res) => {
   res.render("savedLocations", {
     cssFiles: ["style"],
-    jsFiles: [],
+    jsFiles: ["savedLocations"],
   });
 });
 
 app.get("/savedRecipes", (req, res) => {
   res.render("savedRecipes", {
     cssFiles: ["style"],
-    jsFiles: [],
+    jsFiles: ["savedRecipes"],
   });
 });
 
