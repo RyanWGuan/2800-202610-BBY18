@@ -15,38 +15,72 @@
   <div id="radius-content">
     <div>
       <label for="radius-input">
-         Ping Radius (km) 
+        Ping Radius (m)
       </label>
       <input 
         id="radius-input" 
         type="number"
-        min="0.5"
-        max="500"
-        step="0.5"
-        value="5"
-        placeholder="example: 10"
+        min="50"
+        max="1000"
+        step="50"
+        value="500"
       />
     </div>
-    <div>
-      <label for="transit-toggle"> 
-        Enable Transit Ping
-      </label>
-      <input id="transit-toggle" type="checkbox" checked />
+    <div id="transit-toggle-row">
+      <label for="stops-toggle">Show Transit Stops</label>
+      <input id="stops-toggle" type="checkbox" />
     </div>
+    <div id="relay-toggle-row">
+      <label for="relay-toggle">Transit Relay Mode</label>
+      <input id="relay-toggle" type="checkbox" />
+    </div>
+    <div id="foodbank-toggle-row">
+      <label for="foodbank-toggle">Show Food Banks</label>
+      <input id="foodbank-toggle" type="checkbox" />
+    </div>
+    <div>
+  <label for="expansion-input">Transit Ping Expansion (km)</label>
+  <input
+  id="expansion-input"
+  type="number"
+  min="0.5"
+  max="3"
+  step="0.5"
+  value="1"
+/>
+</div>
+<div>
+  <label for="secondary-input">Secondary Ping Radius (m)</label>
+  <input
+  id="secondary-input"
+  type="number"
+  min="50"
+  max="300"
+  step="50"
+  value="100"
+/>
+</div>
     <button id="radius-apply">Apply and Rescan</button>
   </div>
 </div>
 
+<!-- Custom scan location button -->
+<button id="custom-location-btn">
+  <img id="custom-location-icon" src="/images/locationPing.png"/>
+</button>
+
 <!-- First time map page popup -->
-<div id="mapFirstTimePopup" style="display: none" class="popup-overlay">
+<div id="mapFirstTimePopup" class="popup-overlay">
   <div class="popup-content">
     <h2>Grocery Map</h2>
     <p>This map shows nearby grocery stores based on your location.</p>
     <ul>
       <li>Green markers are stores near you</li>
+      <li>Yellow markers are stores reachable via transit</li>
       <li>Tap a marker for the store name and address</li>
       <li>Use the arrow panel on the right to set how far to scan</li>
-      <li>Blue markers are transit options within your area</li>
+      <li>Blue markers are transit stops within your area</li>
+      <li>Orange markers are food banks (toggle in the arrow panel)</li>
     </ul>
     <button id="closeMapPopup">Got It!</button>
   </div>

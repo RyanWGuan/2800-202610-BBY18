@@ -32,7 +32,7 @@ app.get("/profile", (req, res) => {
 
 app.get("/map", (req, res) => {
   res.render("map", {
-    cssFiles: ["style"],
+    cssFiles: ["style", "map"],
     jsFiles: ["map"],
     mapboxToken: process.env.MAPBOX_TOKEN,
   });
