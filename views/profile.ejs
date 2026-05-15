@@ -1,47 +1,44 @@
 <%- include('partials/header') %>
 
 <main class="body">
-                <div class="body_container">
-                    <div class="edit_details">
-                        <span class="info">Username: <strong><%= user.username %></strong></span>
-                        <button type="button" class="edit_button">
-                            Edit
-                        </button>
+    <div class="body_container">
+        <div class="edit_details">
+            <span class="info">Username: <strong><%= user.name %></strong></span>
+            <button type="button" class="edit_button" onclick="openEditModal('name')">Edit</button>
 
-                        <span class="info">Password: <strong>********</strong></span>
-                        <button type="button" class="edit_button">
-                            Edit
-                        </button>
+            <span class="info">Password: <strong>********</strong></span>
+            <button type="button" class="edit_button" onclick="openEditModal('password')">Edit</button>
                         
-                        <span class="info">Email: <strong><%= user.email %></strong></span>
-                        <button type="button" class="edit_button">
-                            Edit
-                        </button>
+            <span class="info">Email: <strong><%= user.email %></strong></span>
+            <button type="button" class="edit_button" onclick="openEditModal('email')">Edit</button>
                         
-                        <span class="info">Phone Number: <strong><%= user.phone || 'Not Set' %></strong></span>
-                        <button type="button" class="edit_button">
-                            Edit
-                        </button>
-                </div>
+            <span class="info">Phone Number: <strong><%= user.phone || 'Add Phone Number' %></strong></span>
+            <button type="button" class="edit_button" onclick="openEditModal('phone')">Edit</button>
+        </div>
 
-                    <div class="saved_data">
-                        <img src="./images/bookmark.png" alt="bookmarked_recipes" class="bookmark_icon">
-                        <span class="saved_info"> Saved Recipes</span>
-                        <button type="button" class="edit_button button" onclick="window.location.href='/savedRecipes'"> 
-                            <img src="./images/rightArrow.png" alt="rightArrow" class="arrow_icon">
-                        </button>
+        <div class="saved_data">
+            <img src="./images/bookmark.png" alt="bookmarked_recipes" class="bookmark_icon">
+            <span class="saved_info"> Saved Recipes</span>
+            <button type="button" class="edit_button button" onclick="window.location.href='/savedRecipes'"> 
+                <img src="./images/rightArrow.png" alt="rightArrow" class="arrow_icon">
+            </button>
 
-                        <img src="./images/bookmark.png" alt="bookmarked_recipes" class="bookmark_icon">
-                        <span class="saved_info">Saved Locations</span>
-                        <button type="button" class="edit_button button" onclick="window.location.href='/savedLocations'"">
-                            <img src="./images/rightArrow.png" alt="rightArrow" class="arrow_icon">
-                        </button>
-                    </div>
+            <img src="./images/bookmark.png" alt="bookmarked_recipes" class="bookmark_icon">
+            <span class="saved_info">Saved Locations</span>
+            <button type="button" class="edit_button button" onclick="window.location.href='/savedLocations'"">
+                <img src="./images/rightArrow.png" alt="rightArrow" class="arrow_icon">
+            </button>
+        </div>
                     
-                    <button class="signout">
-                        Sign Out
-                    </button>
-                </div>
+        <button class="signout" onclick="window.location.href='/logout'">
+            Sign Out
+        </button>
+    </div>
+
+    <form id="updateForm" action="/updateUser" method="POST" style="display:none;">
+        <input type="hidden" name="field" id="formField">
+        <input type="hidden" name="value" id="formValue">
+    </form>
 </main>
 
 <div id="firstTimePopup" style="display: none;" class="popup-overlay">
@@ -49,6 +46,36 @@
         <h2>Profile Page</h2>
         <p>Here, you can edit your user data, as well as view your saved recipes, and locations.</p>
         <button id="closePopup">Got It!</button>
+    </div>
+</div>
+
+<div id="editModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Change your username</h2>
+            <button class="close-x" onclick="closeModal()">&times;</button>
+        </div>
+        <p class="modal-subtitle">Enter a new <span id="fieldLabel">username</span> and your existing password.</p>
+
+        <form action="/updateUser" method="POST">
+            <input type="hidden" name="field" id="modalFieldTarget">
+
+            <div class="input-group">
+                <label id="inputLabel">Username</label>
+                <input type="text" name="value" id="modalInputValue" required>
+                <p class="input-hint" id="modalHint">Please only use numbers, letters, underscores _, or periods.</p>
+            </div>
+
+            <div class="input-group">
+                <label>Current Password</label>
+                <input type="password" name="currentPassword" required>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn-done">Done</button>
+            </div>
+        </form>
     </div>
 </div>
 

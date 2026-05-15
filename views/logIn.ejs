@@ -3,15 +3,15 @@
   <main class="main">
 
     <div class="body_container login_card" id="login_container">
-      <div class="edit_details">
-        <span class="info">Username</span>
-        <input type="text" class="login_input" placeholder="Username" name="username" />
+      <form id="loginForm" action="/loginSubmit" method="POST" class="edit_details">
+        <span class="info">Email</span>
+        <input type="email" class="login_input" placeholder="Email" name="email" required />
 
         <span class="info">Password</span>
-        <input type="password" class="login_input" placeholder="Password" name="password" />
-      </div>
+        <input type="password" class="login_input" placeholder="Password" name="password" required />
+      </form>
 
-      <button class="signout login_button">
+      <button type="submit" form="loginForm" class="signout login_button">
         Log In
       </button>
 
@@ -22,19 +22,18 @@
     </div>
 
     <div class="body_container login_card" id="signup_container" style="display: none;">
-      <div class="edit_details">
-        <span class="info">Username</span>
-        <input type="text" class="login_input" placeholder="Username" name="username" />
+      <form id="signupForm" action="/signupSubmit" method="POST" class="edit_details">
+        <span class="info">Name</span>
+        <input type="text" class="login_input" placeholder="Name" name="name" required />
 
         <span class="info">Email</span>
-        <input type="email" class="login_input" placeholder="Email" name="email" />
+        <input type="email" class="login_input" placeholder="Email" name="email" required />
 
         <span class="info">Password</span>
-        <input type="password" class="login_input" placeholder="Password" name="password" />
+        <input type="password" class="login_input" placeholder="Password" name="password" required />
+      </form>
 
-      </div>
-
-      <button class="signout login_button">
+      <button type="submit" form="signupForm" class="signout login_button">
         Sign Up
       </button>
 
