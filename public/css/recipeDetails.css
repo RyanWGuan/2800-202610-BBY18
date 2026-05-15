@@ -1,0 +1,212 @@
+/* AI assisted CSS based on wireframe, edited and reviewed by humans */
+
+:root {
+    /* --cream: #fdf8f2; */
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --tag-bg: #f0ebe3;
+    --tag-border: #d6cfc4;
+    --accent: #c0392b;
+    --card-bg: #ffffff;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --radius: 12px;
+}
+ 
+body {
+    /* background: var(--cream); */
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    margin: 0;
+}
+ 
+/* ── Page wrapper ── */
+.detail-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 4rem;
+    animation: fadeUp 0.4s ease both;
+}
+ 
+@keyframes fadeUp {
+    /* from { opacity: 0; transform: translateY(16px); } */
+    from { opacity: 0; transform: translateY(1600px); }
+    to   { opacity: 1; transform: translateY(0); }
+ }
+ 
+  /* ── Recipe name ── */
+  .detail-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    line-height: 1.15;
+    margin: 0 0 1.25rem;
+    color: var(--ink);
+  }
+ 
+  /* ── Hero row: image + tags ── */
+  .detail-hero {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    align-items: start;
+  }
+ 
+  .detail-image {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    display: block;
+  }
+ 
+  .detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-content: flex-start;
+  }
+ 
+  .detail-tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--tag-border);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+  }
+ 
+  /* ── Section headings ── */
+  .detail-section {
+    margin-bottom: 1.75rem;
+  }
+ 
+  .detail-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+ 
+  .detail-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin: 0;
+  }
+ 
+  /* ── Favourite button ── */
+  .btn-fav {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    transition: transform 0.15s ease;
+  }
+  .btn-fav:hover { transform: scale(1.2); }
+  .btn-fav svg { width: 28px; height: 28px; }
+  .btn-fav.active svg path { fill: var(--accent); stroke: var(--accent); }
+ 
+  /* ── Ingredients table ── */
+  .ingredient-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.1rem;
+  }
+ 
+  .ingredient-list li {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid #ede8e0;
+    font-size: 0.95rem;
+  }
+ 
+  .ingredient-list li:last-child { border-bottom: none; }
+ 
+  .ing-name { font-weight: 500; }
+  .ing-name::before {
+    content: "•";
+    color: var(--accent);
+    margin-right: 0.5rem;
+  }
+  .ing-measure { color: var(--muted); }
+ 
+  /* ── Instructions ── */
+  .instructions-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+    counter-reset: step;
+  }
+ 
+  .instructions-list li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    align-items: start;
+  }
+ 
+  .instructions-list li::before {
+    content: counter(step);
+    background: var(--ink);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+ 
+  /* ── Video embed ── */
+  .detail-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+ 
+  .detail-video iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+ 
+  /* ── Loading / error states ── */
+  .detail-loading,
+  .detail-error {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+ 
+  .detail-error { color: var(--accent); }
+ 
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .detail-hero {
+      grid-template-columns: 1fr;
+    }
+    .detail-image {
+      width: 100%;
+      height: 220px;
+    }
+  }

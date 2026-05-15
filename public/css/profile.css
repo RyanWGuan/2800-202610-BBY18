@@ -1,0 +1,164 @@
+.body_container{
+    display: grid;
+    width: 100vw;
+    height: 80vh;
+    grid-template-rows: 40vh 30vh 10vh;
+}
+
+.edit_details{
+    display: grid;
+    width: 100vw;
+    height: 40vh;
+    grid-template-columns: 70vw 30vw;
+    grid-template-rows: 10vh 10vh 10vh 10vh;
+}
+
+.edit_button{
+    width: 50%;
+    height: 50%;
+    justify-self: center;
+    align-self: center;
+}
+
+.info{
+    align-self: center;
+    margin-left: 10%;
+}
+
+.saved_data{
+    display: grid;
+    height: 30vh;
+    grid-template-rows: 15vh 15vh;
+    grid-template-columns: 20vw 50vw 30vw;
+    align-content: center;
+}
+
+.saved_info{
+    align-self: center;
+}
+
+.bookmark_icon{
+    height: 30px;
+    width: auto;
+    align-self: center;
+    justify-self: center;
+}
+
+.arrow_icon{
+    width: 30px;
+    height: auto;
+}
+
+.signout{
+    width: 50%;
+    height: 50%;
+    justify-self: center;
+    align-self: center;
+}
+
+/* Popup for Profile */
+.popup-overlay{
+    position: fixed;
+    width: 50%;
+    height: 25%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    justify-self: center;
+    z-index: 1000;
+    margin-top: 25%;
+}
+
+.popup-content{
+    background-color: rgb(233, 230, 230);
+    padding: 2px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Dark Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal Box */
+.modal-content {
+    background: rgb(227, 227, 227);;
+    color: #f2f3f5;
+    padding: 24px;
+    border-radius: 8px;
+    width: 440px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 { margin: 0; font-size: 24px; }
+
+.close-x {
+    background: none; 
+    border: none; 
+    color:black;
+    font-size: 28px; 
+    cursor: pointer;
+}
+
+.modal-subtitle { 
+    color: black; 
+    margin: 8px 0 20px 0; 
+    font-size: 14px; }
+
+/* Inputs */
+.input-group { margin-bottom: 20px; }
+
+.input-group label {
+    display: block;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: bold;
+    color: black;
+    margin-bottom: 8px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    border: none;
+    border-radius: 4px;
+    color: black;
+    box-sizing: border-box;
+}
+
+.input-hint { font-size: 12px; color: #b5bac1; margin-top: 4px; }
+
+/* Buttons */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.btn-cancel { background: none; border: none; color: black; cursor: pointer; }
+
+.btn-done {
+    background:  rgb(200, 200, 200); 
+    color: black;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
