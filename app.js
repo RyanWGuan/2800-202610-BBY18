@@ -46,7 +46,7 @@ app.post("/api/nutrition", async (req, res) => {
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-1.5-flash-8b",
       contents: prompt,
     });
     res.json({ result: response.text });
