@@ -10,7 +10,11 @@
         <% savedRecipes.forEach((recipe) => { %>
             <a href="/recipeDetails?id=<%= recipe.id %>" class="card-link">
                 <div class="card">
-                    <img src="<%= recipe.image %>" alt="<%= recipe.name %>" class="card-img"/>
+                    <img 
+                        src="<%= recipe.image %>" 
+                        alt="<%= recipe.name %>" 
+                        class="card-img"
+                    />
 
                     <div class="card-meta">
                         <h3 class="card-title"><%= recipe.name %></h3>
@@ -18,11 +22,11 @@
                         <div class="card-bottom">
                             <span class="price-label">$10.49</span>
 
-                        <button 
-                            class="delete_recipe_button"
-                            onclick="deleteSavedRecipe(event, '<%= recipe._id %>')"
-                        >
-                        Delete
+                            <button 
+                                class="delete_recipe_button"
+                                onclick="event.preventDefault(); event.stopPropagation(); deleteSavedRecipe('<%= recipe._id %>')"
+                            >
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -32,16 +36,6 @@
 
     </div>
 </main>
-
-<div id="savedRecipesPopup" style="display: none;" class="popup-overlay">
-    <div class="popup-content">
-        <h2>Saved Recipes Page</h2>
-        <p>
-            Here, you can view the recipes you saved and quickly access them later.
-        </p>
-        <button id="closeSavedRecipesPopup">Got It!</button>
-    </div>
-</div>
 
 <script src="/js/savedRecipes.js"></script>
 

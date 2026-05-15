@@ -110,6 +110,76 @@ document.querySelector(".main").addEventListener("scroll", function () {
     loadRecipes();
   }
 });
+    const maxTime = document.getElementById('timeSlider')?.value || 60;
+    const search = document.getElementById('searchInput')?.value || '';
+
+    btn.disabled = true;
+    btn.textContent = 'Thinking…';
+    output.style.display = 'block';
+    output.innerHTML = '<span style="color:#888">Generating suggestion…</span>';
+
+    try {
+        const response = await fetch('/api/recipe-suggest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ search })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Server error');
+
+        if (data.found) {
+            // Render a card linking to the real recipe page
+            output.innerHTML = `
+                <a href="/recipeDetails?id=${data.id}" class="card-link">
+                    <div class="card">
+                        <img src="${data.image}" alt="${data.name}" class="card-img"/>
+                        <div class="card-meta">
+                            <h3 class="card-title">${data.name}</h3>
+                            <span class="price-label">${data.area || ''} · ${data.category || ''}</span>
+                        </div>
+                        <div class="ai-card-badge-wrap">
+                            <span class="ai-card-badge">✦ AI Suggestion</span>
+                        </div>
+                    </div>
+                </a>`;
+        } else {
+            // Fallback if MealDB didn't find a match
+            output.innerHTML = `
+                <div class="card">
+                    <div class="card-meta" style="padding: 10px 14px;">
+                        <h3 class="card-title">${data.name}</h3>
+                        <span class="price-label">Not found in database</span>
+                    </div>
+                    <div class="ai-card-badge-wrap">
+                        <span class="ai-card-badge">✦ AI Suggestion</span>
+                    </div>
+                </div>`;
+        }
+    } catch (err) {
+        output.innerHTML = `<span style="color:red">Failed to get suggestion: ${err.message}</span>`;
+        console.error(err);
+    }
+
+    btn.disabled = false;
+    btn.textContent = '✦ Suggest a recipe';
+}
+
+// Load first 10 on page load
+loadRecipes();
+
+// Infinite scroll -- uses your .main div since that's what scrolls, not the window
+document.querySelector(".main").addEventListener("scroll", function () {
+  const scrollTop = this.scrollTop;
+  const scrollHeight = this.scrollHeight;
+  const clientHeight = this.clientHeight;
+  const scrollBuffer = 5;
+
+  if (scrollTop + clientHeight + scrollBuffer >= scrollHeight) {
+    loadRecipes();
+  }
+});
 
 // popup challenge
 document.addEventListener("DOMContentLoaded", () => {

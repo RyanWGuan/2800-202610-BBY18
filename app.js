@@ -22,45 +22,93 @@ const { MongoClient } = require("mongodb");
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
 const database = new MongoClient(atlasURI, {});
+<<<<<<< HEAD
 const userCollection = database.db(mongodb_database).collection("users");
+=======
+const userCollection = database.db(mongodb_database).collection('users');
+const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
+>>>>>>> dev
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(__dirname + "/public"));
 
-// AI generated AI nutrition facts server side
-app.post("/api/nutrition", async (req, res) => {
-  console.log("Route hit, body:", req.body); // check if request arrives
-  const { mealName, ingredients } = req.body;
+// Shared Gemini fetch helper — no package needed, works in any Node version
+async function callGemini(prompt) {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 1000
+    })
+  });
+  const data = await response.json();
+  console.log("Groq raw response:", JSON.stringify(data));
+  if (!response.ok) throw new Error(data.error?.message || "Groq error");
+  return data.choices?.[0]?.message?.content || "No response.";
+}
 
-  // Dynamic import works inside CommonJS
-  const { GoogleGenAI } = await import("@google/genai");
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// AI nutrition facts
+app.post("/api/nutrition", async (req, res) => {
+  console.log("Route hit, body:", req.body);
+  const { mealName, ingredients } = req.body;
 
   const prompt = `Give concise nutritional facts for the recipe "${mealName}" 
                   with these ingredients: ${ingredients}. 
                   Include estimated calories, protein, carbs, fat, and 2-3 health notes. 
                   Keep it brief and friendly.`;
+  try {
+    const result = await callGemini(prompt);
+    res.json({ result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Recipe suggestion — searches MealDB directly, no AI needed
+app.post("/api/recipe-suggest", async (req, res) => {
+  const { search } = req.body;
 
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: prompt,
-    });
-    res.json({ result: response.text });
-  } catch (err) {
-    let message = err.message;
-    try {
-      const parsed = JSON.parse(err.message);
-      if (parsed.error?.status === "RESOURCE_EXHAUSTED") {
-        message = "Gemini API quota exceeded. Please try again later.";
-      } else {
-        message = parsed.error?.message ?? message;
+    // Search MealDB by name if provided, otherwise fetch a random one
+    let meal = null;
+
+    if (search && search.trim()) {
+      const searchRes = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(search.trim())}`);
+      const searchData = await searchRes.json();
+      if (searchData.meals && searchData.meals.length > 0) {
+        // Pick a random result from the matches so it's not always the same
+        const randomIndex = Math.floor(Math.random() * Math.min(searchData.meals.length, 5));
+        meal = searchData.meals[randomIndex];
       }
-    } catch (_) {
-      // err.message wasn't JSON, use as-is
     }
-    res.status(500).json({ error: message });
+
+    // If no search term or no results, get a random meal from MealDB
+    if (!meal) {
+      const randomRes = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+      const randomData = await randomRes.json();
+      meal = randomData.meals?.[0];
+    }
+
+    if (!meal) {
+      return res.status(404).json({ error: 'No recipe found.' });
+    }
+
+    res.json({
+      found: true,
+      id: meal.idMeal,
+      name: meal.strMeal,
+      image: meal.strMealThumb,
+      category: meal.strCategory,
+      area: meal.strArea,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -267,11 +315,15 @@ app.get("/savedLocations", (req, res) => {
   });
 });
 
-app.get("/savedRecipes", (req, res) => {
-  res.render("savedRecipes", {
-    cssFiles: ["style"],
-    jsFiles: ["savedRecipes"],
-  });
+app.get("/savedRecipes", async (req, res) => {
+
+    const savedRecipes = await savedRecipesCollection.find().toArray();
+
+    res.render("savedRecipes", {
+        cssFiles: ["style", "recipe"],
+        jsFiles: [],
+        savedRecipes: savedRecipes
+    });
 });
 
 app.get("/recipeDetails", (req, res) => {
@@ -279,6 +331,42 @@ app.get("/recipeDetails", (req, res) => {
     cssFiles: ["style", "recipeDetails"],
     jsFiles: ["recipeDetails"],
   });
+});
+
+app.post("/saveRecipe", async (req, res) => {
+
+    const { id, name, image } = req.body;
+
+    const existingRecipe = await savedRecipesCollection.findOne({ id });
+
+    if (existingRecipe) {
+        return res.json({
+            message: "Recipe already saved!"
+        });
+    }
+
+    await savedRecipesCollection.insertOne({
+        id,
+        name,
+        image
+    });
+
+    res.json({
+        message: "Recipe saved successfully!"
+    });
+});
+
+app.delete("/deleteSavedRecipe/:id", async (req, res) => {
+
+    const recipeId = req.params.id;
+
+    await savedRecipesCollection.deleteOne({
+        _id: new ObjectId(recipeId)
+    });
+
+    res.json({
+        message: "Recipe deleted successfully!"
+    });
 });
 
 //AI generated for AI challenge
