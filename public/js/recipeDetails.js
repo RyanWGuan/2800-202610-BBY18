@@ -232,5 +232,5 @@ async function loadNutrition(mealName, ingredients) {
     content.innerHTML = `<p class="detail-error">Failed to load nutrition info.</p>`;
   }
 }
- 
+console.log("loadRecipeDetail called");
 loadRecipeDetail();

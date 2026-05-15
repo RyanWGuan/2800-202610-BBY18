@@ -30,25 +30,28 @@ app.use(express.static(__dirname + '/public'));
 
 // AI generated AI nutrition facts server side
 app.post("/api/nutrition", async (req, res) => {
-  console.log("Route hit, body:", req.body); // check if request arrives
+  console.log("Route hit, body:", req.body);
   const { mealName, ingredients } = req.body;
 
-  // Dynamic import works inside CommonJS
-  const { GoogleGenAI } = await import("@google/genai");
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-  const prompt = `Give concise nutritional facts for the recipe "${mealName}" 
-                  with these ingredients: ${ingredients}. 
-                  Include estimated calories, protein, carbs, fat, and 2-3 health notes. 
-                  Keep it brief and friendly.`;
-
   try {
+    const { GoogleGenAI } = await import("@google/genai");
+    const ai = new GoogleGenAI({ 
+      apiKey: process.env.GEMINI_API_KEY,
+      httpOptions: { apiVersion: "v1" }
+    });
+    const prompt = `Give concise nutritional facts for the recipe "${mealName}" 
+                    with these ingredients: ${ingredients}. 
+                    Include estimated calories, protein, carbs, fat, and 2-3 health notes. 
+                    Keep it brief and friendly.`;
+
     const response = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
     res.json({ result: response.text });
+
   } catch (err) {
+    console.error("Gemini error:", err); // add this to see full error in terminal
     let message = err.message;
     try {
       const parsed = JSON.parse(err.message);
@@ -57,9 +60,7 @@ app.post("/api/nutrition", async (req, res) => {
       } else {
         message = parsed.error?.message ?? message;
       }
-    } catch (_) {
-      // err.message wasn't JSON, use as-is
-    }
+    } catch (_) {}
     res.status(500).json({ error: message });
   }
 });
@@ -219,6 +220,17 @@ app.get("/api/meal/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+//AI generated for AI challenge debugging
+app.get("/api/models", async (req, res) => {
+  const { GoogleGenAI } = await import("@google/genai");
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  const names = [];
+  for await (const model of await ai.models.list()) {
+    names.push(model.name);
+  }
+  res.json(names);
 });
 
 // 404
