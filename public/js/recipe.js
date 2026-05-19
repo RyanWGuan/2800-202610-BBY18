@@ -164,7 +164,6 @@ document.querySelector(".main").addEventListener("scroll", function () {
 
     btn.disabled = false;
     btn.textContent = '✦ Suggest a recipe';
-}
 
 // Load first 10 on page load
 loadRecipes();
