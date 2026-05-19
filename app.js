@@ -22,12 +22,8 @@ const { MongoClient } = require("mongodb");
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
 const database = new MongoClient(atlasURI, {});
-<<<<<<< HEAD
-const userCollection = database.db(mongodb_database).collection("users");
-=======
 const userCollection = database.db(mongodb_database).collection('users');
 const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
->>>>>>> dev
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
