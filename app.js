@@ -20,7 +20,7 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 
 const { MongoClient } = require("mongodb");
 
-const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
+const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`;
 const database = new MongoClient(atlasURI, {});
 const userCollection = database.db(mongodb_database).collection("users");
 const savedRecipesCollection = database
