@@ -22,10 +22,17 @@ const { MongoClient } = require("mongodb");
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
 const database = new MongoClient(atlasURI, {});
+<<<<<<< HEAD
 
 const userCollection = database.db(mongodb_database).collection('users');
 const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
 
+=======
+const userCollection = database.db(mongodb_database).collection("users");
+const savedRecipesCollection = database
+  .db(mongodb_database)
+  .collection("savedRecipes");
+>>>>>>> d9c5a0c13a221ffe618c046c0e24d1fa4f7d0ed4
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -33,18 +40,21 @@ app.use(express.static(__dirname + "/public"));
 
 // Shared Gemini fetch helper — no package needed, works in any Node version
 async function callGemini(prompt) {
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+  const response = await fetch(
+    "https://api.groq.com/openai/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1000,
+      }),
     },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 1000
-    })
-  });
+  );
   const data = await response.json();
   console.log("Groq raw response:", JSON.stringify(data));
   if (!response.ok) throw new Error(data.error?.message || "Groq error");
@@ -77,24 +87,30 @@ app.post("/api/recipe-suggest", async (req, res) => {
     let meal = null;
 
     if (search && search.trim()) {
-      const searchRes = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(search.trim())}`);
+      const searchRes = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(search.trim())}`,
+      );
       const searchData = await searchRes.json();
       if (searchData.meals && searchData.meals.length > 0) {
         // Pick a random result from the matches so it's not always the same
-        const randomIndex = Math.floor(Math.random() * Math.min(searchData.meals.length, 5));
+        const randomIndex = Math.floor(
+          Math.random() * Math.min(searchData.meals.length, 5),
+        );
         meal = searchData.meals[randomIndex];
       }
     }
 
     // If no search term or no results, get a random meal from MealDB
     if (!meal) {
-      const randomRes = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+      const randomRes = await fetch(
+        "https://www.themealdb.com/api/json/v1/1/random.php",
+      );
       const randomData = await randomRes.json();
       meal = randomData.meals?.[0];
     }
 
     if (!meal) {
-      return res.status(404).json({ error: 'No recipe found.' });
+      return res.status(404).json({ error: "No recipe found." });
     }
 
     res.json({
@@ -161,6 +177,22 @@ app.get("/api/recipes", async (req, res) => {
   res.json(data.results);
 });
 
+app.get("/api/recipe-price", async (req, res) => {
+  const { name } = req.query;
+  try {
+    const response = await fetch(
+      `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(name)}&number=1&addRecipeInformation=true&apiKey=${process.env.SPOONACULAR_KEY}`,
+    );
+    const data = await response.json();
+    const recipe = data.results?.[0];
+    const price = recipe?.pricePerServing
+      ? ((recipe.pricePerServing / 100) * 1.3704).toFixed(2)
+      : null;
+    res.json({ price });
+  } catch (err) {
+    res.json({ price: null });
+  }
+});
 app.get("/login", (req, res) => {
   res.render("login", {
     cssFiles: ["style", "login"],
@@ -314,14 +346,13 @@ app.get("/savedLocations", (req, res) => {
 });
 
 app.get("/savedRecipes", async (req, res) => {
+  const savedRecipes = await savedRecipesCollection.find().toArray();
 
-    const savedRecipes = await savedRecipesCollection.find().toArray();
-
-    res.render("savedRecipes", {
-        cssFiles: ["style", "recipe"],
-        jsFiles: [],
-        savedRecipes: savedRecipes
-    });
+  res.render("savedRecipes", {
+    cssFiles: ["style", "recipe"],
+    jsFiles: [],
+    savedRecipes: savedRecipes,
+  });
 });
 
 app.get("/recipeDetails", (req, res) => {
@@ -332,39 +363,37 @@ app.get("/recipeDetails", (req, res) => {
 });
 
 app.post("/saveRecipe", async (req, res) => {
+  const { id, name, image } = req.body;
 
-    const { id, name, image } = req.body;
+  const existingRecipe = await savedRecipesCollection.findOne({ id });
 
-    const existingRecipe = await savedRecipesCollection.findOne({ id });
-
-    if (existingRecipe) {
-        return res.json({
-            message: "Recipe already saved!"
-        });
-    }
-
-    await savedRecipesCollection.insertOne({
-        id,
-        name,
-        image
+  if (existingRecipe) {
+    return res.json({
+      message: "Recipe already saved!",
     });
+  }
 
-    res.json({
-        message: "Recipe saved successfully!"
-    });
+  await savedRecipesCollection.insertOne({
+    id,
+    name,
+    image,
+  });
+
+  res.json({
+    message: "Recipe saved successfully!",
+  });
 });
 
 app.delete("/deleteSavedRecipe/:id", async (req, res) => {
+  const recipeId = req.params.id;
 
-    const recipeId = req.params.id;
+  await savedRecipesCollection.deleteOne({
+    _id: new ObjectId(recipeId),
+  });
 
-    await savedRecipesCollection.deleteOne({
-        _id: new ObjectId(recipeId)
-    });
-
-    res.json({
-        message: "Recipe deleted successfully!"
-    });
+  res.json({
+    message: "Recipe deleted successfully!",
+  });
 });
 
 //AI generated for AI challenge
