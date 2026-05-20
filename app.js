@@ -22,10 +22,17 @@ const { MongoClient } = require("mongodb");
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`;
 const database = new MongoClient(atlasURI, {});
+<<<<<<< HEAD
+
+const userCollection = database.db(mongodb_database).collection('users');
+const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
+
+=======
 const userCollection = database.db(mongodb_database).collection("users");
 const savedRecipesCollection = database
   .db(mongodb_database)
   .collection("savedRecipes");
+>>>>>>> d9c5a0c13a221ffe618c046c0e24d1fa4f7d0ed4
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -154,7 +161,7 @@ function sessionValidation(req, res, next) {
 app.get("/", (req, res) => {
   res.render("recipes", {
     cssFiles: ["style", "recipe"],
-    jsFiles: ["recipe"],
+    jsFiles: ["recipe", "easterEgg"],
   });
 });
 
@@ -189,7 +196,7 @@ app.get("/api/recipe-price", async (req, res) => {
 app.get("/login", (req, res) => {
   res.render("login", {
     cssFiles: ["style", "login"],
-    jsFiles: ["login"],
+    jsFiles: ["login", "easterEgg"],
   });
 });
 
@@ -240,7 +247,7 @@ app.post("/signupSubmit", async (req, res) => {
   const validationResult = schema.validate({ name, email, password });
   if (validationResult.error != null) {
     const message = validationResult.error.details[0].message;
-    res.render("signupSubmit", { message, cssFiles: ["login"], jsFiles: [] });
+    res.render("signupSubmit", { message, cssFiles: ["login"], jsFiles: ["easterEgg"] });
     return;
   }
 
@@ -264,7 +271,14 @@ app.get("/profile", sessionValidation, (req, res) => {
     },
 
     cssFiles: ["style", "profile"],
-    jsFiles: ["profile"],
+    jsFiles: ["profile", "easterEgg"],
+  });
+});
+
+app.get("/miniGame", (req, res) => {
+  res.render("miniGame", {
+    cssFiles: ["style", "miniGame"],
+    jsFiles: ["miniGame"],
   });
 });
 
@@ -318,7 +332,7 @@ app.post("/updateUser", sessionValidation, async (req, res) => {
 app.get("/map", (req, res) => {
   res.render("map", {
     cssFiles: ["style"],
-    jsFiles: ["map"],
+    jsFiles: ["map", "easterEgg"],
     mapboxToken: process.env.MAPBOX_TOKEN,
   });
 });
@@ -327,14 +341,14 @@ app.get("/shoppingList", (req, res) => {
   res.render("shoppingList", {
     title: "Ingredients",
     cssFiles: ["shoppingList", "style"],
-    jsFiles: [],
+    jsFiles: ["easterEgg"],
   });
 });
 
 app.get("/savedLocations", (req, res) => {
   res.render("savedLocations", {
     cssFiles: ["style"],
-    jsFiles: ["savedLocations"],
+    jsFiles: ["savedLocations", "easterEgg"],
   });
 });
 
@@ -343,7 +357,7 @@ app.get("/savedRecipes", async (req, res) => {
 
   res.render("savedRecipes", {
     cssFiles: ["style", "recipe"],
-    jsFiles: [],
+    jsFiles: ["easterEgg"],
     savedRecipes: savedRecipes,
   });
 });
@@ -351,7 +365,7 @@ app.get("/savedRecipes", async (req, res) => {
 app.get("/recipeDetails", (req, res) => {
   res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
-    jsFiles: ["recipeDetails"],
+    jsFiles: ["recipeDetails", "easterEgg"],
   });
 });
 
