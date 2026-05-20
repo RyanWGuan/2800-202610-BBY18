@@ -16,7 +16,6 @@ body{
 .button{
     background: transparent;
     border: none;
-    cursor: pointer;
     justify-self: center;
     align-self: center;
     width: min-content;
@@ -54,6 +53,7 @@ body{
     grid-column: 4 / span 1;
     justify-self: center;
     align-self: center;
+    cursor: pointer;
 }
 
 .profile_icon{
@@ -68,13 +68,31 @@ body{
     align-self: center;
 }
 
+@keyframes softShake {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-6px) rotate(-1deg); }
+    40% { transform: translateX(5px) rotate(1deg); }
+    60% { transform: translateX(-4px) rotate(-1deg); }
+    80% { transform: translateX(3px) rotate(1deg); }
+    100% { transform: translateX(0); }
+}
+
+.shake {
+    animation: softShake 0.4s ease-in-out;
+}
+
+.logo-icon {
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
 .recipe_icon{
     width: 60px;
     height: auto;
 }
 
 .map_icon{
-    width: 40px;
+    width: 60px;
     height: auto;
 }
 
@@ -100,24 +118,25 @@ body{
 .recipe_button{
     grid-row: 1 / span 1;
     grid-column: 1 / span 1;
+    cursor: pointer;
 }
 
 .map_button{
     grid-row: 1 / span 1;
     grid-column: 2 / span 1;
+    cursor: pointer;
 }
 
 .ingredients_button{
     grid-row: 1 / span 1;
     grid-column: 3 / span 1;
+    cursor: pointer;
 }
 
 .main{
     grid-row: 2 / span 1;
     overflow-y: auto;
 }
-
-
 
 /* CSS for savedRecipes.html */
 
