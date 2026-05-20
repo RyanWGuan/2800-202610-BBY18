@@ -57,8 +57,12 @@
 }
 
 #radius-content label {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #ccc;
+}
+
+/* Number input rows: label stacks above the input */
+#radius-content > div:not(.toggle-row) label {
   display: block;
   margin-bottom: 0.25em;
 }
@@ -134,16 +138,26 @@
   cursor: pointer;
 }
 
-/* transit toggle row */
-#transit-toggle-row {
+/* toggle rows — shared style for all three checkbox rows */
+.toggle-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-#transit-toggle {
-  width: 18px;
-  height: 18px;
+.toggle-row input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #4caf50;
+}
+
+.toggle-row label {
+  cursor: pointer;
+  line-height: 1.2;
+  user-select: none;
 }
 
 /* grocery + transit */
@@ -193,28 +207,7 @@
   display: none;
 }
 
-#relay-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-#relay-toggle {
-  width: 18px;
-  height: 18px;
-}
-
-/* Food bank toggle row */
-#foodbank-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#foodbank-toggle {
-  width: 18px;
-  height: 18px;
-}
 
 /* Food bank popup */
 .foodbank-popup .map-popup-link {
@@ -226,7 +219,51 @@
 }
 
 
-/* Custom scan location button */
+/* Store details (OSM hours / phone / website) */
+.store-details-loading {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.store-details {
+  margin-top: 8px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.store-detail-row {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  align-items: baseline;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #555;
+  min-width: 42px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #222;
+  word-break: break-word;
+}
+
+.detail-link {
+  color: #2e7d32;
+  text-decoration: none;
+}
+
+.detail-link:hover {
+  text-decoration: underline;
+}
 #custom-location-btn {
   position: fixed;
   bottom: 8rem;

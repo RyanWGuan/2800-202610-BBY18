@@ -144,6 +144,130 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// ─── OSM Store Details ───────────────────────────────────────────────────────
+
+// Parses OSM opening_hours string into human-friendly HTML lines.
+// Falls back to raw string if format is unrecognised.
+function parseOSMHours(raw) {
+  if (!raw) return "Unavailable";
+  if (raw.trim().toLowerCase() === "24/7") return "Open 24/7";
+
+  const dayMap = { Mo: "Mon", Tu: "Tue", We: "Wed", Th: "Thu", Fr: "Fri", Sa: "Sat", Su: "Sun" };
+  const dayOrder = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+  function formatTime(t) {
+    const [h, m] = t.split(":").map(Number);
+    const period = h >= 12 ? "PM" : "AM";
+    const hour = h % 12 || 12;
+    return `${hour}:${String(m).padStart(2, "0")} ${period}`;
+  }
+
+  function expandDayRange(range) {
+    if (range.includes("-")) {
+      const [start, end] = range.split("-");
+      const si = dayOrder.indexOf(start);
+      const ei = dayOrder.indexOf(end);
+      // Unknown abbreviations → return raw token
+      if (si === -1 || ei === -1) return [range];
+      // Reversed range (e.g. Fr-Mo wrapping the week) → slice would be empty;
+      // return just the two boundary days so at least something meaningful shows
+      if (ei < si) return [dayOrder[si], dayOrder[ei]];
+      return dayOrder.slice(si, ei + 1);
+    }
+    return [range];
+  }
+
+  try {
+    const segments = raw.split(";").map(s => s.trim()).filter(Boolean);
+    const lines = segments.map(seg => {
+      // Case 1: day prefix + time range  e.g. "Mo-Fr 09:00-18:00"
+      const fullMatch = seg.match(/^([A-Za-z,\-]+)\s+(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+      if (fullMatch) {
+        const [, dayPart, open, close] = fullMatch;
+        const days = dayPart.includes(",")
+          ? dayPart.split(",").flatMap(expandDayRange)
+          : expandDayRange(dayPart);
+
+        // Filter out empty strings; map known abbreviations to full names
+        const dayNames = days.map(d => dayMap[d] || d).filter(Boolean);
+
+        const timeStr = `${formatTime(open)} – ${formatTime(close)}`;
+
+        // If we ended up with no valid day names, show time only (no "undefined")
+        if (dayNames.length === 0) return timeStr;
+
+        const dayLabel = dayNames.length === 1
+          ? dayNames[0]
+          : dayNames.length === 7
+            ? "Every day"
+            : `${dayNames[0]} – ${dayNames[dayNames.length - 1]}`;
+
+        return `${dayLabel}: ${timeStr}`;
+      }
+
+      // Case 2: bare time range with no day  e.g. "10:00-15:00"
+      const timeOnlyMatch = seg.match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+      if (timeOnlyMatch) {
+        const [, open, close] = timeOnlyMatch;
+        return `${formatTime(open)} – ${formatTime(close)}`;
+      }
+
+      // Case 3: anything else (e.g. "PH off", "closed") → show as-is
+      return seg;
+    });
+    return lines.join("<br>");
+  } catch (e) {
+    return raw;
+  }
+}
+
+// Queries OSM Overpass for store details near given coordinates.
+async function fetchOSMDetails(name, lat, lon) {
+  const query = `[out:json][timeout:10];(node["shop"~"supermarket|convenience|grocery|department_store"](around:120,${lat},${lon});way["shop"~"supermarket|convenience|grocery|department_store"](around:120,${lat},${lon}););out tags center;`;
+  try {
+    const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data.elements || data.elements.length === 0) return null;
+    const nameLower = name.toLowerCase();
+    const best = data.elements.find(el =>
+      el.tags?.name && (
+        el.tags.name.toLowerCase().includes(nameLower) ||
+        nameLower.includes(el.tags.name.toLowerCase())
+      )
+    ) || data.elements[0];
+    return {
+      hours: best.tags?.opening_hours || null,
+      phone: best.tags?.phone || best.tags?.["contact:phone"] || null,
+      website: best.tags?.website || best.tags?.["contact:website"] || null,
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+// Builds the details block HTML from an OSM result (or null for all-unavailable).
+function buildStoreDetailsHTML(details) {
+  const hoursVal = details ? parseOSMHours(details.hours) : "Unavailable";
+  const phoneVal = details?.phone
+    ? `<a href="tel:${details.phone.replace(/\s/g, "")}" class="detail-link">${details.phone}</a>`
+    : "Unavailable";
+  const webVal = details?.website
+    ? `<a href="${details.website}" target="_blank" rel="noopener" class="detail-link">${details.website.replace(/^https?:\/\/(www\.)?/, "")}</a>`
+    : "Unavailable";
+  return `<div class="store-details">
+    <div class="store-detail-row"><span class="detail-label">Hours</span><span class="detail-value">${hoursVal}</span></div>
+    <div class="store-detail-row"><span class="detail-label">Phone</span><span class="detail-value">${phoneVal}</span></div>
+    <div class="store-detail-row"><span class="detail-label">Web</span><span class="detail-value">${webVal}</span></div>
+  </div>`;
+}
+
+// Generates a DOM-safe unique ID from store coordinates.
+function storeDetailsId(lon, lat) {
+  return `sd_${String(lon).replace(/[^0-9]/g, "_")}_${String(lat).replace(/[^0-9]/g, "_")}`;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // AI assited to figure the logic of this function.
 // This function fetches grocery stores from Mapbox API based on the user's location
 // and the specified radius, then adds markers for those stores on the map.
@@ -181,15 +305,24 @@ function fetchGroceryStores(lon, lat) {
           addedStoreIds.add(store.properties.mapbox_id);
           groceryStoreLocations.push({ lat: storeLat, lon: storeLon });
 
-          const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "280px" }).setHTML(`
+          const did = storeDetailsId(storeLon, storeLat);
+          const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "300px" }).setHTML(`
             <div class="map-popup-body">
               <div class="map-popup-header">
                 <strong class="map-popup-name">${name}</strong>
                 <button class="map-popup-save-btn" onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'>Save</button>
               </div>
               <p class="map-popup-address">${address}</p>
+              <div id="${did}" class="store-details-loading">Loading details…</div>
             </div>
           `);
+
+          popup.on("open", () => {
+            fetchOSMDetails(name, storeLat, storeLon).then(details => {
+              const el = document.getElementById(did);
+              if (el) el.outerHTML = buildStoreDetailsHTML(details);
+            });
+          });
 
           const marker = new mapboxgl.Marker({ color: "green" })
             .setLngLat([storeLon, storeLat])
@@ -246,15 +379,24 @@ function fetchRelayStores(lon, lat, onComplete) {
           addedStoreIds.add(store.properties.mapbox_id);
           relayStoreLocations.push({ lat: storeLat, lon: storeLon });
 
-          const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "280px" }).setHTML(`
+          const did = storeDetailsId(storeLon, storeLat);
+          const popup = new mapboxgl.Popup({ offset: 25, maxWidth: "300px" }).setHTML(`
             <div class="map-popup-body">
               <div class="map-popup-header">
                 <strong class="map-popup-name">${name}</strong>
                 <button class="map-popup-save-btn" onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'>Save</button>
               </div>
               <p class="map-popup-address">${address}</p>
+              <div id="${did}" class="store-details-loading">Loading details…</div>
             </div>
           `);
+
+          popup.on("open", () => {
+            fetchOSMDetails(name, storeLat, storeLon).then(details => {
+              const el = document.getElementById(did);
+              if (el) el.outerHTML = buildStoreDetailsHTML(details);
+            });
+          });
 
           const marker = new mapboxgl.Marker({ color: "yellow" })
             .setLngLat([storeLon, storeLat])
