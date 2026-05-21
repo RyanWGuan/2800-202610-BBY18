@@ -8,7 +8,6 @@ const { ObjectId } = require("mongodb");
 const nodemailer = require("nodemailer");
 const saltRounds = 12;
 
-
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -88,7 +87,6 @@ app.post("/api/nutrition", async (req, res) => {
   }
 });
 
-
 // Recipe suggestion — Uses AI to curate based on saved recipes, if user doesn't, uses MealDB's random query
 app.post("/api/recipe-suggest", async (req, res) => {
   const { search, savedRecipeNames } = req.body;
@@ -108,18 +106,22 @@ Reply with ONLY the recipe name, nothing else.`;
 
     if (searchTerm) {
       const searchRes = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`,
       );
       const searchData = await searchRes.json();
       if (searchData.meals?.length > 0) {
-        const randomIndex = Math.floor(Math.random() * Math.min(searchData.meals.length, 5));
+        const randomIndex = Math.floor(
+          Math.random() * Math.min(searchData.meals.length, 5),
+        );
         meal = searchData.meals[randomIndex];
       }
     }
 
     // Fallback to random
     if (!meal) {
-      const randomRes = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
+      const randomRes = await fetch(
+        "https://www.themealdb.com/api/json/v1/1/random.php",
+      );
       const randomData = await randomRes.json();
       meal = randomData.meals?.[0];
     }
@@ -215,7 +217,6 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/verifyMFA", (req, res) => {
-
   if (!req.session.pendingMFA) {
     return res.redirect("/login");
   }
@@ -227,11 +228,9 @@ app.get("/verifyMFA", (req, res) => {
 });
 
 app.post("/verifyMFA", async (req, res) => {
-
   const { code } = req.body;
 
   if (code === req.session.mfaCode) {
-
     req.session.authenticated = true;
 
     req.session.name = req.session.mfaName;
@@ -260,10 +259,10 @@ app.post("/loginSubmit", async (req, res) => {
 
   const validationResult = schema.validate({ email, password });
   if (validationResult.error != null) {
-    res.render("loginSubmit", { 
-      cssFiles: ["login", "style"], 
+    res.render("loginSubmit", {
+      cssFiles: ["login", "style"],
       jsFiles: [],
-     });
+    });
     return;
   }
 
@@ -280,21 +279,21 @@ app.post("/loginSubmit", async (req, res) => {
   if (await bcrypt.compare(password, result[0].password)) {
     const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-      req.session.pendingMFA = true;
-      req.session.mfaCode = mfaCode;
+    req.session.pendingMFA = true;
+    req.session.mfaCode = mfaCode;
 
-      req.session.mfaName = result[0].name;
-      req.session.mfaEmail = result[0].email;
-      req.session.mfaPhone = result[0].phone || null;
+    req.session.mfaName = result[0].name;
+    req.session.mfaEmail = result[0].email;
+    req.session.mfaPhone = result[0].phone || null;
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: result[0].email,
-        subject: "RecipeQuest Verification Code",
-        text: `Your verification code is: ${mfaCode}`,
-      });
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: result[0].email,
+      subject: "RecipeQuest Verification Code",
+      text: `Your verification code is: ${mfaCode}`,
+    });
 
-res.redirect("/verifyMFA");
+    res.redirect("/verifyMFA");
   } else {
     res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
   }
@@ -444,7 +443,6 @@ app.get("/savedLocations", async (req, res) => {
   });
 });
 
-
 app.get("/savedRecipes", async (req, res) => {
   if (!req.session.authenticated) {
     return res.redirect("/login");
@@ -461,7 +459,6 @@ app.get("/savedRecipes", async (req, res) => {
   });
 });
 
-
 app.get("/recipeDetails", (req, res) => {
   res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
@@ -473,7 +470,7 @@ app.get("/recipeDetails", (req, res) => {
 app.post("/saveRecipe", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({
-      message: "Please log in first."
+      message: "Please log in first.",
     });
   }
 
@@ -540,7 +537,7 @@ app.delete("/deleteSavedLocation/:id", async (req, res) => {
 app.delete("/deleteSavedRecipe/:id", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({
-      message: "Please log in first."
+      message: "Please log in first.",
     });
   }
 
