@@ -2,15 +2,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const popup = document.getElementById('firstTimePopup');
     const closeBtn = document.getElementById('closePopup');
 
-    const hasVisited = localStorage.getItem('hasVisited');
+    const hasVisitedProfile = localStorage.getItem('hasVisitedProfile');
 
-    if (!hasVisited){
+    if (!hasVisitedProfile){
         popup.style.display = 'flex';
     }
 
     closeBtn.addEventListener('click', () => {
         popup.style.display = 'none';
-        localStorage.setItem('hasVisited', 'true');
+        localStorage.setItem('hasVisitedProfile', 'true');
     });
 });
 

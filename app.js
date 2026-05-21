@@ -222,7 +222,7 @@ app.get("/verifyMFA", (req, res) => {
 
   res.render("verifyMFA", {
     cssFiles: ["style", "login"],
-    jsFiles: [],
+    jsFiles: ["easterEgg"],
   });
 });
 
@@ -261,8 +261,8 @@ app.post("/loginSubmit", async (req, res) => {
   const validationResult = schema.validate({ email, password });
   if (validationResult.error != null) {
     res.render("loginSubmit", { 
-      cssFiles: ["login", "style"], 
-      jsFiles: [],
+      cssFiles: ["style", "login"], 
+      jsFiles: ["easterEgg"],
      });
     return;
   }
@@ -273,7 +273,7 @@ app.post("/loginSubmit", async (req, res) => {
     .toArray();
 
   if (result.length !== 1) {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    res.render("loginSubmit", { cssFiles: ["style", "login"], jsFiles: ["easterEgg"] });
     return;
   }
 
@@ -294,9 +294,9 @@ app.post("/loginSubmit", async (req, res) => {
         text: `Your verification code is: ${mfaCode}`,
       });
 
-res.redirect("/verifyMFA");
+    res.redirect("/verifyMFA");
   } else {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    res.render("loginSubmit", { cssFiles: ["style", "login"], jsFiles: ["easterEgg"] });
   }
 });
 
