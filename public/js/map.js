@@ -3,8 +3,8 @@ let pingRadius = 500;            // Scan radius in metres (default 500 m)
 let transitExpansion = 1;        // How far (km) along a bus/skytrain route to follow (default 1 km)
 let secondaryPingRadius = 100;   // Radius (m) around a transit stop to search for stores
 
-let currentMarkers = [];         // All green grocery-store markers currently on the map
-let relayMarkers = [];           // Relay-mode markers (yellow/purple/split)
+let currentMarkers = [];         // All green grocery store markers currently on the map
+let relayMarkers = [];           // Relay mode markers (yellow/purple/split)
 let relayTimeouts = [];          // setTimeout IDs used by relay — kept so they can be cancelled
 let relayStoreLocations = [];    // Lat/lon of stores added by relay mode
 let addedStoreIds = new Set();   // Mapbox IDs of every store already on the map (prevents duplicates)
@@ -818,9 +818,6 @@ function runRelay(lon, lat) {
   });
 }
 
-
-// ─── Save Location ────────────────────────────────────────────────────────────
-
 /**
  * Sends a POST request to the server to save a grocery store to the
  * logged-in user's saved locations list.
@@ -851,8 +848,6 @@ async function saveLocation(button, name, address) {
 }
 
 
-// ─── GPS Event Handler ────────────────────────────────────────────────────────
-
 let initialLoadDone = false; // Guards against triggering a full scan on every GPS update
 
 // Fires each time the browser provides a new GPS position
@@ -869,9 +864,6 @@ geolocate.on("geolocate", (e) => {
     fetchGroceryStores(lastKnownLon, lastKnownLat);
   }
 });
-
-
-// ─── Panel Controls ───────────────────────────────────────────────────────────
 
 // References to the side panel UI elements
 const panel     = document.getElementById("radius-panel");
@@ -998,10 +990,7 @@ closeBtn.addEventListener("click", () => {
   localStorage.setItem("hasVisitedMap", "true"); // Don't show again
 });
 
-
-// ─── Transit Stop Markers ─────────────────────────────────────────────────────
-
-let busMarkers = [];       // All blue bus-stop pins currently on the map
+let busMarkers = [];       // All blue bus stop pins currently on the map
 let skytrainMarkers = [];  // All orange SkyTrain stop pins currently on the map
 
 /** Removes all bus-stop pins from the map and empties the array. */
@@ -1033,8 +1022,8 @@ function isNearGroceryStore(stopLat, stopLon) {
 
 /**
  * Removes stops that are effectively duplicates:
- * two stops within 50 m that share at least one route — only the closer one
- * to the user is kept, unless the farther one sits next to a grocery store.
+ * two stops within 50 m that share at least one route only the closer one
+ * to the user is kept unless the farther one sits next to a grocery store.
  *
  * @param {Array}  stops    Stop objects with lat/lon/routes
  * @param {number} userLat  User latitude (to measure "closer")
@@ -1069,15 +1058,11 @@ function deduplicateStops(stops, userLat, userLon) {
   return stops.filter((_, idx) => !toRemove.has(idx));
 }
 
-/**
- * Builds a key string representing which grocery stores are within
- * secondaryPingRadius of a given stop.
- * Two stops with the same key cover exactly the same set of stores.
- *
- * @param {number} stopLat
- * @param {number} stopLon
- * @returns {string} Comma-separated store indices, or "" if none
- */
+
+ // Builds a key string representing which grocery stores are within
+ // secondaryPingRadius of a given stop.
+ // Two stops with the same key cover exactly the same set of stores.
+
 function getStopStoreKey(stopLat, stopLon) {
   return groceryStoreLocations
     .map((store, i) =>
@@ -1087,22 +1072,16 @@ function getStopStoreKey(stopLat, stopLon) {
     .join(",");
 }
 
-/**
- * Further deduplicates stops that share a route AND cover the same grocery stores.
- * Keeps only the closer stop to the user.
- *
- * @param {Array}  stops    Stop objects
- * @param {number} userLat
- * @param {number} userLon
- * @returns {Array} Filtered stop list
- */
+ // Further deduplicates stops that share a route AND cover the same grocery stores.
+ // Keeps only the closer stop to the user.
+
 function deduplicateByStoreOverlap(stops, userLat, userLon) {
   const toRemove = new Set();
 
   for (let i = 0; i < stops.length; i++) {
     if (toRemove.has(i)) continue;
     const keyI = getStopStoreKey(stops[i].lat, stops[i].lon);
-    if (keyI === "") continue; // Stop doesn't cover any known store — keep it
+    if (keyI === "") continue; // Stop doesn't cover any known store keep it
 
     for (let j = i + 1; j < stops.length; j++) {
       if (toRemove.has(j)) continue;
@@ -1111,9 +1090,9 @@ function deduplicateByStoreOverlap(stops, userLat, userLon) {
       if (!sharesRoute) continue;
 
       const keyJ = getStopStoreKey(stops[j].lat, stops[j].lon);
-      if (keyI !== keyJ) continue; // Different store coverage — keep both
+      if (keyI !== keyJ) continue; // Different store coverage keep both
 
-      // Same route, same stores — remove the farther stop
+      // Same route, same stores remove the farther stop
       const distI = haversineKm(userLat, userLon, stops[i].lat, stops[i].lon);
       const distJ = haversineKm(userLat, userLon, stops[j].lat, stops[j].lon);
       toRemove.add(distI >= distJ ? i : j);
@@ -1123,14 +1102,10 @@ function deduplicateByStoreOverlap(stops, userLat, userLon) {
   return stops.filter((_, idx) => !toRemove.has(idx));
 }
 
-/**
- * Fetches bus stop data, finds routes near the user, then shows blue pins
- * for each relevant stop (within the expanded route corridor and near a store).
- * The popup for each pin lists the route numbers and their departure times.
- *
- * @param {number} lon  Scan centre longitude
- * @param {number} lat  Scan centre latitude
- */
+ // Fetches bus stop data, finds routes near the user, then shows blue pins
+ // for each relevant stop (within the expanded route corridor and near a store).
+ // The popup for each pin lists the route numbers and their departure times.
+
 function fetchBusStops(lon, lat) {
   clearBusMarkers();
   fetch("/data/busStops.json")
@@ -1144,7 +1119,7 @@ function fetchBusStops(lon, lat) {
         }
       });
 
-      if (pingedRoutes.size === 0) return; // No bus routes nearby — nothing to show
+      if (pingedRoutes.size === 0) return; // No bus routes nearby nothing to show
 
       // Step 2: expand along those routes up to transitExpansion km
       const expanded = stops.filter((stop) => {
@@ -1184,12 +1159,8 @@ function fetchBusStops(lon, lat) {
     });
 }
 
-/**
- * Same as fetchBusStops but for SkyTrain stops — uses orange (#FF6B00) pins.
- *
- * @param {number} lon  Scan centre longitude
- * @param {number} lat  Scan centre latitude
- */
+
+ // Same as fetchBusStops but for SkyTrain stops uses orange pins.
 function fetchSkytrainStops(lon, lat) {
   clearSkytrainMarkers();
   fetch("/data/skytrainStops.json")
@@ -1239,20 +1210,17 @@ function fetchSkytrainStops(lon, lat) {
     });
 }
 
-
-// ─── Food Banks ───────────────────────────────────────────────────────────────
-
-let foodBankMarkers = [];   // All dark-orange food bank pins on the map
+let foodBankMarkers = [];   // All dark orange food bank pins on the map
 let foodBanksEnabled = false; // Whether the food bank toggle is on
 let foodBankData = [];        // Cached food bank JSON (loaded once on first toggle)
 
 /**
- * Places a dark-orange pin for every food bank in foodBankData.
+ * Places a dark orange pin for every food bank in foodBankData.
  * The popup shows name, address, phone, optional email, and a website link.
  */
 function renderFoodBanks() {
   foodBankData.forEach((fb) => {
-    // Email is optional — only show the link if one exists in the data
+    // Email is optional only show the link if one exists in the data
     const emailLine = fb.email
       ? `<a class="map-popup-link" href="mailto:${fb.email}">${fb.email}</a>`
       : "";
@@ -1284,7 +1252,6 @@ function clearFoodBankMarkers() {
 }
 
 
-// ─── Custom Scan-Location Marker ──────────────────────────────────────────────
 // Allows the user to drag a red pin anywhere on the map to scan a custom
 // location instead of their GPS position.
 
@@ -1295,13 +1262,11 @@ let customScanLat = null;  // Latitude of the custom scan pin
 const customBtn  = document.getElementById("custom-location-btn");
 const customIcon = document.getElementById("custom-location-icon");
 
-/**
- * Enters custom-pin mode:
- * Places a draggable red pin at the user's current GPS position.
- * Dragging the pin live-updates the custom-scan circle;
- * dropping it (dragend) triggers a full re-scan of the new location.
- * The user-GPS scan circle is hidden while a custom pin is active.
- */
+ // Enters custom-pin mode:
+ // Places a draggable red pin at the user's current GPS position.
+ // Dragging the pin live-updates the custom-scan circle;
+ // dropping it (dragend) triggers a full re-scan of the new location.
+ // The user-GPS scan circle is hidden while a custom pin is active.
 function enterCustomMode() {
   if (lastKnownLon === null || lastKnownLat === null) return; // Can't enter if GPS hasn't fired
 
@@ -1343,9 +1308,9 @@ function enterCustomMode() {
 }
 
 /**
- * Exits custom-pin mode:
+ * Exits custom pin mode:
  * Removes the draggable red pin, restores the GPS scan circle, and
- * re-scans from the user's GPS position.
+ * re scans from the user's GPS position.
  */
 function exitCustomMode() {
   if (customMarker) {
@@ -1373,8 +1338,8 @@ function exitCustomMode() {
 // Toggle custom-pin mode on or off each time the button is clicked
 customBtn.addEventListener("click", () => {
   if (customMarker) {
-    exitCustomMode();  // Pin is active — remove it
+    exitCustomMode();  // Pin is active remove it
   } else {
-    enterCustomMode(); // Pin is not active — place it
+    enterCustomMode(); // Pin is not active place it
   }
 });

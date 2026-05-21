@@ -73,6 +73,20 @@ async function callGemini(prompt) {
   return data.choices?.[0]?.message?.content || "No response.";
 }
 
+// Merge Local Session into account you log into.
+async function mergeSessionShoppingList(req) {
+  const sessionList = req.session.shoppingList || [];
+  if (sessionList.length === 0) return;
+
+  for (const item of sessionList) {
+    const { recipeName, ingredients } = item;
+    await shoppingListCollection.deleteMany({ recipeName, userEmail: req.session.email });
+    await shoppingListCollection.insertOne({ recipeName, ingredients, userEmail: req.session.email });
+  }
+
+  req.session.shoppingList = [];
+}
+
 // AI nutrition facts
 app.post("/api/nutrition", async (req, res) => {
   console.log("Route hit, body:", req.body);
@@ -288,6 +302,7 @@ app.post("/loginSubmit", async (req, res) => {
       req.session.mfaName = result[0].name;
       req.session.mfaEmail = result[0].email;
       req.session.mfaPhone = result[0].phone || null;
+      await mergeSessionShoppingList(req);
 
       try {
         await transporter.sendMail({
@@ -419,18 +434,29 @@ app.get("/map", (req, res) => {
 app.post("/api/shoppingList/add", async (req, res) => {
   const { recipeName, ingredients } = req.body;
 
-  // Remove existing entries for this recipe first
-  await shoppingListCollection.deleteMany({ recipeName });
+  if (req.session.authenticated) {
+    const userEmail = req.session.email;
+    await shoppingListCollection.deleteMany({ recipeName, userEmail });
+    await shoppingListCollection.insertOne({ recipeName, ingredients, userEmail });
+  }
 
-  // Insert new ones
-  await shoppingListCollection.insertOne({ recipeName, ingredients });
+  if (!req.session.shoppingList) req.session.shoppingList = [];
+  req.session.shoppingList = req.session.shoppingList.filter(i => i.recipeName !== recipeName);
+  req.session.shoppingList.push({ recipeName, ingredients });
+
+  await new Promise((resolve, reject) =>
+    req.session.save(err => err ? reject(err) : resolve())
+  );
 
   res.json({ message: "Added to shopping list!" });
 });
 
 app.get("/api/shoppingList", async (req, res) => {
-  const items = await shoppingListCollection.find().toArray();
-  res.json(items);
+  if (req.session.authenticated) {
+    const items = await shoppingListCollection.find({ userEmail: req.session.email }).toArray();
+    return res.json(items);
+  }
+  res.json(req.session.shoppingList || []);
 });
 
 app.get("/shoppingList", (req, res) => {
