@@ -242,6 +242,42 @@ app.get("/login", (req, res) => {
   });
 });
 
+app.get("/verifyMFA", (req, res) => {
+
+  if (!req.session.pendingMFA) {
+    return res.redirect("/login");
+  }
+
+  res.render("verifyMFA", {
+    cssFiles: ["style", "login"],
+    jsFiles: ["easterEgg"],
+  });
+});
+
+app.post("/verifyMFA", async (req, res) => {
+
+  const { code } = req.body;
+
+  if (code === req.session.mfaCode) {
+
+    req.session.authenticated = true;
+
+    req.session.name = req.session.mfaName;
+    req.session.email = req.session.mfaEmail;
+    req.session.phone = req.session.mfaPhone;
+
+    delete req.session.pendingMFA;
+    delete req.session.mfaCode;
+    delete req.session.mfaName;
+    delete req.session.mfaEmail;
+    delete req.session.mfaPhone;
+
+    return res.redirect("/profile");
+  }
+
+  res.send("Invalid verification code.");
+});
+
 app.post("/loginSubmit", async (req, res) => {
   const { email, password } = req.body;
 
@@ -253,10 +289,10 @@ app.post("/loginSubmit", async (req, res) => {
   const validationResult = schema.validate({ email, password });
 
   if (validationResult.error != null) {
-    res.render("loginSubmit", {
-      cssFiles: ["login", "style"],
-      jsFiles: [],
-    });
+    res.render("loginSubmit", { 
+      cssFiles: ["style", "login"], 
+      jsFiles: ["easterEgg"],
+     });
     return;
   }
 
@@ -266,10 +302,7 @@ app.post("/loginSubmit", async (req, res) => {
     .toArray();
 
   if (result.length !== 1) {
-    res.render("loginSubmit", {
-      cssFiles: ["login"],
-      jsFiles: [],
-    });
+    res.render("loginSubmit", { cssFiles: ["style", "login"], jsFiles: ["easterEgg"] });
     return;
   }
 
@@ -281,9 +314,9 @@ app.post("/loginSubmit", async (req, res) => {
 
     res.redirect("/profile");
   } else {
-    res.render("loginSubmit", {
-      cssFiles: ["login"],
-      jsFiles: [],
+    res.render("loginSubmit", { 
+      cssFiles: ["style", "login"], 
+      jsFiles: ["easterEgg"]
     });
   }
 });

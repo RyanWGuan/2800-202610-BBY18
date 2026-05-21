@@ -218,6 +218,39 @@ body{
     gap: 8px;
 }
 
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background-color: #4a8cee;
+    padding: 32px 28px;
+    border-radius: 6px;
+    text-align: center;
+    max-width: 320px;
+    width: 90%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.popup-content > h2, p, button {
+    color: white;
+}
+
+#closePopup, #closeSavedLocationsPopup{
+    background-color: #8cc63f;
+    border-radius: 6px;
+    border: none;
+}
+
 /* For mobile */
  @media screen and (max-width: 600px)
 {
