@@ -285,3 +285,29 @@
   display: block;
   pointer-events: none;
 }
+
+/* Split relay marker (bus + skytrain both scan the same store)
+   Single div — same teardrop clip-path as the standard Mapbox pin (27x41 px).
+   linear-gradient splits left half yellow (bus) / right half purple (skytrain).
+   ::after draws the white inner circle. */
+.split-relay-marker {
+  position: relative;
+  width: 27px;
+  height: 41px;
+  clip-path: path('M13.5,0 C6.04,0 0,6.04 0,13.5 C0,22.5 13.5,41 13.5,41 C13.5,41 27,22.5 27,13.5 C27,6.04 20.96,0 13.5,0Z');
+  background: linear-gradient(to right, #FFD700 50%, #8B5CF6 50%);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+  cursor: pointer;
+}
+
+.split-relay-marker::after {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  background: white;
+  border-radius: 50%;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
