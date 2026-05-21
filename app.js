@@ -252,7 +252,7 @@ Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 de
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", {
+  res.render("logIn", {
     cssFiles: ["style", "login"],
     jsFiles: ["login", "easterEgg"],
   });
@@ -322,7 +322,7 @@ app.post("/loginSubmit", async (req, res) => {
 
   const result = await userCollection
     .find({ email })
-    .project({ name: 1, email: 1, password: 1, user_type: 1, _id: 1 })
+    .project({ name: 1, email: 1, password: 1, user_ype: 1, _id: 1 })
     .toArray();
 
   if (result.length !== 1) {
