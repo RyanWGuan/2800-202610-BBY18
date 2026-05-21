@@ -344,41 +344,106 @@
 
 const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
 const FIRST_MEAL_ID = 52772;
- 
-// Flip to false when deploying for real Spoonacular prices.
-const DEV_MOCK_PRICES = true;
- 
+
 // ─── Session cache keys ───────────────────────────────────────────────────────
 const CACHE_KEY_MEALS  = "cachedMeals";
 const CACHE_KEY_CURSOR = "mealCursor";
- 
+
 // ─── In-memory state ──────────────────────────────────────────────────────────
 let allMeals = [];
 let current  = FIRST_MEAL_ID;
 let loading  = false;
- 
-// ─── Price throttle queue ─────────────────────────────────────────────────────
-const priceQueue     = [];
-let   queueRunning   = false;
-const PRICE_DELAY_MS = 500;
- 
-async function enqueuePriceFetch(mealName, cardId) {
-  priceQueue.push({ mealName, cardId });
-  if (!queueRunning) runPriceQueue();
+
+// ─── BC price throttle queue ──────────────────────────────────────────────────
+// One Groq call per card, throttled so we don't hammer the API.
+// Each entry: { mealId, mealName, cardId }
+const bcQueue      = [];
+let   bcRunning    = false;
+const BC_DELAY_MS  = 400;
+
+function enqueueBCEstimate(mealId, mealName, cardId) {
+  bcQueue.push({ mealId, mealName, cardId });
+  if (!bcRunning) runBCQueue();
 }
- 
-async function runPriceQueue() {
-  queueRunning = true;
-  while (priceQueue.length > 0) {
-    const { mealName, cardId } = priceQueue.shift();
-    await fetchPrice(mealName, cardId);
-    if (priceQueue.length > 0) {
-      await new Promise((r) => setTimeout(r, PRICE_DELAY_MS));
+
+async function runBCQueue() {
+  bcRunning = true;
+  while (bcQueue.length > 0) {
+    const { mealId, mealName, cardId } = bcQueue.shift();
+    await fetchAndDisplayBCPrice(mealId, mealName, cardId);
+    if (bcQueue.length > 0) {
+      await new Promise((r) => setTimeout(r, BC_DELAY_MS));
     }
   }
-  queueRunning = false;
+  bcRunning = false;
 }
- 
+
+// ─── BC price fetch (automatic, per card) ────────────────────────────────────
+// Pulls ingredients from MealDB then asks Groq for a BC cost estimate.
+// Result is cached in sessionStorage and stored on the meal object in allMeals
+// so the price filter can use it without re-fetching.
+async function fetchAndDisplayBCPrice(mealId, mealName, cardId) {
+  const priceEl = document.getElementById(`${cardId}-price`);
+
+  // Check sessionStorage cache first
+  const cacheKey = `bc-price:${mealId}`;
+  const cached   = sessionStorage.getItem(cacheKey);
+  if (cached) {
+    const { price } = JSON.parse(cached);
+    if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
+    storePriceOnMeal(mealId, price);
+    return;
+  }
+
+  try {
+    // Step 1: get ingredients from MealDB
+    const mealRes  = await fetch(`/api/meal/${mealId}`);
+    const mealData = await mealRes.json();
+    const meal     = mealData.meals?.[0];
+
+    const ingredients = [];
+    if (meal) {
+      for (let i = 1; i <= 20; i++) {
+        const ing     = meal[`strIngredient${i}`];
+        const measure = meal[`strMeasure${i}`];
+        if (ing && ing.trim()) {
+          ingredients.push(`${measure ? measure.trim() + " " : ""}${ing.trim()}`);
+        }
+      }
+    }
+
+    // Step 2: ask Groq for a BC price breakdown
+    const res  = await fetch("/api/bc-price-estimate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mealName, ingredients }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Server error");
+
+    const price = Number(data.estimatedCostPerServing);
+
+    // Cache and store
+    sessionStorage.setItem(cacheKey, JSON.stringify({ price }));
+    storePriceOnMeal(mealId, price);
+
+    if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
+  } catch {
+    if (priceEl) priceEl.textContent = "Price unavailable";
+  }
+}
+
+// Store the fetched BC price back onto the meal object in allMeals
+// so applyFilters can compare it without any extra API calls.
+function storePriceOnMeal(mealId, price) {
+  const meal = allMeals.find((m) => String(m.idMeal) === String(mealId));
+  if (meal) {
+    meal._bcPrice = price;
+    saveMealsToSession(); // persist the price for the session
+  }
+}
+
 // ─── API helpers ──────────────────────────────────────────────────────────────
 async function fetchMealById(id) {
   const response = await fetch(`${MEALDB_LOOKUP}${id}`);
@@ -386,33 +451,7 @@ async function fetchMealById(id) {
   const data = await response.json();
   return data.meals ? data.meals[0] : null;
 }
- 
-async function fetchPrice(mealName, cardId) {
-  const priceEl = document.getElementById(`${cardId}-price`);
- 
-  if (DEV_MOCK_PRICES) {
-    if (priceEl) priceEl.textContent = `~$${(Math.random() * 15 + 3).toFixed(2)}`;
-    return;
-  }
- 
-  const cacheKey = `price:${mealName}`;
-  const cached   = localStorage.getItem(cacheKey);
-  if (cached) {
-    if (priceEl) priceEl.textContent = cached;
-    return;
-  }
- 
-  try {
-    const res     = await fetch(`/api/recipe-price?name=${encodeURIComponent(mealName)}`);
-    const data    = await res.json();
-    const display = data.price ? `~$${data.price}` : "Price unavailable";
-    localStorage.setItem(cacheKey, display);
-    if (priceEl) priceEl.textContent = display;
-  } catch {
-    if (priceEl) priceEl.textContent = "Price unavailable";
-  }
-}
- 
+
 // ─── Session-storage helpers ──────────────────────────────────────────────────
 function saveMealsToSession() {
   try {
@@ -420,7 +459,7 @@ function saveMealsToSession() {
     sessionStorage.setItem(CACHE_KEY_CURSOR, String(current));
   } catch { /* storage full — silently ignore */ }
 }
- 
+
 function loadMealsFromSession() {
   try {
     const raw    = sessionStorage.getItem(CACHE_KEY_MEALS);
@@ -430,45 +469,52 @@ function loadMealsFromSession() {
       current  = parseInt(cursor, 10);
       return true;
     }
-  } catch { /* corrupted cache — start fresh */ }
+  } catch { /* corrupted — start fresh */ }
   return false;
 }
- 
+
 // ─── Card builder ─────────────────────────────────────────────────────────────
 function buildCard(meal) {
-  const cardId = `meal-${meal.idMeal}`;
+  const cardId      = `meal-${meal.idMeal}`;
+  // If we already have a BC price cached on the meal object, show it immediately
+  const priceText   = meal._bcPrice != null
+    ? `🍁 ~$${meal._bcPrice.toFixed(2)}`
+    : "Loading BC price…";
+
   return `
     <a href="/recipeDetails?id=${meal.idMeal}" class="card-link">
       <div class="card">
         <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
         <div class="card-meta">
           <h3 class="card-title">${meal.strMeal}</h3>
-          <span class="price-label" id="${cardId}-price">Loading price...</span>
+          <span class="price-label" id="${cardId}-price">${priceText}</span>
         </div>
       </div>
     </a>`;
 }
- 
+
 // ─── Render a list of meals into #results ─────────────────────────────────────
 function renderMeals(meals) {
   const results  = document.getElementById("results");
   const aiOutput = document.getElementById("aiOutput");
- 
-  // Clear everything except the AI output div
+
   results.innerHTML = "";
   if (aiOutput) results.appendChild(aiOutput);
- 
+
   for (const meal of meals) {
     results.insertAdjacentHTML("beforeend", buildCard(meal));
-    enqueuePriceFetch(meal.strMeal, `meal-${meal.idMeal}`);
+    // Only enqueue if we don't already have the price
+    if (meal._bcPrice == null) {
+      enqueueBCEstimate(meal.idMeal, meal.strMeal, `meal-${meal.idMeal}`);
+    }
   }
 }
- 
+
 // ─── Load next batch from MealDB ─────────────────────────────────────────────
 async function loadMeals() {
   if (loading) return;
   loading = true;
- 
+
   const newMeals = [];
   for (let i = current; i < current + 10; i++) {
     try {
@@ -476,24 +522,24 @@ async function loadMeals() {
       if (meal) newMeals.push(meal);
     } catch { /* skip bad IDs */ }
   }
- 
+
   current  += 10;
   allMeals  = [...allMeals, ...newMeals];
   saveMealsToSession();
- 
-  // If no active search, append new cards directly (avoids full re-render)
+
+  // If no active search, append new cards directly
   const searchTerm = document.getElementById("searchInput")?.value.trim() || "";
   if (!searchTerm) {
     const results = document.getElementById("results");
     for (const meal of newMeals) {
       results.insertAdjacentHTML("beforeend", buildCard(meal));
-      enqueuePriceFetch(meal.strMeal, `meal-${meal.idMeal}`);
+      enqueueBCEstimate(meal.idMeal, meal.strMeal, `meal-${meal.idMeal}`);
     }
   }
- 
+
   loading = false;
 }
- 
+
 // ─── Wishlist helper ──────────────────────────────────────────────────────────
 function getSavedRecipeIds() {
   try {
@@ -503,10 +549,8 @@ function getSavedRecipeIds() {
     return new Set();
   }
 }
- 
+
 // ─── Filter & search ──────────────────────────────────────────────────────────
-// With a search term: hits MealDB's full-database search endpoint.
-// Without: filters the local cache client-side (zero network calls).
 async function applyFilters() {
   const searchTerm   = document.getElementById("searchInput")?.value.trim() || "";
   const wishlistOnly = document.getElementById("wishlistToggle")?.checked || false;
@@ -514,17 +558,16 @@ async function applyFilters() {
   const maxPrice     = priceEnabled
     ? parseFloat(document.getElementById("priceInput")?.value) || Infinity
     : Infinity;
- 
+
   const savedIds = getSavedRecipeIds();
   let pool;
- 
+
   if (searchTerm) {
     try {
       const res  = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`);
       const data = await res.json();
       pool = data.meals || [];
- 
-      // Merge any new results into the local cache
+
       const existingIds = new Set(allMeals.map((m) => m.idMeal));
       const newOnes     = pool.filter((m) => !existingIds.has(m.idMeal));
       if (newOnes.length) {
@@ -532,7 +575,6 @@ async function applyFilters() {
         saveMealsToSession();
       }
     } catch {
-      // Network error — fall back to local cache
       pool = allMeals.filter((m) =>
         m.strMeal.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -540,24 +582,21 @@ async function applyFilters() {
   } else {
     pool = allMeals;
   }
- 
-  // Apply wishlist & price filters on top of search results
+
   const filtered = pool.filter((meal) => {
     if (wishlistOnly && !savedIds.has(String(meal.idMeal))) return false;
- 
-    if (priceEnabled && !DEV_MOCK_PRICES) {
-      const cached = localStorage.getItem(`price:${meal.strMeal}`);
-      if (cached) {
-        const num = parseFloat(cached.replace(/[^0-9.]/g, ""));
-        if (!isNaN(num) && num > maxPrice) return false;
-      }
+
+    // Price filter uses the BC Groq estimate stored on the meal object.
+    // Meals without a price yet are kept visible (they're still loading).
+    if (priceEnabled && meal._bcPrice != null && meal._bcPrice > maxPrice) {
+      return false;
     }
- 
+
     return true;
   });
- 
+
   renderMeals(filtered);
- 
+
   if (filtered.length === 0) {
     document.getElementById("results").insertAdjacentHTML(
       "beforeend",
@@ -565,19 +604,19 @@ async function applyFilters() {
     );
   }
 }
- 
+
 // ─── Filter UI helpers ────────────────────────────────────────────────────────
 function toggleDropdown() {
   document.getElementById("filterBtn").classList.toggle("open");
   document.getElementById("dropdown").classList.toggle("open");
 }
- 
+
 function togglePriceField() {
   const on = document.getElementById("priceToggle").checked;
   document.getElementById("priceRow").style.display = on ? "flex" : "none";
   applyFilters();
 }
- 
+
 // ─── AI suggest ───────────────────────────────────────────────────────────────
 async function suggestRecipe() {
   const btn    = document.getElementById("aiSuggestBtn");
@@ -590,25 +629,15 @@ async function suggestRecipe() {
   output.innerHTML = '<span style="color:#888">Generating suggestion…</span>';
 
   try {
-    // Fetch the user's saved recipes to inform the suggestion
-    let savedRecipeNames = [];
-    try {
-      const savedRes  = await fetch("/savedRecipes", { headers: { Accept: "application/json" } });
-      // savedRecipes returns an EJS page, so use the API collection directly
-      const apiRes    = await fetch("/api/savedRecipes");
-      const apiData   = await apiRes.json();
-      savedRecipeNames = apiData.map((r) => r.name).filter(Boolean);
-    } catch { /* not logged in or endpoint missing — silently skip */ }
-
     const response = await fetch("/api/recipe-suggest", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ search, savedRecipeNames }),
+      body: JSON.stringify({ search }),
     });
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Server error");
- 
+
     if (data.found) {
       output.innerHTML = `
         <a href="/recipeDetails?id=${data.id}" class="card-link">
@@ -639,30 +668,28 @@ async function suggestRecipe() {
     output.innerHTML = `<span style="color:red">Failed to get suggestion: ${err.message}</span>`;
     console.error(err);
   }
- 
+
   btn.disabled    = false;
   btn.textContent = "✦ Suggest a recipe";
 }
- 
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   const hasCached = loadMealsFromSession();
- 
+
   if (hasCached && allMeals.length > 0) {
-    // Returning visit this session — render instantly from cache
     renderMeals(allMeals);
   } else {
-    // First visit — fetch from MealDB
     loadMeals();
   }
- 
+
   // Infinite scroll
   document.querySelector(".main").addEventListener("scroll", function () {
     if (this.scrollTop + this.clientHeight + 5 >= this.scrollHeight) {
       loadMeals();
     }
   });
- 
+
   // Search input (debounced 300ms)
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
@@ -672,7 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
       debounceTimer = setTimeout(() => applyFilters(), 300);
     });
   }
- 
+
   // Time slider label update
   const timeSlider = document.getElementById("timeSlider");
   const timeVal    = document.getElementById("timeVal");
@@ -682,11 +709,11 @@ document.addEventListener("DOMContentLoaded", () => {
       applyFilters();
     });
   }
- 
+
   // AI suggest button
   const aiBtn = document.getElementById("aiSuggestBtn");
   if (aiBtn) aiBtn.addEventListener("click", suggestRecipe);
- 
+
   // First-visit popup
   const popup    = document.getElementById("firstTimePopupRecipe");
   const closeBtn = document.getElementById("closePopup");
