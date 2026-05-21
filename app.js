@@ -73,20 +73,6 @@ async function callGemini(prompt) {
   return data.choices?.[0]?.message?.content || "No response.";
 }
 
-// Merge Local Session into account you log into.
-async function mergeSessionShoppingList(req) {
-  const sessionList = req.session.shoppingList || [];
-  if (sessionList.length === 0) return;
-
-  for (const item of sessionList) {
-    const { recipeName, ingredients } = item;
-    await shoppingListCollection.deleteMany({ recipeName, userEmail: req.session.email });
-    await shoppingListCollection.insertOne({ recipeName, ingredients, userEmail: req.session.email });
-  }
-
-  req.session.shoppingList = [];
-}
-
 // AI nutrition facts
 app.post("/api/nutrition", async (req, res) => {
   console.log("Route hit, body:", req.body);
@@ -432,31 +418,21 @@ app.get("/map", (req, res) => {
 });
 
 app.post("/api/shoppingList/add", async (req, res) => {
+  if (!req.session.authenticated) return res.status(401).json({ message: "Please log in first." });
+  
   const { recipeName, ingredients } = req.body;
+  const userEmail = req.session.email;
 
-  if (req.session.authenticated) {
-    const userEmail = req.session.email;
-    await shoppingListCollection.deleteMany({ recipeName, userEmail });
-    await shoppingListCollection.insertOne({ recipeName, ingredients, userEmail });
-  }
-
-  if (!req.session.shoppingList) req.session.shoppingList = [];
-  req.session.shoppingList = req.session.shoppingList.filter(i => i.recipeName !== recipeName);
-  req.session.shoppingList.push({ recipeName, ingredients });
-
-  await new Promise((resolve, reject) =>
-    req.session.save(err => err ? reject(err) : resolve())
-  );
+  await shoppingListCollection.deleteMany({ recipeName, userEmail });
+  await shoppingListCollection.insertOne({ recipeName, ingredients, userEmail });
 
   res.json({ message: "Added to shopping list!" });
 });
 
 app.get("/api/shoppingList", async (req, res) => {
-  if (req.session.authenticated) {
-    const items = await shoppingListCollection.find({ userEmail: req.session.email }).toArray();
-    return res.json(items);
-  }
-  res.json(req.session.shoppingList || []);
+  if (!req.session.authenticated) return res.json([]);
+  const items = await shoppingListCollection.find({ userEmail: req.session.email }).toArray();
+  res.json(items);
 });
 
 app.get("/shoppingList", (req, res) => {
