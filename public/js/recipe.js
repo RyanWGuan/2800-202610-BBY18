@@ -57,10 +57,9 @@ async function fetchBatchBCPrices(meals) {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(`Server ${res.status}: ${data.error || "Unknown error"}`);
+    if (!res.ok) throw new Error(data.error || "Server error");
 
     const prices = data.prices || {};
-    console.log("BC prices received:", prices);
 
     for (const meal of uncached) {
       const price = Number(prices[String(meal.idMeal)]);
@@ -77,12 +76,12 @@ async function fetchBatchBCPrices(meals) {
     // Persist updated prices to session cache
     saveMealsToSession();
   } catch (err) {
-    // Log the full error so it's visible in devtools, not just "Price unavailable"
-    console.error("Batch BC price fetch failed:", err.message, err);
+    // On failure, mark all as unavailable so we don't retry indefinitely
     for (const meal of uncached) {
       const priceEl = document.getElementById(`meal-${meal.idMeal}-price`);
       if (priceEl) priceEl.textContent = "Price unavailable";
     }
+    console.error("Batch BC price fetch failed:", err);
   }
 }
 
@@ -93,7 +92,7 @@ function buildCard(meal) {
     : "Loading BC price…";
 
   return `
-    <a href="/recipeDetails?id=${meal.idMeal}" class="card-link">
+    <a href="/recipeDetails?id=${meal.idMeal}" class="card-link" data-meal-id="${meal.idMeal}">
       <div class="card">
         <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
         <div class="card-meta">
@@ -105,19 +104,40 @@ function buildCard(meal) {
 }
 
 // ─── Render a list of meals into #results ─────────────────────────────────────
-// After rendering, fires one batch Groq call for any cards missing prices.
+// Diffs the current DOM against the desired meal list:
+//   - cards already present are kept in place (prices intact, no flicker)
+//   - cards no longer in the list are removed
+//   - new cards are appended
+// After diffing, fires one batch Groq call for any cards still missing prices.
 function renderMeals(meals) {
   const results  = document.getElementById("results");
   const aiOutput = document.getElementById("aiOutput");
 
-  results.innerHTML = "";
-  if (aiOutput) results.appendChild(aiOutput);
+  // Build a set of ids we want to show
+  const wantedIds = new Set(meals.map((m) => String(m.idMeal)));
+
+  // Remove cards that are no longer in the filtered list
+  results.querySelectorAll("a[data-meal-id]").forEach((el) => {
+    if (!wantedIds.has(el.dataset.mealId)) el.remove();
+  });
+
+  // Append cards that aren't in the DOM yet
+  const existingIds = new Set(
+    [...results.querySelectorAll("a[data-meal-id]")].map((el) => el.dataset.mealId)
+  );
 
   for (const meal of meals) {
-    results.insertAdjacentHTML("beforeend", buildCard(meal));
+    if (!existingIds.has(String(meal.idMeal))) {
+      results.insertAdjacentHTML("beforeend", buildCard(meal));
+    }
   }
 
-  // One Groq call for all visible meals that still need a price
+  // Keep aiOutput at the top
+  if (aiOutput && results.firstChild !== aiOutput) {
+    results.prepend(aiOutput);
+  }
+
+  // Fetch prices only for cards that don't have one yet
   fetchBatchBCPrices(meals);
 }
 
@@ -138,15 +158,10 @@ async function loadMeals() {
   allMeals  = [...allMeals, ...newMeals];
   saveMealsToSession();
 
-  const searchTerm = document.getElementById("searchInput")?.value.trim() || "";
-  if (!searchTerm) {
-    const results = document.getElementById("results");
-    for (const meal of newMeals) {
-      results.insertAdjacentHTML("beforeend", buildCard(meal));
-    }
-    // One batch call for the new batch of cards
-    fetchBatchBCPrices(newMeals);
-  }
+  // Always re-render through applyFilters so the display stays consistent
+  // whether or not a search/filter is active. applyFilters also triggers
+  // fetchBatchBCPrices for any new meals that need a price.
+  await applyFilters();
 
   loading = false;
 }
