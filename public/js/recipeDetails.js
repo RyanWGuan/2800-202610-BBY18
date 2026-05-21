@@ -1,3 +1,4 @@
+const IS_LOGGED_IN = document.getElementById("isLoggedIn").value === "true";
 const MEALDB_LOOKUP = "/api/meal/";
 
 // Pull meal ID from url
@@ -132,13 +133,19 @@ function renderRecipe(meal) {
         <div class="detail-section-header">
           <h2>Ingredients</h2>
           <div class="recipe-action-buttons">
-            <button
+            ${
+              IS_LOGGED_IN
+                ? `
+            <button 
               class="save_recipe_button"
               id="save_recipe_button"
             >
-              Save
-            </button>
-          </div>
+            Save
+          </button>
+           `
+                : ""
+            }
+        </div>
         </div>
         <ul class="ingredient-list">${ingredientHTML}</ul>
       </section>
@@ -162,22 +169,6 @@ function renderRecipe(meal) {
     loadNutrition(btn.dataset.meal, btn.dataset.ingredients);
   });
 
-  // Save recipe button listener
-  const saveRecipeBtn = document.getElementById("save_recipe_button");
-  saveRecipeBtn.addEventListener("click", async () => {
-    const response = await fetch("/saveRecipe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: meal.idMeal,
-        name: meal.strMeal,
-        image: meal.strMealThumb,
-      }),
-    });
-    const result = await response.json();
-    alert(result.message);
-  });
-
   //AI Assisted shopping list button event listener
   const addToShoppingListBtn = document.getElementById("add-to-shopping-list");
   addToShoppingListBtn.addEventListener("click", async () => {
@@ -195,6 +186,29 @@ function renderRecipe(meal) {
     const result = await response.json();
     alert(result.message);
   });
+
+  // Save recipe button listener
+  const saveRecipeBtn = document.getElementById("save_recipe_button");
+
+  if (saveRecipeBtn) {
+    saveRecipeBtn.addEventListener("click", async () => {
+      const response = await fetch("/saveRecipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: meal.idMeal,
+          name: meal.strMeal,
+          image: meal.strMealThumb,
+        }),
+      });
+
+      const result = await response.json();
+
+      alert(result.message);
+    });
+  }
 }
 
 async function loadRecipeDetail() {

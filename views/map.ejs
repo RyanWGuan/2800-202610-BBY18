@@ -26,40 +26,47 @@
         value="500"
       />
     </div>
-    <div id="transit-toggle-row">
-      <label for="stops-toggle">Show Transit Stops</label>
-      <input id="stops-toggle" type="checkbox" />
+
+    <!-- SPLIT: separate bus and skytrain toggles -->
+    <div id="bus-toggle-row" class="toggle-row">
+      <input id="bus-toggle" type="checkbox" />
+      <label for="bus-toggle">Show Bus Stops</label>
     </div>
-    <div id="relay-toggle-row">
-      <label for="relay-toggle">Transit Relay Mode</label>
+    <div id="skytrain-toggle-row" class="toggle-row">
+      <input id="skytrain-toggle" type="checkbox" />
+      <label for="skytrain-toggle">Show SkyTrain Stops</label>
+    </div>
+
+    <div id="relay-toggle-row" class="toggle-row">
       <input id="relay-toggle" type="checkbox" />
+      <label for="relay-toggle">Transit Relay Mode</label>
     </div>
-    <div id="foodbank-toggle-row">
-      <label for="foodbank-toggle">Show Food Banks</label>
+    <div id="foodbank-toggle-row" class="toggle-row">
       <input id="foodbank-toggle" type="checkbox" />
+      <label for="foodbank-toggle">Show Food Banks</label>
     </div>
     <div>
-  <label for="expansion-input">Transit Ping Expansion (km)</label>
-  <input
-  id="expansion-input"
-  type="number"
-  min="0.5"
-  max="3"
-  step="0.5"
-  value="1"
-/>
-</div>
-<div>
-  <label for="secondary-input">Secondary Ping Radius (m)</label>
-  <input
-  id="secondary-input"
-  type="number"
-  min="50"
-  max="300"
-  step="50"
-  value="100"
-/>
-</div>
+      <label for="expansion-input">Transit Ping Expansion (km)</label>
+      <input
+        id="expansion-input"
+        type="number"
+        min="0.5"
+        max="3"
+        step="0.5"
+        value="1"
+      />
+    </div>
+    <div>
+      <label for="secondary-input">Secondary Ping Radius (m)</label>
+      <input
+        id="secondary-input"
+        type="number"
+        min="50"
+        max="300"
+        step="50"
+        value="100"
+      />
+    </div>
     <button id="radius-apply">Apply and Rescan</button>
   </div>
 </div>
@@ -76,11 +83,13 @@
     <p>This map shows nearby grocery stores based on your location.</p>
     <ul>
       <li>Green markers are stores near you</li>
-      <li>Yellow markers are stores reachable via transit</li>
+      <li>Yellow markers are stores reachable via bus</li>
+      <li>Purple markers are stores reachable via SkyTrain</li>
+      <li>Split markers are reachable by both</li>
       <li>Tap a marker for the store name and address</li>
       <li>Use the arrow panel on the right to set how far to scan</li>
-      <li>Blue markers are transit stops within your area</li>
-      <li>Orange markers are food banks (toggle in the arrow panel)</li>
+      <li>Blue markers are bus stops, orange are SkyTrain stops</li>
+      <li>Dark orange markers are food banks (toggle in the arrow panel)</li>
     </ul>
     <button id="closeMapPopup">Got It!</button>
   </div>
@@ -92,5 +101,7 @@
 
 <!-- AI assisted to help get the API -->
 <script src="https://api.mapbox.com/mapbox-gl-js/v3.13.0/mapbox-gl.js"></script>
+
+<input type="hidden" id="isLoggedIn" value="<%= isLoggedIn ? 'true' : 'false' %>">
 
 <%- include('partials/footer') %>

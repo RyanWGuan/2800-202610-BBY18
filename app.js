@@ -30,6 +30,10 @@ const savedRecipesCollection = database
   .db(mongodb_database)
   .collection("savedRecipes");
 
+const savedLocationsCollection = database
+  .db(mongodb_database)
+  .collection("savedLocations");
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(__dirname + "/public"));
@@ -335,6 +339,7 @@ app.get("/map", (req, res) => {
     cssFiles: ["style"],
     jsFiles: ["map", "easterEgg"],
     mapboxToken: process.env.MAPBOX_TOKEN,
+    isLoggedIn: req.session.authenticated || false,
   });
 });
 
@@ -363,15 +368,28 @@ app.get("/shoppingList", (req, res) => {
   });
 });
 
-app.get("/savedLocations", (req, res) => {
+app.get("/savedLocations", async (req, res) => {
+  const savedLocations = await savedLocationsCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
+
   res.render("savedLocations", {
     cssFiles: ["style"],
     jsFiles: ["savedLocations", "easterEgg"],
+    jsFiles: ["savedLocations"],
+    savedLocations: savedLocations,
   });
 });
 
+
 app.get("/savedRecipes", async (req, res) => {
-  const savedRecipes = await savedRecipesCollection.find().toArray();
+  if (!req.session.authenticated) {
+    return res.redirect("/login");
+  }
+
+  const savedRecipes = await savedRecipesCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
 
   res.render("savedRecipes", {
     cssFiles: ["style", "recipe"],
@@ -380,17 +398,29 @@ app.get("/savedRecipes", async (req, res) => {
   });
 });
 
+
 app.get("/recipeDetails", (req, res) => {
   res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
     jsFiles: ["recipeDetails", "easterEgg"],
+    jsFiles: ["recipeDetails"],
+    isLoggedIn: req.session.authenticated || false,
   });
 });
 
 app.post("/saveRecipe", async (req, res) => {
+  if (!req.session.authenticated) {
+    return res.status(401).json({
+      message: "Please log in first."
+    });
+  }
+
   const { id, name, image } = req.body;
 
-  const existingRecipe = await savedRecipesCollection.findOne({ id });
+  const existingRecipe = await savedRecipesCollection.findOne({
+    userEmail: req.session.email,
+    id: id,
+  });
 
   if (existingRecipe) {
     return res.json({
@@ -399,6 +429,7 @@ app.post("/saveRecipe", async (req, res) => {
   }
 
   await savedRecipesCollection.insertOne({
+    userEmail: req.session.email,
     id,
     name,
     image,
@@ -409,11 +440,51 @@ app.post("/saveRecipe", async (req, res) => {
   });
 });
 
+app.post("/saveLocation", async (req, res) => {
+  if (!req.session.authenticated) {
+    return res.status(401).json({ message: "Please log in first." });
+  }
+
+  const { name, address } = req.body;
+
+  const existingLocation = await savedLocationsCollection.findOne({
+    userEmail: req.session.email,
+    name,
+    address,
+  });
+
+  if (existingLocation) {
+    return res.json({ message: "Location already saved!" });
+  }
+
+  await savedLocationsCollection.insertOne({
+    userEmail: req.session.email,
+    name,
+    address,
+  });
+
+  res.json({ message: "Location saved successfully!" });
+});
+
+app.delete("/deleteSavedLocation/:id", async (req, res) => {
+  await savedLocationsCollection.deleteOne({
+    _id: new ObjectId(req.params.id),
+    userEmail: req.session.email,
+  });
+
+  res.json({ message: "Location deleted successfully!" });
+});
+
 app.delete("/deleteSavedRecipe/:id", async (req, res) => {
-  const recipeId = req.params.id;
+  if (!req.session.authenticated) {
+    return res.status(401).json({
+      message: "Please log in first."
+    });
+  }
 
   await savedRecipesCollection.deleteOne({
-    _id: new ObjectId(recipeId),
+    _id: new ObjectId(req.params.id),
+    userEmail: req.session.email,
   });
 
   res.json({
