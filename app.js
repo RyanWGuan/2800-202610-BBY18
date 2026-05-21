@@ -5,7 +5,17 @@ const MongoStore = require("connect-mongo").default;
 const port = process.env.PORT || 3000;
 const bcrypt = require("bcrypt");
 const { ObjectId } = require("mongodb");
+const nodemailer = require("nodemailer");
 const saltRounds = 12;
+
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const app = express();
 
@@ -78,40 +88,43 @@ app.post("/api/nutrition", async (req, res) => {
   }
 });
 
-// Recipe suggestion — searches MealDB directly, no AI needed
+
+// Recipe suggestion — Uses AI to curate based on saved recipes, if user doesn't, uses MealDB's random query
 app.post("/api/recipe-suggest", async (req, res) => {
-  const { search } = req.body;
+  const { search, savedRecipeNames } = req.body;
 
   try {
-    // Search MealDB by name if provided, otherwise fetch a random one
+    let searchTerm = search?.trim() || "";
+
+    // If user has saved recipes, ask AI to suggest something based on them
+    if (!searchTerm && savedRecipeNames?.length > 0) {
+      const prompt = `A user enjoys these recipes: ${savedRecipeNames.join(", ")}.
+Suggest ONE recipe name they would likely enjoy that is different from those listed.
+Reply with ONLY the recipe name, nothing else.`;
+      searchTerm = (await callGemini(prompt)).trim();
+    }
+
     let meal = null;
 
-    if (search && search.trim()) {
+    if (searchTerm) {
       const searchRes = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(search.trim())}`,
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`
       );
       const searchData = await searchRes.json();
-      if (searchData.meals && searchData.meals.length > 0) {
-        // Pick a random result from the matches so it's not always the same
-        const randomIndex = Math.floor(
-          Math.random() * Math.min(searchData.meals.length, 5),
-        );
+      if (searchData.meals?.length > 0) {
+        const randomIndex = Math.floor(Math.random() * Math.min(searchData.meals.length, 5));
         meal = searchData.meals[randomIndex];
       }
     }
 
-    // If no search term or no results, get a random meal from MealDB
+    // Fallback to random
     if (!meal) {
-      const randomRes = await fetch(
-        "https://www.themealdb.com/api/json/v1/1/random.php",
-      );
+      const randomRes = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
       const randomData = await randomRes.json();
       meal = randomData.meals?.[0];
     }
 
-    if (!meal) {
-      return res.status(404).json({ error: "No recipe found." });
-    }
+    if (!meal) return res.status(404).json({ error: "No recipe found." });
 
     res.json({
       found: true,
@@ -201,6 +214,42 @@ app.get("/login", (req, res) => {
   });
 });
 
+app.get("/verifyMFA", (req, res) => {
+
+  if (!req.session.pendingMFA) {
+    return res.redirect("/login");
+  }
+
+  res.render("verifyMFA", {
+    cssFiles: ["style", "login"],
+    jsFiles: [],
+  });
+});
+
+app.post("/verifyMFA", async (req, res) => {
+
+  const { code } = req.body;
+
+  if (code === req.session.mfaCode) {
+
+    req.session.authenticated = true;
+
+    req.session.name = req.session.mfaName;
+    req.session.email = req.session.mfaEmail;
+    req.session.phone = req.session.mfaPhone;
+
+    delete req.session.pendingMFA;
+    delete req.session.mfaCode;
+    delete req.session.mfaName;
+    delete req.session.mfaEmail;
+    delete req.session.mfaPhone;
+
+    return res.redirect("/profile");
+  }
+
+  res.send("Invalid verification code.");
+});
+
 app.post("/loginSubmit", async (req, res) => {
   const { email, password } = req.body;
 
@@ -229,11 +278,23 @@ app.post("/loginSubmit", async (req, res) => {
   }
 
   if (await bcrypt.compare(password, result[0].password)) {
-    req.session.authenticated = true;
-    req.session.name = result[0].name;
-    req.session.email = result[0].email;
-    req.session.phone = result[0].phone || null;
-    res.redirect("/profile");
+    const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      req.session.pendingMFA = true;
+      req.session.mfaCode = mfaCode;
+
+      req.session.mfaName = result[0].name;
+      req.session.mfaEmail = result[0].email;
+      req.session.mfaPhone = result[0].phone || null;
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: result[0].email,
+        subject: "RecipeQuest Verification Code",
+        text: `Your verification code is: ${mfaCode}`,
+      });
+
+res.redirect("/verifyMFA");
   } else {
     res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
   }
@@ -379,7 +440,6 @@ app.get("/savedLocations", async (req, res) => {
   res.render("savedLocations", {
     cssFiles: ["style"],
     jsFiles: ["savedLocations", "easterEgg"],
-    jsFiles: ["savedLocations"],
     savedLocations: savedLocations,
   });
 });
@@ -406,7 +466,6 @@ app.get("/recipeDetails", (req, res) => {
   res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
     jsFiles: ["recipeDetails", "easterEgg"],
-    jsFiles: ["recipeDetails"],
     isLoggedIn: req.session.authenticated || false,
   });
 });
@@ -506,6 +565,14 @@ app.get("/api/meal/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get("/api/savedRecipes", async (req, res) => {
+  if (!req.session.authenticated) return res.json([]);
+  const saved = await savedRecipesCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
+  res.json(saved);
 });
 
 // 404
