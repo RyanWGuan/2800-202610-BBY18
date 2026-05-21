@@ -1,165 +1,95 @@
 <%- include('partials/header') %>
 <main class="main">
-  <div id="firstTimePopupRecipe" style="display: none" class="popup-overlay">
-    <div class="popup-content">
-      <h2>Recipe Page</h2>
-      <p>
-        Here you can view recipes based on filter and search settings, such as
-        if they within a certain price range, or if they match the ingredients
-        within your wishlist!
-      </p>
-      <button id="closePopup">Got It!</button>
-    </div>
-  </div>
 
-  <br />
-
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <!-- Filter button -->
-    <div class="filter-wrapper">
-      <button class="filter-btn" id="filterBtn" onclick="toggleDropdown()">
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="4" y1="6" x2="20" y2="6" />
-          <line x1="8" y1="12" x2="16" y2="12" />
-          <line x1="11" y1="18" x2="13" y2="18" />
-        </svg>
-        Filter
-        <svg
-          class="chevron"
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-
-      <div class="dropdown" id="dropdown">
-        <!-- Wishlist toggle -->
-        <div class="dd-label">Wishlist</div>
-        <div class="toggle-row">
-          <span>
-            <i
-              class="ti ti-heart"
-              aria-hidden="true"
-              style="font-size: 16px; color: #ccc"
-            ></i>
-            Shopping List Only
-          </span>
-          <label class="toggle">
-            <input
-              type="checkbox"
-              id="wishlistToggle"
-              onchange="applyFilters()"
-            />
-            <span class="slider"></span>
-          </label>
+    <div id="firstTimePopupRecipe" style="display: none;" class="popup-overlay">
+        <div class="popup-content">
+            <h2>Recipe Page</h2>
+            <p>Here you can view recipes based on filter and search settings, such as if they within a certain price range, or if they match the ingredients within your wishlist!</p>
+            <button id="closePopup">Got It!</button>
         </div>
-
-        <div class="divider"></div>
-
-        <!-- Price cap toggle -->
-        <div class="dd-label">Price cap</div>
-        <div class="toggle-row">
-          <span>
-            <i
-              class="ti ti-tag"
-              aria-hidden="true"
-              style="font-size: 16px; color: #ccc"
-            ></i>
-            Enable price cap
-          </span>
-          <label class="toggle">
-            <input
-              type="checkbox"
-              id="priceToggle"
-              onchange="togglePriceField()"
-            />
-            <span class="slider"></span>
-          </label>
-        </div>
-
-        <!-- Price input -->
-        <div class="price-row" id="priceRow" style="display: none">
-          <span>Max price</span>
-          <div class="price-field">
-            <span>$</span>
-            <input
-              type="number"
-              id="priceInput"
-              min="0"
-              step="0.01"
-              placeholder="0.00"
-              oninput="applyFilters()"
-              aria-label="Maximum price"
-            />
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <!-- Max cooking time slider -->
-        <div class="dd-label">Max cooking time</div>
-        <div class="slider-row">
-          <i
-            class="ti ti-clock"
-            aria-hidden="true"
-            style="font-size: 15px; color: #ccc"
-          ></i>
-          <input
-            type="range"
-            id="timeSlider"
-            min="10"
-            max="120"
-            value="120"
-            step="5"
-            style="flex: 1"
-          />
-          <span class="slider-val" id="timeVal">120 min</span>
-        </div>
-      </div>
     </div>
 
-    <!-- Search bar -->
-    <div class="search-wrapper">
-      <i
-        class="ti ti-search"
-        aria-hidden="true"
-        style="font-size: 16px; color: #bbb"
-      ></i>
-      <input
-        type="text"
-        placeholder="Search items…"
-        id="searchInput"
-        oninput="applyFilters()"
-        aria-label="Search items"
-      />
+    <br/>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+
+        <!-- Filter button -->
+        <div class="filter-wrapper">
+            <button class="filter-btn" id="filterBtn" onclick="toggleDropdown()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                Filter
+                <svg class="chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+
+            <div class="dropdown" id="dropdown">
+
+                <!-- Wishlist toggle -->
+                <div class="dd-label">Wishlist</div>
+                <div class="toggle-row">
+                    <span>
+                        <i class="ti ti-heart" aria-hidden="true" style="font-size:16px;color:#ccc"></i>
+                        Wishlisted only
+                    </span>
+                    <label class="toggle">
+                        <input type="checkbox" id="wishlistToggle" onchange="applyFilters()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Price cap toggle -->
+                <div class="dd-label">Price cap</div>
+                <div class="toggle-row">
+                    <span>
+                        <i class="ti ti-tag" aria-hidden="true" style="font-size:16px;color:#ccc"></i>
+                        Enable price cap
+                    </span>
+                    <label class="toggle">
+                        <input type="checkbox" id="priceToggle" onchange="togglePriceField()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- Price input -->
+                <div class="price-row" id="priceRow" style="display:none">
+                    <span>Max price</span>
+                    <div class="price-field">
+                        <span>$</span>
+                        <input type="number" id="priceInput" min="0" step="0.01" placeholder="0.00" oninput="applyFilters()" aria-label="Maximum price" />
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Max cooking time slider -->
+                <div class="dd-label">Max cooking time</div>
+                <div class="slider-row">
+                    <i class="ti ti-clock" aria-hidden="true" style="font-size:15px;color:#ccc"></i>
+                    <input type="range" id="timeSlider" min="10" max="120" value="120" step="5" style="flex:1;" />
+                    <span class="slider-val" id="timeVal">120 min</span>
+                </div>
+
+
+            </div>
+        </div>
+
+        <!-- Search bar -->
+        <div class="search-wrapper">
+            <i class="ti ti-search" aria-hidden="true" style="font-size:16px;color:#bbb"></i>
+            <input type="text" placeholder="Search items…" id="searchInput" oninput="applyFilters()" aria-label="Search items" />
+        </div>
+
+        <!-- AI Suggest button -->
+        <button class="ai-btn" id="aiSuggestBtn">✦ Suggest a recipe</button>
+
     </div>
 
-    <!-- AI Suggest button -->
-    <button class="ai-btn" id="aiSuggestBtn">✦ Suggest a recipe</button>
-  </div>
+    <!-- Meals grid -->
+    <div class="results" id="results">
+        <div id="aiOutput" style="display:none;"></div>
+    </div>
 
-  <!-- Meals grid -->
-  <div class="results" id="results">
-    <div id="aiOutput" style="display: none"></div>
-  </div>
 </main>
 <%- include('partials/footer') %>

@@ -211,10 +211,10 @@ app.post("/loginSubmit", async (req, res) => {
 
   const validationResult = schema.validate({ email, password });
   if (validationResult.error != null) {
-    res.render("loginSubmit", {
-      cssFiles: ["login", "style"],
+    res.render("loginSubmit", { 
+      cssFiles: ["login", "style"], 
       jsFiles: [],
-    });
+     });
     return;
   }
 
@@ -347,30 +347,19 @@ app.get("/map", (req, res) => {
 });
 
 app.post("/api/shoppingList/add", async (req, res) => {
-  if (!req.session.authenticated) {
-    return res.status(401).json({ message: "Not logged in" });
-  }
-
   const { recipeName, ingredients } = req.body;
-  const userEmail = req.session.email;
 
-  await shoppingListCollection.deleteMany({ recipeName, userEmail });
-  await shoppingListCollection.insertOne({
-    recipeName,
-    ingredients,
-    userEmail,
-  });
+  // Remove existing entries for this recipe first
+  await shoppingListCollection.deleteMany({ recipeName });
+
+  // Insert new ones
+  await shoppingListCollection.insertOne({ recipeName, ingredients });
 
   res.json({ message: "Added to shopping list!" });
 });
 
 app.get("/api/shoppingList", async (req, res) => {
-  if (!req.session.authenticated) {
-    return res.status(401).json([]);
-  }
-
-  const userEmail = req.session.email;
-  const items = await shoppingListCollection.find({ userEmail }).toArray();
+  const items = await shoppingListCollection.find().toArray();
   res.json(items);
 });
 
@@ -395,6 +384,7 @@ app.get("/savedLocations", async (req, res) => {
   });
 });
 
+
 app.get("/savedRecipes", async (req, res) => {
   if (!req.session.authenticated) {
     return res.redirect("/login");
@@ -411,6 +401,7 @@ app.get("/savedRecipes", async (req, res) => {
   });
 });
 
+
 app.get("/recipeDetails", (req, res) => {
   res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
@@ -423,7 +414,7 @@ app.get("/recipeDetails", (req, res) => {
 app.post("/saveRecipe", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({
-      message: "Please log in first.",
+      message: "Please log in first."
     });
   }
 
@@ -490,7 +481,7 @@ app.delete("/deleteSavedLocation/:id", async (req, res) => {
 app.delete("/deleteSavedRecipe/:id", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({
-      message: "Please log in first.",
+      message: "Please log in first."
     });
   }
 

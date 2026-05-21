@@ -1,12 +1,6 @@
 async function loadShoppingList() {
   const container = document.getElementById("shopping-list-container");
   const response = await fetch("/api/shoppingList");
-
-  if (response.status === 401) {
-    container.innerHTML = "<p>Please log in to view your shopping list.</p>";
-    return;
-  }
-
   const items = await response.json();
 
   if (items.length === 0) {
