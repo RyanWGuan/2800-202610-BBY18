@@ -335,6 +335,7 @@ app.post("/loginSubmit", async (req, res) => {
       req.session.mfaName = result[0].name;
       req.session.mfaEmail = result[0].email;
       req.session.mfaPhone = result[0].phone || null;
+      await mergeSessionShoppingList(req);
 
       try {
         await transporter.sendMail({
@@ -464,19 +465,20 @@ app.get("/map", (req, res) => {
 });
 
 app.post("/api/shoppingList/add", async (req, res) => {
+  if (!req.session.authenticated) return res.status(401).json({ message: "Please log in first." });
+  
   const { recipeName, ingredients } = req.body;
+  const userEmail = req.session.email;
 
-  // Remove existing entries for this recipe first
-  await shoppingListCollection.deleteMany({ recipeName });
-
-  // Insert new ones
-  await shoppingListCollection.insertOne({ recipeName, ingredients });
+  await shoppingListCollection.deleteMany({ recipeName, userEmail });
+  await shoppingListCollection.insertOne({ recipeName, ingredients, userEmail });
 
   res.json({ message: "Added to shopping list!" });
 });
 
 app.get("/api/shoppingList", async (req, res) => {
-  const items = await shoppingListCollection.find().toArray();
+  if (!req.session.authenticated) return res.json([]);
+  const items = await shoppingListCollection.find({ userEmail: req.session.email }).toArray();
   res.json(items);
 });
 
