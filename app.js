@@ -78,40 +78,43 @@ app.post("/api/nutrition", async (req, res) => {
   }
 });
 
-// Recipe suggestion — searches MealDB directly, no AI needed
+
+// Recipe suggestion — Uses AI to curate based on saved recipes, if user doesn't, uses MealDB's random query
 app.post("/api/recipe-suggest", async (req, res) => {
-  const { search } = req.body;
+  const { search, savedRecipeNames } = req.body;
 
   try {
-    // Search MealDB by name if provided, otherwise fetch a random one
+    let searchTerm = search?.trim() || "";
+
+    // If user has saved recipes, ask AI to suggest something based on them
+    if (!searchTerm && savedRecipeNames?.length > 0) {
+      const prompt = `A user enjoys these recipes: ${savedRecipeNames.join(", ")}.
+Suggest ONE recipe name they would likely enjoy that is different from those listed.
+Reply with ONLY the recipe name, nothing else.`;
+      searchTerm = (await callGemini(prompt)).trim();
+    }
+
     let meal = null;
 
-    if (search && search.trim()) {
+    if (searchTerm) {
       const searchRes = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(search.trim())}`,
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`
       );
       const searchData = await searchRes.json();
-      if (searchData.meals && searchData.meals.length > 0) {
-        // Pick a random result from the matches so it's not always the same
-        const randomIndex = Math.floor(
-          Math.random() * Math.min(searchData.meals.length, 5),
-        );
+      if (searchData.meals?.length > 0) {
+        const randomIndex = Math.floor(Math.random() * Math.min(searchData.meals.length, 5));
         meal = searchData.meals[randomIndex];
       }
     }
 
-    // If no search term or no results, get a random meal from MealDB
+    // Fallback to random
     if (!meal) {
-      const randomRes = await fetch(
-        "https://www.themealdb.com/api/json/v1/1/random.php",
-      );
+      const randomRes = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
       const randomData = await randomRes.json();
       meal = randomData.meals?.[0];
     }
 
-    if (!meal) {
-      return res.status(404).json({ error: "No recipe found." });
-    }
+    if (!meal) return res.status(404).json({ error: "No recipe found." });
 
     res.json({
       found: true,
@@ -506,6 +509,14 @@ app.get("/api/meal/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.get("/api/savedRecipes", async (req, res) => {
+  if (!req.session.authenticated) return res.json([]);
+  const saved = await savedRecipesCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
+  res.json(saved);
 });
 
 // 404

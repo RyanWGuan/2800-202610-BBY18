@@ -583,19 +583,29 @@ async function suggestRecipe() {
   const btn    = document.getElementById("aiSuggestBtn");
   const output = document.getElementById("aiOutput");
   const search = document.getElementById("searchInput")?.value || "";
- 
+
   btn.disabled    = true;
   btn.textContent = "Thinking…";
   output.style.display = "block";
   output.innerHTML = '<span style="color:#888">Generating suggestion…</span>';
- 
+
   try {
+    // Fetch the user's saved recipes to inform the suggestion
+    let savedRecipeNames = [];
+    try {
+      const savedRes  = await fetch("/savedRecipes", { headers: { Accept: "application/json" } });
+      // savedRecipes returns an EJS page, so use the API collection directly
+      const apiRes    = await fetch("/api/savedRecipes");
+      const apiData   = await apiRes.json();
+      savedRecipeNames = apiData.map((r) => r.name).filter(Boolean);
+    } catch { /* not logged in or endpoint missing — silently skip */ }
+
     const response = await fetch("/api/recipe-suggest", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ search }),
+      body: JSON.stringify({ search, savedRecipeNames }),
     });
- 
+
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Server error");
  
