@@ -87,25 +87,6 @@
   transition: background 0.2s;
 }
 
-/*First-time map popup*/
-.popup-overlay {
-  position: fixed;
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  justify-self: center;
-  z-index: 1000;
-  margin-top: 25%;
-}
-
-.popup-content {
-  background-color: rgb(233, 230, 230);
-  padding: 1em 1.5em;
-  border-radius: 0.375em;
-  text-align: center;
-}
-
 .popup-content h2 {
   margin: 0 0 0.5em 0;
   font-size: 1.1rem;
@@ -126,16 +107,13 @@
 
 .popup-content ul li {
   margin-bottom: 0.4em;
+  color: white;
 }
 
 #closeMapPopup {
-  padding: 0.5em 1.25em;
-  background: #4caf50;
-  color: #fff;
+  background-color: #8cc63f;
+  border-radius: 6px;
   border: none;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 /* toggle rows — shared style for all three checkbox rows */

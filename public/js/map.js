@@ -3,8 +3,8 @@ let pingRadius = 500;            // Scan radius in metres (default 500 m)
 let transitExpansion = 1;        // How far (km) along a bus/skytrain route to follow (default 1 km)
 let secondaryPingRadius = 100;   // Radius (m) around a transit stop to search for stores
 
-let currentMarkers = [];         // All green grocery-store markers currently on the map
-let relayMarkers = [];           // Relay-mode markers (yellow/purple/split)
+let currentMarkers = [];         // All green grocery store markers currently on the map
+let relayMarkers = [];           // Relay mode markers (yellow/purple/split)
 let relayTimeouts = [];          // setTimeout IDs used by relay — kept so they can be cancelled
 let relayStoreLocations = [];    // Lat/lon of stores added by relay mode
 let addedStoreIds = new Set();   // Mapbox IDs of every store already on the map (prevents duplicates)
@@ -28,7 +28,6 @@ const IS_LOGGED_IN = document.getElementById("isLoggedIn").value === "true";
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
 // create the interactive map inside the div with id of "map".
-// it starts zoomed out at zoom: 2 centered on (0,0) until GPS kicks in.
 const map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
@@ -644,7 +643,7 @@ function renderRelayStores(collector) {
       <div class="map-popup-body">
         <div class="map-popup-header">
           <strong class="map-popup-name">${name}</strong>
-          <button class="map-popup-save-btn" onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'>Save</button>
+          <button class="map-popup-save-btn" onclick='saveLocation(this, ${JSON.stringify(name)}, ${JSON.stringify(address)})'>Save</button>
         </div>
         <p class="map-popup-address">${address}</p>
         <div id="${did}" class="store-details-loading">Loading details…</div>
@@ -749,10 +748,6 @@ function runRelay(lon, lat) {
     // Step 3: deduplicate stops that are too close together or cover identical stores
     const deduped50m   = deduplicateStops(expanded, lat, lon);
     const stopsToFetch = deduplicateByStoreOverlap(deduped50m, lat, lon);
-
-    console.log("Relay stops after dedup:", stopsToFetch.length,
-      "| bus:", stopsToFetch.filter((s) => s._transitType === "bus").length,
-      "| skytrain:", stopsToFetch.filter((s) => s._transitType === "skytrain").length);
 
     if (stopsToFetch.length === 0) { finishWithStops(); return; }
 
@@ -912,7 +907,6 @@ toggleBtn.addEventListener("click", () => {
 // listeners which caused fetchGroceryStores to fire twice (once with wrong
 // coordinates when a custom pin was active). Now one listener handles both cases.
 applyBtn.addEventListener("click", () => {
-  console.log("relay enabled:", relayEnabled, "| bus enabled:", busEnabled, "| skytrain enabled:", skytrainEnabled);
 
   // Read the new values from the panel inputs
   const val          = parseFloat(radiusInput.value);
@@ -955,7 +949,7 @@ closeBtn.addEventListener("click", () => {
   localStorage.setItem("hasVisitedMap", "true"); // Don't show again
 });
 
-let busMarkers = [];       // All blue bus-stop pins currently on the map
+let busMarkers = [];       // All blue bus stop pins currently on the map
 let skytrainMarkers = [];  // All orange SkyTrain stop pins currently on the map
 
 /** Removes all bus-stop pins from the map and empties the array. */
@@ -1112,7 +1106,8 @@ function fetchBusStops(lon, lat) {
     });
 }
 
-// Same as fetchBusStops but for SkyTrain stops — uses orange (#FF6B00) pins.
+
+ // Same as fetchBusStops but for SkyTrain stops uses orange pins.
 function fetchSkytrainStops(lon, lat) {
   clearSkytrainMarkers();
   fetch("/data/skytrainStops.json")
@@ -1162,12 +1157,14 @@ function fetchSkytrainStops(lon, lat) {
     });
 }
 
-let foodBankMarkers = [];   // All dark-orange food bank pins on the map
+let foodBankMarkers = [];   // All dark orange food bank pins on the map
 let foodBanksEnabled = false; // Whether the food bank toggle is on
 let foodBankData = [];        // Cached food bank JSON (loaded once on first toggle)
 
-// Places a dark-orange pin for every food bank in foodBankData.
-// The popup shows name, address, phone, optional email, and a website link.
+/**
+ * Places a dark orange pin for every food bank in foodBankData.
+ * The popup shows name, address, phone, optional email, and a website link.
+ */
 function renderFoodBanks() {
   foodBankData.forEach((fb) => {
     // Email is optional only show the link if one exists in the data
@@ -1211,13 +1208,11 @@ let customScanLat = null;  // Latitude of the custom scan pin
 const customBtn  = document.getElementById("custom-location-btn");
 const customIcon = document.getElementById("custom-location-icon");
 
-/**
- * Enters custom pin mode:
- * Places a draggable red pin at the user's current GPS position.
- * Dragging the pin live updates the custom scan circle;
- * dropping it (dragend) triggers a full re scan of the new location.
- * The user GPS scan circle is hidden while a custom pin is active.
- */
+ // Enters custom-pin mode:
+ // Places a draggable red pin at the user's current GPS position.
+ // Dragging the pin live-updates the custom-scan circle;
+ // dropping it (dragend) triggers a full re-scan of the new location.
+ // The user-GPS scan circle is hidden while a custom pin is active.
 function enterCustomMode() {
   if (lastKnownLon === null || lastKnownLat === null) return; // Can't enter if GPS hasn't fired
 
