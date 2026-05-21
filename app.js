@@ -7,6 +7,18 @@ const bcrypt = require("bcrypt");
 const { ObjectId } = require("mongodb");
 const saltRounds = 12;
 
+<<<<<<< HEAD
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+=======
+>>>>>>> dev
 
 const app = express();
 
@@ -79,7 +91,6 @@ app.post("/api/nutrition", async (req, res) => {
   }
 });
 
-
 // Recipe suggestion — Uses AI to curate based on saved recipes, if user doesn't, uses MealDB's random query
 app.post("/api/recipe-suggest", async (req, res) => {
   const { search, savedRecipeNames } = req.body;
@@ -99,18 +110,22 @@ Reply with ONLY the recipe name, nothing else.`;
 
     if (searchTerm) {
       const searchRes = await fetch(
-        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`,
       );
       const searchData = await searchRes.json();
       if (searchData.meals?.length > 0) {
-        const randomIndex = Math.floor(Math.random() * Math.min(searchData.meals.length, 5));
+        const randomIndex = Math.floor(
+          Math.random() * Math.min(searchData.meals.length, 5),
+        );
         meal = searchData.meals[randomIndex];
       }
     }
 
     // Fallback to random
     if (!meal) {
-      const randomRes = await fetch("https://www.themealdb.com/api/json/v1/1/random.php");
+      const randomRes = await fetch(
+        "https://www.themealdb.com/api/json/v1/1/random.php",
+      );
       const randomData = await randomRes.json();
       meal = randomData.meals?.[0];
     }
@@ -190,7 +205,7 @@ app.get("/api/recipe-price", async (req, res) => {
     const data = await response.json();
     const recipe = data.results?.[0];
 
-    const BC_MARKUP = 1.20;
+    const BC_MARKUP = 1.2;
     const price = recipe?.pricePerServing
       ? ((recipe.pricePerServing / 100) * 1.3704 * BC_MARKUP).toFixed(2)
       : null;
@@ -267,7 +282,6 @@ app.get("/verifyMFA", (req, res) => {
 });
 
 app.get("/verifyMFA", (req, res) => {
-
   if (!req.session.pendingMFA) {
     return res.redirect("/login");
   }
@@ -279,11 +293,9 @@ app.get("/verifyMFA", (req, res) => {
 });
 
 app.post("/verifyMFA", async (req, res) => {
-
   const { code } = req.body;
 
   if (code === req.session.mfaCode) {
-
     req.session.authenticated = true;
 
     req.session.name = req.session.mfaName;
@@ -453,21 +465,36 @@ app.get("/map", (req, res) => {
 });
 
 app.post("/api/shoppingList/add", async (req, res) => {
-  if (!req.session.authenticated) return res.status(401).json({ message: "Please log in first." });
-  
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
   const { recipeName, ingredients } = req.body;
   const userEmail = req.session.email;
 
   await shoppingListCollection.deleteMany({ recipeName, userEmail });
-  await shoppingListCollection.insertOne({ recipeName, ingredients, userEmail });
+  await shoppingListCollection.insertOne({
+    recipeName,
+    ingredients,
+    userEmail,
+  });
 
   res.json({ message: "Added to shopping list!" });
 });
 
 app.get("/api/shoppingList", async (req, res) => {
   if (!req.session.authenticated) return res.json([]);
-  const items = await shoppingListCollection.find({ userEmail: req.session.email }).toArray();
+  const items = await shoppingListCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
   res.json(items);
+});
+
+app.delete("/api/shoppingList/clear", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  await shoppingListCollection.deleteMany({ userEmail: req.session.email });
+  res.json({ message: "Shopping list cleared." });
 });
 
 app.get("/shoppingList", (req, res) => {
@@ -490,7 +517,6 @@ app.get("/savedLocations", async (req, res) => {
   });
 });
 
-
 app.get("/savedRecipes", async (req, res) => {
   if (!req.session.authenticated) {
     return res.redirect("/login");
@@ -507,7 +533,6 @@ app.get("/savedRecipes", async (req, res) => {
   });
 });
 
-
 app.get("/recipeDetails", (req, res) => {
   res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
@@ -519,7 +544,7 @@ app.get("/recipeDetails", (req, res) => {
 app.post("/saveRecipe", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({
-      message: "Please log in first."
+      message: "Please log in first.",
     });
   }
 
@@ -586,7 +611,7 @@ app.delete("/deleteSavedLocation/:id", async (req, res) => {
 app.delete("/deleteSavedRecipe/:id", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({
-      message: "Please log in first."
+      message: "Please log in first.",
     });
   }
 
