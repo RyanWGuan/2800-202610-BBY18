@@ -247,7 +247,6 @@ Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 de
   }
 });
 
-<<<<<<< HEAD
 app.get("/login", (req, res) => {
   res.render("login", {
     cssFiles: ["style", "login"],
@@ -264,17 +263,6 @@ app.get("/verifyMFA", (req, res) => {
   res.render("verifyMFA", {
     cssFiles: ["style", "login"],
     jsFiles: [],
-  });
-});
-
-=======
->>>>>>> 2dd69d08d9e0866afa289466e47b7e42adeb45d1
-
-
-app.get("/login", (req, res) => {
-  res.render("logIn", {
-    cssFiles: ["style", "login"],
-    jsFiles: ["login"],
   });
 });
 
