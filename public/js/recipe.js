@@ -344,133 +344,261 @@
 
 const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
 const FIRST_MEAL_ID = 52772;
-
-// Set to true during development to avoid burning Spoonacular quota.
-// Prices will show as random realistic values so you can test the UI.
-// Flip to false when deploying for real prices.
+ 
+// Flip to false when deploying for real Spoonacular prices.
 const DEV_MOCK_PRICES = true;
-
-// --- Throttle queue ---
-const priceQueue = [];
-let queueRunning = false;
-const PRICE_DELAY_MS = 500; // 1 request per 500ms — raise to 1500-3000ms if on Spoonacular free tier
-
+ 
+// ─── Session cache keys ───────────────────────────────────────────────────────
+const CACHE_KEY_MEALS  = "cachedMeals";
+const CACHE_KEY_CURSOR = "mealCursor";
+ 
+// ─── In-memory state ──────────────────────────────────────────────────────────
+let allMeals = [];
+let current  = FIRST_MEAL_ID;
+let loading  = false;
+ 
+// ─── Price throttle queue ─────────────────────────────────────────────────────
+const priceQueue     = [];
+let   queueRunning   = false;
+const PRICE_DELAY_MS = 500;
+ 
 async function enqueuePriceFetch(mealName, cardId) {
   priceQueue.push({ mealName, cardId });
   if (!queueRunning) runPriceQueue();
 }
-
+ 
 async function runPriceQueue() {
   queueRunning = true;
   while (priceQueue.length > 0) {
     const { mealName, cardId } = priceQueue.shift();
     await fetchPrice(mealName, cardId);
     if (priceQueue.length > 0) {
-      await new Promise((resolve) => setTimeout(resolve, PRICE_DELAY_MS));
+      await new Promise((r) => setTimeout(r, PRICE_DELAY_MS));
     }
   }
   queueRunning = false;
 }
-
-// Get meal from MealDB by ID
+ 
+// ─── API helpers ──────────────────────────────────────────────────────────────
 async function fetchMealById(id) {
   const response = await fetch(`${MEALDB_LOOKUP}${id}`);
   if (!response.ok) throw new Error(`API error: ${response.status}`);
   const data = await response.json();
   return data.meals ? data.meals[0] : null;
 }
-
-// Fetch price from Spoonacular (called only by the queue, one at a time).
-// Checks localStorage first — if cached, skips the API call entirely.
-// In DEV_MOCK_PRICES mode, returns a random price with no API call at all.
+ 
 async function fetchPrice(mealName, cardId) {
   const priceEl = document.getElementById(`${cardId}-price`);
-
+ 
   if (DEV_MOCK_PRICES) {
-    if (priceEl)
-      priceEl.textContent = `~$${(Math.random() * 15 + 3).toFixed(2)}`;
+    if (priceEl) priceEl.textContent = `~$${(Math.random() * 15 + 3).toFixed(2)}`;
     return;
   }
-
+ 
   const cacheKey = `price:${mealName}`;
-  const cached = localStorage.getItem(cacheKey);
-
+  const cached   = localStorage.getItem(cacheKey);
   if (cached) {
     if (priceEl) priceEl.textContent = cached;
     return;
   }
-
+ 
   try {
-    const res = await fetch(
-      `/api/recipe-price?name=${encodeURIComponent(mealName)}`,
-    );
-    const data = await res.json();
+    const res     = await fetch(`/api/recipe-price?name=${encodeURIComponent(mealName)}`);
+    const data    = await res.json();
     const display = data.price ? `~$${data.price}` : "Price unavailable";
-
     localStorage.setItem(cacheKey, display);
-
     if (priceEl) priceEl.textContent = display;
   } catch {
     if (priceEl) priceEl.textContent = "Price unavailable";
   }
 }
-
-var loading = false;
-var current = FIRST_MEAL_ID;
-
-// Load 10 meals at a time
+ 
+// ─── Session-storage helpers ──────────────────────────────────────────────────
+function saveMealsToSession() {
+  try {
+    sessionStorage.setItem(CACHE_KEY_MEALS,  JSON.stringify(allMeals));
+    sessionStorage.setItem(CACHE_KEY_CURSOR, String(current));
+  } catch { /* storage full — silently ignore */ }
+}
+ 
+function loadMealsFromSession() {
+  try {
+    const raw    = sessionStorage.getItem(CACHE_KEY_MEALS);
+    const cursor = sessionStorage.getItem(CACHE_KEY_CURSOR);
+    if (raw && cursor) {
+      allMeals = JSON.parse(raw);
+      current  = parseInt(cursor, 10);
+      return true;
+    }
+  } catch { /* corrupted cache — start fresh */ }
+  return false;
+}
+ 
+// ─── Card builder ─────────────────────────────────────────────────────────────
+function buildCard(meal) {
+  const cardId = `meal-${meal.idMeal}`;
+  return `
+    <a href="/recipeDetails?id=${meal.idMeal}" class="card-link">
+      <div class="card">
+        <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
+        <div class="card-meta">
+          <h3 class="card-title">${meal.strMeal}</h3>
+          <span class="price-label" id="${cardId}-price">Loading price...</span>
+        </div>
+      </div>
+    </a>`;
+}
+ 
+// ─── Render a list of meals into #results ─────────────────────────────────────
+function renderMeals(meals) {
+  const results  = document.getElementById("results");
+  const aiOutput = document.getElementById("aiOutput");
+ 
+  // Clear everything except the AI output div
+  results.innerHTML = "";
+  if (aiOutput) results.appendChild(aiOutput);
+ 
+  for (const meal of meals) {
+    results.insertAdjacentHTML("beforeend", buildCard(meal));
+    enqueuePriceFetch(meal.strMeal, `meal-${meal.idMeal}`);
+  }
+}
+ 
+// ─── Load next batch from MealDB ─────────────────────────────────────────────
 async function loadMeals() {
   if (loading) return;
   loading = true;
-
-  const results = document.getElementById("results");
-
+ 
+  const newMeals = [];
   for (let i = current; i < current + 10; i++) {
-    let meal = await fetchMealById(i);
-    if (!meal) continue;
-
-    const cardId = `meal-${meal.idMeal}`;
-
-    results.innerHTML += `
-      <a href="/recipeDetails?id=${meal.idMeal}" class="card-link">
-        <div class="card">
-          <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
-          <div class="card-meta">
-            <h3 class="card-title">${meal.strMeal}</h3>
-            <span class="price-label" id="${cardId}-price">Loading price...</span>
-          </div>
-        </div>
-      </a>`;
-
-    current++;
-
-    // Enqueue price fetch — processed one at a time with a delay between each
-    enqueuePriceFetch(meal.strMeal, cardId);
+    try {
+      const meal = await fetchMealById(i);
+      if (meal) newMeals.push(meal);
+    } catch { /* skip bad IDs */ }
   }
+ 
+  current  += 10;
+  allMeals  = [...allMeals, ...newMeals];
+  saveMealsToSession();
+ 
+  // If no active search, append new cards directly (avoids full re-render)
+  const searchTerm = document.getElementById("searchInput")?.value.trim() || "";
+  if (!searchTerm) {
+    const results = document.getElementById("results");
+    for (const meal of newMeals) {
+      results.insertAdjacentHTML("beforeend", buildCard(meal));
+      enqueuePriceFetch(meal.strMeal, `meal-${meal.idMeal}`);
+    }
+  }
+ 
   loading = false;
 }
-
-// AI suggest button handler
+ 
+// ─── Wishlist helper ──────────────────────────────────────────────────────────
+function getSavedRecipeIds() {
+  try {
+    const raw = localStorage.getItem("savedRecipeIds");
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+ 
+// ─── Filter & search ──────────────────────────────────────────────────────────
+// With a search term: hits MealDB's full-database search endpoint.
+// Without: filters the local cache client-side (zero network calls).
+async function applyFilters() {
+  const searchTerm   = document.getElementById("searchInput")?.value.trim() || "";
+  const wishlistOnly = document.getElementById("wishlistToggle")?.checked || false;
+  const priceEnabled = document.getElementById("priceToggle")?.checked || false;
+  const maxPrice     = priceEnabled
+    ? parseFloat(document.getElementById("priceInput")?.value) || Infinity
+    : Infinity;
+ 
+  const savedIds = getSavedRecipeIds();
+  let pool;
+ 
+  if (searchTerm) {
+    try {
+      const res  = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`);
+      const data = await res.json();
+      pool = data.meals || [];
+ 
+      // Merge any new results into the local cache
+      const existingIds = new Set(allMeals.map((m) => m.idMeal));
+      const newOnes     = pool.filter((m) => !existingIds.has(m.idMeal));
+      if (newOnes.length) {
+        allMeals = [...allMeals, ...newOnes];
+        saveMealsToSession();
+      }
+    } catch {
+      // Network error — fall back to local cache
+      pool = allMeals.filter((m) =>
+        m.strMeal.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  } else {
+    pool = allMeals;
+  }
+ 
+  // Apply wishlist & price filters on top of search results
+  const filtered = pool.filter((meal) => {
+    if (wishlistOnly && !savedIds.has(String(meal.idMeal))) return false;
+ 
+    if (priceEnabled && !DEV_MOCK_PRICES) {
+      const cached = localStorage.getItem(`price:${meal.strMeal}`);
+      if (cached) {
+        const num = parseFloat(cached.replace(/[^0-9.]/g, ""));
+        if (!isNaN(num) && num > maxPrice) return false;
+      }
+    }
+ 
+    return true;
+  });
+ 
+  renderMeals(filtered);
+ 
+  if (filtered.length === 0) {
+    document.getElementById("results").insertAdjacentHTML(
+      "beforeend",
+      `<p style="color:#aaa;padding:20px;">No recipes match your search.</p>`
+    );
+  }
+}
+ 
+// ─── Filter UI helpers ────────────────────────────────────────────────────────
+function toggleDropdown() {
+  document.getElementById("filterBtn").classList.toggle("open");
+  document.getElementById("dropdown").classList.toggle("open");
+}
+ 
+function togglePriceField() {
+  const on = document.getElementById("priceToggle").checked;
+  document.getElementById("priceRow").style.display = on ? "flex" : "none";
+  applyFilters();
+}
+ 
+// ─── AI suggest ───────────────────────────────────────────────────────────────
 async function suggestRecipe() {
-  const btn = document.getElementById("aiSuggestBtn");
+  const btn    = document.getElementById("aiSuggestBtn");
   const output = document.getElementById("aiOutput");
   const search = document.getElementById("searchInput")?.value || "";
-
-  btn.disabled = true;
+ 
+  btn.disabled    = true;
   btn.textContent = "Thinking…";
   output.style.display = "block";
   output.innerHTML = '<span style="color:#888">Generating suggestion…</span>';
-
+ 
   try {
     const response = await fetch("/api/recipe-suggest", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ search }),
     });
-
+ 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Server error");
-
+ 
     if (data.found) {
       output.innerHTML = `
         <a href="/recipeDetails?id=${data.id}" class="card-link">
@@ -501,53 +629,59 @@ async function suggestRecipe() {
     output.innerHTML = `<span style="color:red">Failed to get suggestion: ${err.message}</span>`;
     console.error(err);
   }
-
-  btn.disabled = false;
+ 
+  btn.disabled    = false;
   btn.textContent = "✦ Suggest a recipe";
 }
-
-// Open/close filter dropdown
-function toggleDropdown() {
-  document.getElementById("filterBtn").classList.toggle("open");
-  document.getElementById("dropdown").classList.toggle("open");
-}
-
-// Show/hide price field when toggled
-function togglePriceField() {
-  const on = document.getElementById("priceToggle").checked;
-  document.getElementById("priceRow").style.display = on ? "flex" : "none";
-  applyFilters();
-}
-
-// Main filter function
-function applyFilters() {}
-
-// Init on DOM ready
+ 
+// ─── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  // Load first batch of meals
-  loadMeals();
-
+  const hasCached = loadMealsFromSession();
+ 
+  if (hasCached && allMeals.length > 0) {
+    // Returning visit this session — render instantly from cache
+    renderMeals(allMeals);
+  } else {
+    // First visit — fetch from MealDB
+    loadMeals();
+  }
+ 
   // Infinite scroll
   document.querySelector(".main").addEventListener("scroll", function () {
-    const scrollTop = this.scrollTop;
-    const scrollHeight = this.scrollHeight;
-    const clientHeight = this.clientHeight;
-    if (scrollTop + clientHeight + 5 >= scrollHeight) {
+    if (this.scrollTop + this.clientHeight + 5 >= this.scrollHeight) {
       loadMeals();
     }
   });
-
+ 
+  // Search input (debounced 300ms)
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    let debounceTimer;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => applyFilters(), 300);
+    });
+  }
+ 
+  // Time slider label update
+  const timeSlider = document.getElementById("timeSlider");
+  const timeVal    = document.getElementById("timeVal");
+  if (timeSlider && timeVal) {
+    timeSlider.addEventListener("input", () => {
+      timeVal.textContent = `${timeSlider.value} min`;
+      applyFilters();
+    });
+  }
+ 
   // AI suggest button
   const aiBtn = document.getElementById("aiSuggestBtn");
   if (aiBtn) aiBtn.addEventListener("click", suggestRecipe);
-
-  // Popup
-  const popup = document.getElementById("firstTimePopupRecipe");
+ 
+  // First-visit popup
+  const popup    = document.getElementById("firstTimePopupRecipe");
   const closeBtn = document.getElementById("closePopup");
   if (popup && closeBtn) {
-    if (!localStorage.getItem("hasVisited")) {
-      popup.style.display = "flex";
-    }
+    if (!localStorage.getItem("hasVisited")) popup.style.display = "flex";
     closeBtn.addEventListener("click", () => {
       popup.style.display = "none";
       localStorage.setItem("hasVisited", "true");
