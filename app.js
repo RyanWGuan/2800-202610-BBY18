@@ -207,7 +207,10 @@ app.post("/loginSubmit", async (req, res) => {
 
   const validationResult = schema.validate({ email, password });
   if (validationResult.error != null) {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    res.render("loginSubmit", { 
+      cssFiles: ["login", "style"], 
+      jsFiles: [],
+     });
     return;
   }
 

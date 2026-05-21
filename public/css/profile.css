@@ -18,6 +18,17 @@
     height: 50%;
     justify-self: center;
     align-self: center;
+    color: rgb(255, 255, 255);
+    background-color: #2f6bc6;
+    border-radius: 5px;
+    border: none;
+}
+
+.signout{
+    border-radius: 5px;
+    border: none;
+    background-color: #af2f2f;
+    color: white;
 }
 
 .info{
@@ -38,7 +49,7 @@
 }
 
 .bookmark_icon{
-    height: 30px;
+    height: 45px;
     width: auto;
     align-self: center;
     justify-self: center;
@@ -90,12 +101,11 @@
 
 /* Modal Box */
 .modal-content {
-    background: rgb(227, 227, 227);;
-    color: #f2f3f5;
+    background: #4a8cee;
+    color: white;
     padding: 24px;
     border-radius: 8px;
     width: 440px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
 
 .modal-header {
@@ -109,15 +119,20 @@
 .close-x {
     background: none; 
     border: none; 
-    color:black;
+    color:white;
     font-size: 28px; 
     cursor: pointer;
 }
 
 .modal-subtitle { 
-    color: black; 
+    color: white; 
     margin: 8px 0 20px 0; 
-    font-size: 14px; }
+    font-size: 14px; 
+}
+
+#fieldLabel, #modalTitle{
+    color: white;
+}
 
 /* Inputs */
 .input-group { margin-bottom: 20px; }
@@ -127,7 +142,7 @@
     text-transform: uppercase;
     font-size: 12px;
     font-weight: bold;
-    color: black;
+    color:white;
     margin-bottom: 8px;
 }
 
@@ -151,11 +166,11 @@
     margin-top: 28px;
 }
 
-.btn-cancel { background: none; border: none; color: black; cursor: pointer; }
+.btn-cancel { background: none; border: none; color: white; cursor: pointer; }
 
 .btn-done {
-    background:  rgb(200, 200, 200); 
-    color: black;
+    background:  #8cc63f; 
+    color: white;
     border: none;
     padding: 10px 24px;
     border-radius: 4px;

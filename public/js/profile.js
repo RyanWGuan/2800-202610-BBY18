@@ -28,7 +28,7 @@ function openEditModal(field) {
 
     const isPassword = (field === 'password');
     inputField.type = isPassword ? 'password' : 'text';
-    inputField.placeholder = isPassword ? 'Enter new password' : '';
+    inputField.placeholder = isPassword ? 'Enter new password' : `Enter new ${field}`;
     
     hint.style.display = (field === 'username') ? 'block' : 'none';
 
