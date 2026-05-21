@@ -212,7 +212,7 @@ app.get("/api/recipe-price", async (req, res) => {
 app.get("/login", (req, res) => {
   res.render("logIn", {
     cssFiles: ["style", "login"],
-    jsFiles: ["login", "easterEgg"],
+    jsFiles: ["easterEgg"],
   });
 });
 
@@ -289,14 +289,21 @@ app.post("/loginSubmit", async (req, res) => {
       req.session.mfaEmail = result[0].email;
       req.session.mfaPhone = result[0].phone || null;
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: result[0].email,
-        subject: "RecipeQuest Verification Code",
-        text: `Your verification code is: ${mfaCode}`,
-      });
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: result[0].email,
+          subject: "RecipeQuest Verification Code",
+          text: `Your verification code is: ${mfaCode}`,
+        });
+      
+        res.redirect("/verifyMFA");
+      
+      } catch (error) {
+        console.log("MFA EMAIL ERROR:", error);
+        res.send("Could not send verification email. Please try again.");
+      }
 
-res.redirect("/verifyMFA");
   } else {
     res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
   }
