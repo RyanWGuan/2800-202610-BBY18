@@ -7,18 +7,6 @@ const bcrypt = require("bcrypt");
 const { ObjectId } = require("mongodb");
 const saltRounds = 12;
 
-<<<<<<< HEAD
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-=======
->>>>>>> dev
 
 const app = express();
 
@@ -334,7 +322,7 @@ app.post("/loginSubmit", async (req, res) => {
 
   const result = await userCollection
     .find({ email })
-    .project({ name: 1, email: 1, password: 1, user_type: 1, _id: 1 })
+    .project({ name: 1, email: 1, password: 1, user_ype: 1, _id: 1 })
     .toArray();
 
   if (result.length !== 1) {
