@@ -23,6 +23,9 @@ const { MongoClient } = require("mongodb");
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`;
 const database = new MongoClient(atlasURI, {});
 const userCollection = database.db(mongodb_database).collection("users");
+const shoppingListCollection = database
+  .db(mongodb_database)
+  .collection("shoppingList");
 const savedRecipesCollection = database
   .db(mongodb_database)
   .collection("savedRecipes");
@@ -190,6 +193,7 @@ app.get("/api/recipe-price", async (req, res) => {
     res.json({ price: null });
   }
 });
+
 app.get("/login", (req, res) => {
   res.render("login", {
     cssFiles: ["style", "login"],
@@ -247,7 +251,11 @@ app.post("/signupSubmit", async (req, res) => {
   const validationResult = schema.validate({ name, email, password });
   if (validationResult.error != null) {
     const message = validationResult.error.details[0].message;
-    res.render("signupSubmit", { message, cssFiles: ["login"], jsFiles: ["easterEgg"] });
+    res.render("signupSubmit", {
+      message,
+      cssFiles: ["login"],
+      jsFiles: ["easterEgg"],
+    });
     return;
   }
 
@@ -336,6 +344,23 @@ app.get("/map", (req, res) => {
     mapboxToken: process.env.MAPBOX_TOKEN,
     isLoggedIn: req.session.authenticated || false,
   });
+});
+
+app.post("/api/shoppingList/add", async (req, res) => {
+  const { recipeName, ingredients } = req.body;
+
+  // Remove existing entries for this recipe first
+  await shoppingListCollection.deleteMany({ recipeName });
+
+  // Insert new ones
+  await shoppingListCollection.insertOne({ recipeName, ingredients });
+
+  res.json({ message: "Added to shopping list!" });
+});
+
+app.get("/api/shoppingList", async (req, res) => {
+  const items = await shoppingListCollection.find().toArray();
+  res.json(items);
 });
 
 app.get("/shoppingList", (req, res) => {
