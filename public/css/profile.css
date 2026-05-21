@@ -67,26 +67,6 @@
     align-self: center;
 }
 
-/* Popup for Profile */
-.popup-overlay{
-    position: fixed;
-    width: 50%;
-    height: 25%;
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    justify-self: center;
-    z-index: 1000;
-    margin-top: 25%;
-}
-
-.popup-content{
-    background-color: rgb(233, 230, 230);
-    padding: 2px;
-    border-radius: 5px;
-    text-align: center;
-}
-
 /* Dark Overlay */
 .modal-overlay {
     position: fixed;
