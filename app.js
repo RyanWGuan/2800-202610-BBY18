@@ -201,44 +201,68 @@ app.get("/api/recipe-price", async (req, res) => {
 });
 
 // Groq-powered BC ingredient cost estimate made with AI
+// Groq-powered BC ingredient cost estimate
+// Batch BC price estimate — prices multiple meals in a single Groq call.
+// Body: { meals: [{ id, name }, ...] }
+// Returns: { prices: { "<id>": 12.50, ... } }
 app.post("/api/bc-price-estimate", async (req, res) => {
-  const { mealName, ingredients } = req.body;
-  const ingredientList = ingredients?.length
-    ? ingredients
-    : "typical ingredients for this dish";
-
-  const prompt = `You are a Canadian grocery pricing assistant. 
-                  Estimate the realistic cost in CAD to make one serving of "${mealName}" using 
-                  ingredients bought at a typical BC grocery store 
-                  (e.g. Save-On-Foods, Superstore, or Walmart Canada) in 2024.
-                  Ingredients: ${ingredientList}.
-                  Reply ONLY with a JSON object in this exact format, no extra text:
-                  {
-                    "estimatedCostPerServing": 12.50,
-                    "breakdown": [
-                      { "ingredient": "chicken breast", "amount": "150g", "cost": 3.50 },
-                      { "ingredient": "olive oil", "amount": "1 tbsp", "cost": 0.30 }
-                    ],
-                  }`;
-
+  const { meals } = req.body;
+ 
+  if (!meals?.length) {
+    return res.status(400).json({ error: "No meals provided." });
+  }
+ 
+  const list = meals
+    .map((m, i) => `${i + 1}. id="${m.id}" name="${m.name}"`)
+    .join("\n");
+ 
+  const prompt = `You are a Canadian grocery pricing assistant with expert knowledge of BC grocery store prices in 2024.
+ 
+For each recipe below, estimate the REALISTIC total cost in CAD to make ONE serving of that dish, as if you were buying all the ingredients at a BC grocery store (Save-On-Foods, Superstore, or Walmart Canada).
+ 
+Pricing guidelines:
+- Chicken breast: ~$3.50-4.50 per 150g serving
+- Ground beef: ~$3.00-4.00 per 150g serving
+- Fish/seafood: ~$4.00-7.00 per serving
+- Pork: ~$2.50-4.00 per serving
+- Most vegetarian dishes: ~$4.00-8.00 per serving
+- Pasta dishes with meat: ~$5.00-9.00 per serving
+- Most dishes should fall between $6 and $18 per serving
+- Include a proportional share of pantry staples (oil, spices, flour, etc.)
+- Do NOT return prices under $3.00 — even simple dishes cost at least $4-5 in BC
+ 
+Recipes:
+${list}
+ 
+Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 decimal places. No extra text, no markdown:
+{ "52772": 11.50, "52773": 8.00 }`;
+ 
   try {
     const result = await callGemini(prompt);
-
-    // Strip any markdown fences the model might add
-    const clean = result.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(clean);
-    res.json(parsed);
+    const clean  = result.replace(/```json|```/g, "").trim();
+    const prices = JSON.parse(clean);
+    res.json({ prices });
   } catch (err) {
-    res.status(500).json({ error: "Could not estimate price: " + err.message });
+    res.status(500).json({ error: "Could not estimate prices: " + err.message });
   }
 });
 
-
-
 app.get("/login", (req, res) => {
-  res.render("logIn", {
+  res.render("login", {
     cssFiles: ["style", "login"],
-    jsFiles: ["login"],
+    jsFiles: ["login", "easterEgg"],
+  });
+});
+ 
+app.get("/verifyMFA", (req, res) => {
+ 
+  if (!req.session.pendingMFA) {
+    return res.redirect("/login");
+  }
+ 
+  res.render("verifyMFA", {
+    cssFiles: ["style", "login"],
+    jsFiles: [],
   });
 });
 

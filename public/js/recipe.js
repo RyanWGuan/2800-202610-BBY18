@@ -342,6 +342,354 @@
 //   }
 // });
 
+
+// code annotated and cleaned up with AI
+// const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
+
+// const FIRST_MEAL_ID = 52772;
+// const LOAD_SIZE = 20;
+
+// // get meal from API
+// async function fetchMealById(id) {
+//   const response = await fetch(`${MEALDB_LOOKUP}${id}`);
+
+//   if (!response.ok) {
+//     throw new Error(`API error: ${response.status}`);
+//   }
+
+//   const data = await response.json();
+//   return data.meals ? data.meals[0] : null;
+// }
+
+// // loadMeals based on Lab03
+// var offset = 0;
+// var loading = false;
+// var current = FIRST_MEAL_ID;
+
+// // load 10 meals
+// async function loadMeals() {
+//   loading = true;
+
+//   for (i = current; i < current + 10; i++) {
+//     let meal = await fetchMealById(i);
+//     if (!meal) continue;
+
+//     results.innerHTML += `
+//                     <a href="/recipeDetails?id=${meal.idMeal}" class="card-link">
+//                         <div class="card">
+//                             <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
+//                             <div class="card-meta">
+//                                 <h3 class="card-title">${meal.strMeal}</h3>
+//                                 <span class="price-label">$10.49</span>
+//                             </div>
+//                         </div>
+//                     </a>`;
+
+//     current++;
+//   }
+//   loading = false;
+// }
+// loadMeals();
+
+// // Open/close filter
+// function toggleDropdown() {
+//   document.getElementById("filterBtn").classList.toggle("open");
+//   document.getElementById("dropdown").classList.toggle("open");
+// }
+
+// // Show price field when toggled
+// function togglePriceField() {
+//   const on = document.getElementById("priceToggle").checked;
+//   document.getElementById("priceRow").style.display = on ? "flex" : "none";
+//   applyFilters();
+// }
+
+// // Main filter function
+// function applyFilters() {}
+
+// // Displaying card functionality learnt in COMP 2537
+// // let offset = 0;
+// // const limit = 10;
+// // let isLoading = false;
+
+// // async function loadRecipes() {
+// //   if (isLoading) return;
+// //   isLoading = true;
+
+// //   const response = await fetch(`/api/recipes?offset=${offset}`);
+// //   const recipes = await response.json();
+
+// //   for (let recipe of recipes) {
+// //     const price = recipe.pricePerServing
+// //       ? ((recipe.pricePerServing / 100) * 1.3704).toFixed(2)
+// //       : "0.00";
+
+// //     // AI assisted grid
+// //     const card = `
+// //       <div class="card" data-name="${recipe.title.toLowerCase()}" data-price="${price}">
+// //         <img src="${recipe.image}" alt="${recipe.title}" style="width:100%; border-radius:8px;">
+// //         ${recipe.title}
+// //         <div class="card-meta">
+// //           <span class="price-label">$${price}</span>
+// //         </div>
+// //       </div>
+// //     `;
+
+// //     document.getElementById("results").innerHTML += card;
+// //   }
+
+// //   offset += limit;
+// //   isLoading = false;
+// // }
+
+// // Load first 10 on page load
+// // loadRecipes();
+
+// // Infinite scroll -- uses your .main div since that's what scrolls, not the window
+// document.querySelector(".main").addEventListener("scroll", function () {
+//   const scrollTop = this.scrollTop;
+//   const scrollHeight = this.scrollHeight;
+//   const clientHeight = this.clientHeight;
+//   const scrollBuffer = 5;
+
+//   if (scrollTop + clientHeight + scrollBuffer >= scrollHeight) {
+//     loadRecipes();
+//   }
+// });
+// const maxTime = document.getElementById("timeSlider")?.value || 60;
+// const search = document.getElementById("searchInput")?.value || "";
+
+// btn.disabled = true;
+// btn.textContent = "Thinking…";
+// output.style.display = "block";
+// output.innerHTML = '<span style="color:#888">Generating suggestion…</span>';
+
+// try {
+//   const response = await fetch("/api/recipe-suggest", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ search }),
+//   });
+
+//   const data = await response.json();
+
+//   if (!response.ok) throw new Error(data.error || "Server error");
+
+//   if (data.found) {
+//     // Render a card linking to the real recipe page
+//     output.innerHTML = `
+//                 <a href="/recipeDetails?id=${data.id}" class="card-link">
+//                     <div class="card">
+//                         <img src="${data.image}" alt="${data.name}" class="card-img"/>
+//                         <div class="card-meta">
+//                             <h3 class="card-title">${data.name}</h3>
+//                             <span class="price-label">${data.area || ""} · ${data.category || ""}</span>
+//                         </div>
+//                         <div class="ai-card-badge-wrap">
+//                             <span class="ai-card-badge">✦ AI Suggestion</span>
+//                         </div>
+//                     </div>
+//                 </a>`;
+//   } else {
+//     // Fallback if MealDB didn't find a match
+//     output.innerHTML = `
+//                 <div class="card">
+//                     <div class="card-meta" style="padding: 10px 14px;">
+//                         <h3 class="card-title">${data.name}</h3>
+//                         <span class="price-label">Not found in database</span>
+//                     </div>
+//                     <div class="ai-card-badge-wrap">
+//                         <span class="ai-card-badge">✦ AI Suggestion</span>
+//                     </div>
+//                 </div>`;
+//   }
+// } catch (err) {
+//   output.innerHTML = `<span style="color:red">Failed to get suggestion: ${err.message}</span>`;
+//   console.error(err);
+// }
+
+// btn.disabled = false;
+// btn.textContent = "✦ Suggest a recipe";
+
+// Load first 10 on page load
+// loadRecipes();
+
+// Infinite scroll -- uses your .main div since that's what scrolls, not the window
+// document.querySelector(".main").addEventListener("scroll", function () {
+//   const scrollTop = this.scrollTop;
+//   const scrollHeight = this.scrollHeight;
+//   const clientHeight = this.clientHeight;
+//   const scrollBuffer = 5;
+
+//   if (scrollTop + clientHeight + scrollBuffer >= scrollHeight) {
+//     loadRecipes();
+//   }
+// });
+
+// // popup challenge
+// document.addEventListener("DOMContentLoaded", () => {
+//   const popup = document.getElementById("firstTimePopupRecipe");
+//   const closeBtn = document.getElementById("closePopup");
+
+//   const hasVisited = localStorage.getItem("hasVisited");
+
+//   if (!hasVisited) {
+//     popup.style.display = "flex";
+//   }
+
+//   closeBtn.addEventListener("click", () => {
+//     popup.style.display = "none";
+//     localStorage.setItem("hasVisited", "true");
+//   });
+// });
+// const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
+// const FIRST_MEAL_ID = 52772;
+
+// // Get meal from API
+// async function fetchMealById(id) {
+//   const response = await fetch(`${MEALDB_LOOKUP}${id}`);
+//   if (!response.ok) throw new Error(`API error: ${response.status}`);
+//   const data = await response.json();
+//   return data.meals ? data.meals[0] : null;
+// }
+
+// var loading = false;
+// var current = FIRST_MEAL_ID;
+
+// // Load 10 meals at a time
+// async function loadMeals() {
+//   if (loading) return;
+//   loading = true;
+
+//   const results = document.getElementById("results");
+
+//   for (let i = current; i < current + 10; i++) {
+//     let meal = await fetchMealById(i);
+//     if (!meal) continue;
+
+//     results.innerHTML += `
+//       <a href="/recipeDetails?id=${meal.idMeal}" class="card-link">
+//         <div class="card">
+//           <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
+//           <div class="card-meta">
+//             <h3 class="card-title">${meal.strMeal}</h3>
+//             <span class="price-label">$10.49</span>
+//           </div>
+//         </div>
+//       </a>`;
+
+//     current++;
+//   }
+//   loading = false;
+// }
+
+// // AI suggest button handler
+// async function suggestRecipe() {
+//   const btn = document.getElementById("aiSuggestBtn");
+//   const output = document.getElementById("aiOutput");
+//   const search = document.getElementById("searchInput")?.value || "";
+
+//   btn.disabled = true;
+//   btn.textContent = "Thinking…";
+//   output.style.display = "block";
+//   output.innerHTML = '<span style="color:#888">Generating suggestion…</span>';
+
+//   try {
+//     const response = await fetch("/api/recipe-suggest", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ search }),
+//     });
+
+//     const data = await response.json();
+//     if (!response.ok) throw new Error(data.error || "Server error");
+
+//     if (data.found) {
+//       output.innerHTML = `
+//         <a href="/recipeDetails?id=${data.id}" class="card-link">
+//           <div class="card">
+//             <img src="${data.image}" alt="${data.name}" class="card-img"/>
+//             <div class="card-meta">
+//               <h3 class="card-title">${data.name}</h3>
+//               <span class="price-label">${data.area || ""} · ${data.category || ""}</span>
+//             </div>
+//             <div class="ai-card-badge-wrap">
+//               <span class="ai-card-badge">✦ AI Suggestion</span>
+//             </div>
+//           </div>
+//         </a>`;
+//     } else {
+//       output.innerHTML = `
+//         <div class="card">
+//           <div class="card-meta" style="padding: 10px 14px;">
+//             <h3 class="card-title">${data.name}</h3>
+//             <span class="price-label">Not found in database</span>
+//           </div>
+//           <div class="ai-card-badge-wrap">
+//             <span class="ai-card-badge">✦ AI Suggestion</span>
+//           </div>
+//         </div>`;
+//     }
+//   } catch (err) {
+//     output.innerHTML = `<span style="color:red">Failed to get suggestion: ${err.message}</span>`;
+//     console.error(err);
+//   }
+
+//   btn.disabled = false;
+//   btn.textContent = "✦ Suggest a recipe";
+// }
+
+// // Open/close filter
+// function toggleDropdown() {
+//   document.getElementById("filterBtn").classList.toggle("open");
+//   document.getElementById("dropdown").classList.toggle("open");
+// }
+
+// // Show price field when toggled
+// function togglePriceField() {
+//   const on = document.getElementById("priceToggle").checked;
+//   document.getElementById("priceRow").style.display = on ? "flex" : "none";
+//   applyFilters();
+// }
+
+// // Main filter function
+// function applyFilters() {}
+
+// // Init on DOM ready
+// document.addEventListener("DOMContentLoaded", () => {
+//   // Load first batch of meals
+//   loadMeals();
+
+//   // Infinite scroll
+//   document.querySelector(".main").addEventListener("scroll", function () {
+//     const scrollTop = this.scrollTop;
+//     const scrollHeight = this.scrollHeight;
+//     const clientHeight = this.clientHeight;
+//     if (scrollTop + clientHeight + 5 >= scrollHeight) {
+//       loadMeals();
+//     }
+//   });
+
+//   // AI suggest button
+//   const aiBtn = document.getElementById("aiSuggestBtn");
+//   if (aiBtn) aiBtn.addEventListener("click", suggestRecipe);
+
+//   // Popup
+//   const popup = document.getElementById("firstTimePopupRecipe");
+//   const closeBtn = document.getElementById("closePopup");
+//   if (popup && closeBtn) {
+//     if (!localStorage.getItem("hasVisited")) {
+//       popup.style.display = "flex";
+//     }
+//     closeBtn.addEventListener("click", () => {
+//       popup.style.display = "none";
+//       localStorage.setItem("hasVisited", "true");
+//     });
+//   }
+// });
+
+
+// code annotated and cleaned up with AI
 const MEALDB_LOOKUP = "https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
 const FIRST_MEAL_ID = 52772;
 
@@ -353,96 +701,6 @@ const CACHE_KEY_CURSOR = "mealCursor";
 let allMeals = [];
 let current  = FIRST_MEAL_ID;
 let loading  = false;
-
-// ─── BC price throttle queue ──────────────────────────────────────────────────
-// One Groq call per card, throttled so we don't hammer the API.
-// Each entry: { mealId, mealName, cardId }
-const bcQueue      = [];
-let   bcRunning    = false;
-const BC_DELAY_MS  = 400;
-
-function enqueueBCEstimate(mealId, mealName, cardId) {
-  bcQueue.push({ mealId, mealName, cardId });
-  if (!bcRunning) runBCQueue();
-}
-
-async function runBCQueue() {
-  bcRunning = true;
-  while (bcQueue.length > 0) {
-    const { mealId, mealName, cardId } = bcQueue.shift();
-    await fetchAndDisplayBCPrice(mealId, mealName, cardId);
-    if (bcQueue.length > 0) {
-      await new Promise((r) => setTimeout(r, BC_DELAY_MS));
-    }
-  }
-  bcRunning = false;
-}
-
-// ─── BC price fetch (automatic, per card) ────────────────────────────────────
-// Pulls ingredients from MealDB then asks Groq for a BC cost estimate.
-// Result is cached in sessionStorage and stored on the meal object in allMeals
-// so the price filter can use it without re-fetching.
-async function fetchAndDisplayBCPrice(mealId, mealName, cardId) {
-  const priceEl = document.getElementById(`${cardId}-price`);
-
-  // Check sessionStorage cache first
-  const cacheKey = `bc-price:${mealId}`;
-  const cached   = sessionStorage.getItem(cacheKey);
-  if (cached) {
-    const { price } = JSON.parse(cached);
-    if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
-    storePriceOnMeal(mealId, price);
-    return;
-  }
-
-  try {
-    // Step 1: get ingredients from MealDB
-    const mealRes  = await fetch(`/api/meal/${mealId}`);
-    const mealData = await mealRes.json();
-    const meal     = mealData.meals?.[0];
-
-    const ingredients = [];
-    if (meal) {
-      for (let i = 1; i <= 20; i++) {
-        const ing     = meal[`strIngredient${i}`];
-        const measure = meal[`strMeasure${i}`];
-        if (ing && ing.trim()) {
-          ingredients.push(`${measure ? measure.trim() + " " : ""}${ing.trim()}`);
-        }
-      }
-    }
-
-    // Step 2: ask Groq for a BC price breakdown
-    const res  = await fetch("/api/bc-price-estimate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mealName, ingredients }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Server error");
-
-    const price = Number(data.estimatedCostPerServing);
-
-    // Cache and store
-    sessionStorage.setItem(cacheKey, JSON.stringify({ price }));
-    storePriceOnMeal(mealId, price);
-
-    if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
-  } catch {
-    if (priceEl) priceEl.textContent = "Price unavailable";
-  }
-}
-
-// Store the fetched BC price back onto the meal object in allMeals
-// so applyFilters can compare it without any extra API calls.
-function storePriceOnMeal(mealId, price) {
-  const meal = allMeals.find((m) => String(m.idMeal) === String(mealId));
-  if (meal) {
-    meal._bcPrice = price;
-    saveMealsToSession(); // persist the price for the session
-  }
-}
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
 async function fetchMealById(id) {
@@ -473,11 +731,56 @@ function loadMealsFromSession() {
   return false;
 }
 
+// ─── Batch BC price fetch ─────────────────────────────────────────────────────
+// Takes an array of meals that don't have a price yet, sends them all in one
+// Groq call, then updates each card's price label and stores the price on the
+// meal object so the filter can use it.
+async function fetchBatchBCPrices(meals) {
+  const uncached = meals.filter((m) => m._bcPrice == null);
+  if (!uncached.length) return;
+
+  try {
+    const res  = await fetch("/api/bc-price-estimate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        meals: uncached.map((m) => ({ id: String(m.idMeal), name: m.strMeal })),
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(`Server ${res.status}: ${data.error || "Unknown error"}`);
+
+    const prices = data.prices || {};
+    console.log("BC prices received:", prices);
+
+    for (const meal of uncached) {
+      const price = Number(prices[String(meal.idMeal)]);
+      if (!isNaN(price)) {
+        meal._bcPrice = price;
+        const priceEl = document.getElementById(`meal-${meal.idMeal}-price`);
+        if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
+      } else {
+        const priceEl = document.getElementById(`meal-${meal.idMeal}-price`);
+        if (priceEl) priceEl.textContent = "Price unavailable";
+      }
+    }
+
+    // Persist updated prices to session cache
+    saveMealsToSession();
+  } catch (err) {
+    // Log the full error so it's visible in devtools, not just "Price unavailable"
+    console.error("Batch BC price fetch failed:", err.message, err);
+    for (const meal of uncached) {
+      const priceEl = document.getElementById(`meal-${meal.idMeal}-price`);
+      if (priceEl) priceEl.textContent = "Price unavailable";
+    }
+  }
+}
+
 // ─── Card builder ─────────────────────────────────────────────────────────────
 function buildCard(meal) {
-  const cardId      = `meal-${meal.idMeal}`;
-  // If we already have a BC price cached on the meal object, show it immediately
-  const priceText   = meal._bcPrice != null
+  const priceText = meal._bcPrice != null
     ? `🍁 ~$${meal._bcPrice.toFixed(2)}`
     : "Loading BC price…";
 
@@ -487,13 +790,14 @@ function buildCard(meal) {
         <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
         <div class="card-meta">
           <h3 class="card-title">${meal.strMeal}</h3>
-          <span class="price-label" id="${cardId}-price">${priceText}</span>
+          <span class="price-label" id="meal-${meal.idMeal}-price">${priceText}</span>
         </div>
       </div>
     </a>`;
 }
 
 // ─── Render a list of meals into #results ─────────────────────────────────────
+// After rendering, fires one batch Groq call for any cards missing prices.
 function renderMeals(meals) {
   const results  = document.getElementById("results");
   const aiOutput = document.getElementById("aiOutput");
@@ -503,11 +807,10 @@ function renderMeals(meals) {
 
   for (const meal of meals) {
     results.insertAdjacentHTML("beforeend", buildCard(meal));
-    // Only enqueue if we don't already have the price
-    if (meal._bcPrice == null) {
-      enqueueBCEstimate(meal.idMeal, meal.strMeal, `meal-${meal.idMeal}`);
-    }
   }
+
+  // One Groq call for all visible meals that still need a price
+  fetchBatchBCPrices(meals);
 }
 
 // ─── Load next batch from MealDB ─────────────────────────────────────────────
@@ -527,14 +830,14 @@ async function loadMeals() {
   allMeals  = [...allMeals, ...newMeals];
   saveMealsToSession();
 
-  // If no active search, append new cards directly
   const searchTerm = document.getElementById("searchInput")?.value.trim() || "";
   if (!searchTerm) {
     const results = document.getElementById("results");
     for (const meal of newMeals) {
       results.insertAdjacentHTML("beforeend", buildCard(meal));
-      enqueueBCEstimate(meal.idMeal, meal.strMeal, `meal-${meal.idMeal}`);
     }
+    // One batch call for the new batch of cards
+    fetchBatchBCPrices(newMeals);
   }
 
   loading = false;
@@ -586,11 +889,8 @@ async function applyFilters() {
   const filtered = pool.filter((meal) => {
     if (wishlistOnly && !savedIds.has(String(meal.idMeal))) return false;
 
-    // Price filter uses the BC Groq estimate stored on the meal object.
-    // Meals without a price yet are kept visible (they're still loading).
-    if (priceEnabled && meal._bcPrice != null && meal._bcPrice > maxPrice) {
-      return false;
-    }
+    // Only filter by price if we actually have one — meals still loading are kept visible
+    if (priceEnabled && meal._bcPrice != null && meal._bcPrice > maxPrice) return false;
 
     return true;
   });
