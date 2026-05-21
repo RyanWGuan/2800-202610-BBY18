@@ -22,17 +22,10 @@ const { MongoClient } = require("mongodb");
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`;
 const database = new MongoClient(atlasURI, {});
-<<<<<<< HEAD
-
-const userCollection = database.db(mongodb_database).collection('users');
-const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
-
-=======
 const userCollection = database.db(mongodb_database).collection("users");
 const savedRecipesCollection = database
   .db(mongodb_database)
   .collection("savedRecipes");
->>>>>>> d9c5a0c13a221ffe618c046c0e24d1fa4f7d0ed4
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
