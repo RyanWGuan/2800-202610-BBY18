@@ -52,6 +52,10 @@ body {
     border-radius: 8px;
 }
 
+#login_container > h2, #login_container > p{
+    color: white;
+}
+
 #signup_container {
     display: none;
 }
@@ -121,30 +125,6 @@ body {
 
 .switch_link:hover {
     color: rgb(230, 227, 227);
-}
-
-
-.popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.popup-content {
-    background-color: rgb(227, 227, 227);
-    padding: 32px 28px;
-    border-radius: 8px;
-    text-align: center;
-    max-width: 320px;
-    width: 90%;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 

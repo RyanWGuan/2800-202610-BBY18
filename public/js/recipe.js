@@ -10,96 +10,6 @@ let allMeals = [];
 let current  = FIRST_MEAL_ID;
 let loading  = false;
 
-// ─── BC price throttle queue ──────────────────────────────────────────────────
-// One Groq call per card, throttled so we don't hammer the API.
-// Each entry: { mealId, mealName, cardId }
-const bcQueue      = [];
-let   bcRunning    = false;
-const BC_DELAY_MS  = 400;
-
-function enqueueBCEstimate(mealId, mealName, cardId) {
-  bcQueue.push({ mealId, mealName, cardId });
-  if (!bcRunning) runBCQueue();
-}
-
-async function runBCQueue() {
-  bcRunning = true;
-  while (bcQueue.length > 0) {
-    const { mealId, mealName, cardId } = bcQueue.shift();
-    await fetchAndDisplayBCPrice(mealId, mealName, cardId);
-    if (bcQueue.length > 0) {
-      await new Promise((r) => setTimeout(r, BC_DELAY_MS));
-    }
-  }
-  bcRunning = false;
-}
-
-// ─── BC price fetch (automatic, per card) ────────────────────────────────────
-// Pulls ingredients from MealDB then asks Groq for a BC cost estimate.
-// Result is cached in sessionStorage and stored on the meal object in allMeals
-// so the price filter can use it without re-fetching.
-async function fetchAndDisplayBCPrice(mealId, mealName, cardId) {
-  const priceEl = document.getElementById(`${cardId}-price`);
-
-  // Check sessionStorage cache first
-  const cacheKey = `bc-price:${mealId}`;
-  const cached   = sessionStorage.getItem(cacheKey);
-  if (cached) {
-    const { price } = JSON.parse(cached);
-    if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
-    storePriceOnMeal(mealId, price);
-    return;
-  }
-
-  try {
-    // Step 1: get ingredients from MealDB
-    const mealRes  = await fetch(`/api/meal/${mealId}`);
-    const mealData = await mealRes.json();
-    const meal     = mealData.meals?.[0];
-
-    const ingredients = [];
-    if (meal) {
-      for (let i = 1; i <= 20; i++) {
-        const ing     = meal[`strIngredient${i}`];
-        const measure = meal[`strMeasure${i}`];
-        if (ing && ing.trim()) {
-          ingredients.push(`${measure ? measure.trim() + " " : ""}${ing.trim()}`);
-        }
-      }
-    }
-
-    // Step 2: ask Groq for a BC price breakdown
-    const res  = await fetch("/api/bc-price-estimate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mealName, ingredients }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Server error");
-
-    const price = Number(data.estimatedCostPerServing);
-
-    // Cache and store
-    sessionStorage.setItem(cacheKey, JSON.stringify({ price }));
-    storePriceOnMeal(mealId, price);
-
-    if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
-  } catch {
-    if (priceEl) priceEl.textContent = "Price unavailable";
-  }
-}
-
-// Store the fetched BC price back onto the meal object in allMeals
-// so applyFilters can compare it without any extra API calls.
-function storePriceOnMeal(mealId, price) {
-  const meal = allMeals.find((m) => String(m.idMeal) === String(mealId));
-  if (meal) {
-    meal._bcPrice = price;
-    saveMealsToSession(); // persist the price for the session
-  }
-}
-
 // ─── API helpers ──────────────────────────────────────────────────────────────
 async function fetchMealById(id) {
   const response = await fetch(`${MEALDB_LOOKUP}${id}`);
@@ -129,11 +39,56 @@ function loadMealsFromSession() {
   return false;
 }
 
+// ─── Batch BC price fetch ─────────────────────────────────────────────────────
+// Takes an array of meals that don't have a price yet, sends them all in one
+// Groq call, then updates each card's price label and stores the price on the
+// meal object so the filter can use it.
+async function fetchBatchBCPrices(meals) {
+  const uncached = meals.filter((m) => m._bcPrice == null);
+  if (!uncached.length) return;
+
+  try {
+    const res  = await fetch("/api/bc-price-estimate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        meals: uncached.map((m) => ({ id: String(m.idMeal), name: m.strMeal })),
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(`Server ${res.status}: ${data.error || "Unknown error"}`);
+
+    const prices = data.prices || {};
+    console.log("BC prices received:", prices);
+
+    for (const meal of uncached) {
+      const price = Number(prices[String(meal.idMeal)]);
+      if (!isNaN(price)) {
+        meal._bcPrice = price;
+        const priceEl = document.getElementById(`meal-${meal.idMeal}-price`);
+        if (priceEl) priceEl.textContent = `🍁 ~$${price.toFixed(2)}`;
+      } else {
+        const priceEl = document.getElementById(`meal-${meal.idMeal}-price`);
+        if (priceEl) priceEl.textContent = "Price unavailable";
+      }
+    }
+
+    // Persist updated prices to session cache
+    saveMealsToSession();
+  } catch (err) {
+    // Log the full error so it's visible in devtools, not just "Price unavailable"
+    console.error("Batch BC price fetch failed:", err.message, err);
+    for (const meal of uncached) {
+      const priceEl = document.getElementById(`meal-${meal.idMeal}-price`);
+      if (priceEl) priceEl.textContent = "Price unavailable";
+    }
+  }
+}
+
 // ─── Card builder ─────────────────────────────────────────────────────────────
 function buildCard(meal) {
-  const cardId      = `meal-${meal.idMeal}`;
-  // If we already have a BC price cached on the meal object, show it immediately
-  const priceText   = meal._bcPrice != null
+  const priceText = meal._bcPrice != null
     ? `🍁 ~$${meal._bcPrice.toFixed(2)}`
     : "Loading BC price…";
 
@@ -143,13 +98,14 @@ function buildCard(meal) {
         <img src="${meal.strMealThumb}" alt="${meal.strMeal}" class="card-img"/>
         <div class="card-meta">
           <h3 class="card-title">${meal.strMeal}</h3>
-          <span class="price-label" id="${cardId}-price">${priceText}</span>
+          <span class="price-label" id="meal-${meal.idMeal}-price">${priceText}</span>
         </div>
       </div>
     </a>`;
 }
 
 // ─── Render a list of meals into #results ─────────────────────────────────────
+// After rendering, fires one batch Groq call for any cards missing prices.
 function renderMeals(meals) {
   const results  = document.getElementById("results");
   const aiOutput = document.getElementById("aiOutput");
@@ -159,11 +115,10 @@ function renderMeals(meals) {
 
   for (const meal of meals) {
     results.insertAdjacentHTML("beforeend", buildCard(meal));
-    // Only enqueue if we don't already have the price
-    if (meal._bcPrice == null) {
-      enqueueBCEstimate(meal.idMeal, meal.strMeal, `meal-${meal.idMeal}`);
-    }
   }
+
+  // One Groq call for all visible meals that still need a price
+  fetchBatchBCPrices(meals);
 }
 
 // ─── Load next batch from MealDB ─────────────────────────────────────────────
@@ -183,14 +138,14 @@ async function loadMeals() {
   allMeals  = [...allMeals, ...newMeals];
   saveMealsToSession();
 
-  // If no active search, append new cards directly
   const searchTerm = document.getElementById("searchInput")?.value.trim() || "";
   if (!searchTerm) {
     const results = document.getElementById("results");
     for (const meal of newMeals) {
       results.insertAdjacentHTML("beforeend", buildCard(meal));
-      enqueueBCEstimate(meal.idMeal, meal.strMeal, `meal-${meal.idMeal}`);
     }
+    // One batch call for the new batch of cards
+    fetchBatchBCPrices(newMeals);
   }
 
   loading = false;
@@ -242,11 +197,8 @@ async function applyFilters() {
   const filtered = pool.filter((meal) => {
     if (wishlistOnly && !savedIds.has(String(meal.idMeal))) return false;
 
-    // Price filter uses the BC Groq estimate stored on the meal object.
-    // Meals without a price yet are kept visible (they're still loading).
-    if (priceEnabled && meal._bcPrice != null && meal._bcPrice > maxPrice) {
-      return false;
-    }
+    // Only filter by price if we actually have one — meals still loading are kept visible
+    if (priceEnabled && meal._bcPrice != null && meal._bcPrice > maxPrice) return false;
 
     return true;
   });
