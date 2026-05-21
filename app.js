@@ -200,13 +200,60 @@ app.get("/api/recipe-price", async (req, res) => {
     );
     const data = await response.json();
     const recipe = data.results?.[0];
+
+    const BC_MARKUP = 1.20;
     const price = recipe?.pricePerServing
-      ? ((recipe.pricePerServing / 100) * 1.3704).toFixed(2)
+      ? ((recipe.pricePerServing / 100) * 1.3704 * BC_MARKUP).toFixed(2)
       : null;
     res.json({ price });
   } catch (err) {
     res.json({ price: null });
   }
+});
+
+// Groq-powered BC ingredient cost estimate made with AI
+app.post("/api/bc-price-estimate", async (req, res) => {
+  const { mealName, ingredients } = req.body;
+  const ingredientList = ingredients?.length
+    ? ingredients
+    : "typical ingredients for this dish";
+
+  const prompt = `You are a Canadian grocery pricing assistant. 
+                  Estimate the realistic cost in CAD to make one serving of "${mealName}" using 
+                  ingredients bought at a typical BC grocery store 
+                  (e.g. Save-On-Foods, Superstore, or Walmart Canada) in 2024.
+                  Ingredients: ${ingredientList}.
+                  Reply ONLY with a JSON object in this exact format, no extra text:
+                  {
+                    "estimatedCostPerServing": 12.50,
+                    "breakdown": [
+                      { "ingredient": "chicken breast", "amount": "150g", "cost": 3.50 },
+                      { "ingredient": "olive oil", "amount": "1 tbsp", "cost": 0.30 }
+                    ],
+                  }`;
+
+  try {
+    const result = await callGemini(prompt);
+
+    // Strip any markdown fences the model might add
+    const clean = result.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+    res.json(parsed);
+  } catch (err) {
+    res.status(500).json({ error: "Could not estimate price: " + err.message });
+  }
+});
+
+app.get("/login", (req, res) => {
+
+  res.render("login", {
+
+    cssFiles: ["style", "login"],
+
+    jsFiles: ["login"],
+
+  });
+
 });
 
 app.get("/login", (req, res) => {
