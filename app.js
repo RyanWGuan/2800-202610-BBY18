@@ -5,19 +5,8 @@ const MongoStore = require("connect-mongo").default;
 const port = process.env.PORT || 3000;
 const bcrypt = require("bcrypt");
 const { ObjectId } = require("mongodb");
-const nodemailer = require("nodemailer");
 const saltRounds = 12;
 
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 const app = express();
 
@@ -258,6 +247,7 @@ Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 de
   }
 });
 
+<<<<<<< HEAD
 app.get("/login", (req, res) => {
   res.render("login", {
     cssFiles: ["style", "login"],
@@ -277,49 +267,15 @@ app.get("/verifyMFA", (req, res) => {
   });
 });
 
+=======
+>>>>>>> 2dd69d08d9e0866afa289466e47b7e42adeb45d1
 
 
 app.get("/login", (req, res) => {
   res.render("logIn", {
     cssFiles: ["style", "login"],
-    jsFiles: ["easterEgg"],
+    jsFiles: ["login"],
   });
-});
-
-app.get("/verifyMFA", (req, res) => {
-
-  if (!req.session.pendingMFA) {
-    return res.redirect("/login");
-  }
-
-  res.render("verifyMFA", {
-    cssFiles: ["style", "login"],
-    jsFiles: [],
-  });
-});
-
-app.post("/verifyMFA", async (req, res) => {
-
-  const { code } = req.body;
-
-  if (code === req.session.mfaCode) {
-
-    req.session.authenticated = true;
-
-    req.session.name = req.session.mfaName;
-    req.session.email = req.session.mfaEmail;
-    req.session.phone = req.session.mfaPhone;
-
-    delete req.session.pendingMFA;
-    delete req.session.mfaCode;
-    delete req.session.mfaName;
-    delete req.session.mfaEmail;
-    delete req.session.mfaPhone;
-
-    return res.redirect("/profile");
-  }
-
-  res.send("Invalid verification code.");
 });
 
 app.post("/loginSubmit", async (req, res) => {
@@ -331,11 +287,12 @@ app.post("/loginSubmit", async (req, res) => {
   });
 
   const validationResult = schema.validate({ email, password });
+
   if (validationResult.error != null) {
-    res.render("loginSubmit", { 
-      cssFiles: ["login", "style"], 
+    res.render("loginSubmit", {
+      cssFiles: ["login", "style"],
       jsFiles: [],
-     });
+    });
     return;
   }
 
@@ -345,38 +302,25 @@ app.post("/loginSubmit", async (req, res) => {
     .toArray();
 
   if (result.length !== 1) {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    res.render("loginSubmit", {
+      cssFiles: ["login"],
+      jsFiles: [],
+    });
     return;
   }
 
   if (await bcrypt.compare(password, result[0].password)) {
-    const mfaCode = Math.floor(100000 + Math.random() * 900000).toString();
+    req.session.authenticated = true;
+    req.session.name = result[0].name;
+    req.session.email = result[0].email;
+    req.session.phone = result[0].phone || null;
 
-      req.session.pendingMFA = true;
-      req.session.mfaCode = mfaCode;
-
-      req.session.mfaName = result[0].name;
-      req.session.mfaEmail = result[0].email;
-      req.session.mfaPhone = result[0].phone || null;
-      await mergeSessionShoppingList(req);
-
-      try {
-        await transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: result[0].email,
-          subject: "RecipeQuest Verification Code",
-          text: `Your verification code is: ${mfaCode}`,
-        });
-      
-        res.redirect("/verifyMFA");
-      
-      } catch (error) {
-        console.log("MFA EMAIL ERROR:", error);
-        res.send("Could not send verification email. Please try again.");
-      }
-
+    res.redirect("/profile");
   } else {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    res.render("loginSubmit", {
+      cssFiles: ["login"],
+      jsFiles: [],
+    });
   }
 });
 
@@ -509,7 +453,7 @@ app.get("/shoppingList", (req, res) => {
   res.render("shoppingList", {
     title: "Ingredients",
     cssFiles: ["shoppingList", "style"],
-    jsFiles: ["easterEgg"],
+    jsFiles: ["shoppingList", "easterEgg"],
   });
 });
 
