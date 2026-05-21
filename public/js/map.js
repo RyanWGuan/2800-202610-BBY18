@@ -1,3 +1,4 @@
+const IS_LOGGED_IN = document.getElementById("isLoggedIn").value === "true";
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const map = new mapboxgl.Map({
@@ -368,7 +369,11 @@ function fetchGroceryStores(lon, lat) {
             <div class="map-popup-body">
               <div class="map-popup-header">
                 <strong class="map-popup-name">${name}</strong>
-                <button class="map-popup-save-btn" onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'>Save</button>
+                ${IS_LOGGED_IN ? `
+                  <button class="map-popup-save-btn" onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'>
+                    Save
+                  </button>
+                  ` : ""}
               </div>
               <p class="map-popup-address">${address}</p>
               <div id="${did}" class="store-details-loading">Loading details…</div>
@@ -600,12 +605,18 @@ function runRelay(lon, lat) {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-function saveLocation(name, address) {
-  let savedLocations =
-    JSON.parse(localStorage.getItem("savedLocations")) || [];
-  savedLocations.push({ name, address });
-  localStorage.setItem("savedLocations", JSON.stringify(savedLocations));
-  alert("Location saved!");
+// Function to save location
+async function saveLocation(name, address) {
+  const response = await fetch("/saveLocation", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ name, address }),
+  });
+
+  const result = await response.json();
+  alert(result.message);
 }
 
 let initialLoadDone = false;

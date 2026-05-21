@@ -1,20 +1,37 @@
 <%- include("partials/header", { cssFiles: ["style"] }) %>
 
 <main class="main">
-    <div class="location_grid" id="savedLocationsContainer">
-        <!-- Saved locations will be added here by savedLocations.js -->
-    </div>
+  <div id="savedLocationsContainer">
+
+    <% if (savedLocations.length === 0) { %>
+      <p>No saved locations yet.</p>
+    <% } %>
+
+    <% savedLocations.forEach((location) => { %>
+      <div class="location_card">
+        <div class="location_text">
+          <h2><%= location.name %></h2>
+          <p><%= location.address %></p>
+
+          <button
+            class="delete_button"
+            onclick="deleteLocation('<%= location._id %>')"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    <% }) %>
+
+  </div>
 </main>
 
 <div id="savedLocationsPopup" style="display: none;" class="popup-overlay">
-    <div class="popup-content">
-        <h2>Saved Locations Page</h2>
-        <p>
-            Here, you can view the locations you saved, including the location name,
-            description, and image.
-        </p>
-        <button id="closeSavedLocationsPopup">Got It!</button>
-    </div>
+  <div class="popup-content">
+    <h2>Saved Locations Page</h2>
+    <p>Here, you can view the locations you saved and quickly access them later.</p>
+    <button id="closeSavedLocationsPopup">Got It!</button>
+  </div>
 </div>
 
 <script src="/js/savedLocations.js"></script>
