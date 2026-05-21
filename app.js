@@ -207,8 +207,8 @@ app.get("/api/recipe-price", async (req, res) => {
   }
 });
 
-app.get("/login", (req, res) => {
-  res.render("login", {
+app.get("/logIn", (req, res) => {
+  res.render("logIn", {
     cssFiles: ["style", "login"],
     jsFiles: ["login", "easterEgg"],
   });
