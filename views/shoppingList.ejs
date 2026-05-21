@@ -1,62 +1,28 @@
 <%- include('partials/header') %>
 
-<!-- AI ASSISTED SHOPPING LIST PAGE -->
-<div id="firstTimePopup" style="display: none" class="popup-overlay">
-  <div class="popup-content">
-    <h2>Shopping List</h2>
-    <p>
-      Check off ingredients as you shop. Use "Clear completed" to remove checked
-      items.
-    </p>
-    <button id="closePopup">Got It!</button>
-  </div>
-</div>
-
-<div class="shopping-list">
-  <h1>Shopping List</h1>
-
-  <div class="recipe-group">
-    <div class="recipe-label">For: Recipe Name</div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r1-i1" />
-      <label for="r1-i1">Ingredient 1</label>
-    </div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r1-i2" />
-      <label for="r1-i2">Ingredient 2</label>
-    </div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r1-i3" />
-      <label for="r1-i3">Ingredient 3</label>
-    </div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r1-i4" />
-      <label for="r1-i4">Ingredient 4</label>
+<main class="main">
+  <!-- AI ASSISTED SHOPPING LIST PAGE -->
+  <div id="firstTimePopup" style="display: none" class="popup-overlay">
+    <div class="popup-content">
+      <h2>Shopping List</h2>
+      <p>
+        Check off ingredients as you shop. Use "Clear completed" to remove
+        checked items.
+      </p>
+      <button id="closePopup">Got It!</button>
     </div>
   </div>
 
-  <div class="recipe-group">
-    <div class="recipe-label">For: Recipe Name 2</div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r2-i1" />
-      <label for="r2-i1">Ingredient 1</label>
+  <div class="shopping-list">
+    <h1>Shopping List</h1>
+    <div id="shopping-list-container">
+      <p>Loading...</p>
     </div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r2-i2" />
-      <label for="r2-i2">Ingredient 2</label>
-    </div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r2-i3" />
-      <label for="r2-i3">Ingredient 3</label>
-    </div>
-    <div class="ingredient-item">
-      <input type="checkbox" id="r2-i4" />
-      <label for="r2-i4">Ingredient 4</label>
-    </div>
+    <button class="clear-btn" onclick="clearCompleted()">
+      Clear completed
+    </button>
   </div>
-
-  <button class="clear-btn" onclick="clearCompleted()">Clear completed</button>
-</div>
+</main>
 
 <script src="/js/shoppingList.js"></script>
 <script src="/js/profile.js"></script>

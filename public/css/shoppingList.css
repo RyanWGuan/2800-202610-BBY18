@@ -1,14 +1,10 @@
 /* AI ASSISTED CSS PAGE */
 
-html,
-body {
-  overflow-y: auto;
-}
-
 .main {
   background-color: white;
-  min-height: 80vh;
   width: 100vw;
+  padding-bottom: 1rem;
+  overflow-x: hidden;
 }
 
 .shopping-list {
@@ -26,6 +22,7 @@ body {
   letter-spacing: -0.02em;
   color: #1a1a1a;
   margin: 0 0 1.5rem;
+  box-sizing: border-box;
 }
 
 .recipe-group {
