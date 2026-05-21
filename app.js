@@ -248,7 +248,7 @@ Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 de
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", {
+  res.render("logIn", {
     cssFiles: ["style", "login"],
     jsFiles: ["login", "easterEgg"],
   });
