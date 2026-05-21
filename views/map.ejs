@@ -95,6 +95,19 @@
   </div>
 </div>
 
+<!-- AI Shopping Suggestions Panel — shown when arriving from shopping list -->
+<div id="ai-shopping-panel" style="display:none;">
+  <div id="ai-panel-header">
+    <span id="ai-panel-title">AI Store Suggestions</span>
+    <button id="ai-panel-close" title="Close">✕</button>
+  </div>
+  <div id="ai-panel-ingredients-row">
+    <span id="ai-panel-ing-label">Loading ingredients…</span>
+  </div>
+  <button id="ai-suggest-btn" disabled>Scanning for stores…</button>
+  <div id="ai-results-list"></div>
+</div>
+
 <script>
   const MAPBOX_TOKEN = "<%= mapboxToken %>";
 </script>

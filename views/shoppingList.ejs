@@ -1,7 +1,6 @@
 <%- include('partials/header') %>
 
 <main class="main">
-  <!-- AI ASSISTED SHOPPING LIST PAGE -->
   <div id="firstTimePopup" style="display: none" class="popup-overlay">
     <div class="popup-content">
       <h2>Shopping List</h2>
@@ -18,13 +17,13 @@
     <div id="shopping-list-container">
       <p>Loading...</p>
     </div>
+    <button class="ai-store-btn" onclick="findNearbyStores()">
+      Find Nearby Stores for My List
+    </button>
     <button class="clear-btn" onclick="clearCompleted()">
       Clear completed
     </button>
   </div>
 </main>
-
-<script src="/js/shoppingList.js"></script>
-<script src="/js/profile.js"></script>
 
 <%- include('partials/footer') %>

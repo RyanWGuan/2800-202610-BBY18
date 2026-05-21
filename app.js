@@ -7,7 +7,6 @@ const bcrypt = require("bcrypt");
 const { ObjectId } = require("mongodb");
 const saltRounds = 12;
 
-
 const app = express();
 
 const Joi = require("joi");
@@ -210,15 +209,15 @@ app.get("/api/recipe-price", async (req, res) => {
 // Returns: { prices: { "<id>": 12.50, ... } }
 app.post("/api/bc-price-estimate", async (req, res) => {
   const { meals } = req.body;
- 
+
   if (!meals?.length) {
     return res.status(400).json({ error: "No meals provided." });
   }
- 
+
   const list = meals
     .map((m, i) => `${i + 1}. id="${m.id}" name="${m.name}"`)
     .join("\n");
- 
+
   const prompt = `You are a Canadian grocery pricing assistant with expert knowledge of BC grocery store prices in 2024.
  
 For each recipe below, estimate the REALISTIC total cost in CAD to make ONE serving of that dish, as if you were buying all the ingredients at a BC grocery store (Save-On-Foods, Superstore, or Walmart Canada).
@@ -239,14 +238,16 @@ ${list}
  
 Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 decimal places. No extra text, no markdown:
 { "52772": 11.50, "52773": 8.00 }`;
- 
+
   try {
     const result = await callGemini(prompt);
-    const clean  = result.replace(/```json|```/g, "").trim();
+    const clean = result.replace(/```json|```/g, "").trim();
     const prices = JSON.parse(clean);
     res.json({ prices });
   } catch (err) {
-    res.status(500).json({ error: "Could not estimate prices: " + err.message });
+    res
+      .status(500)
+      .json({ error: "Could not estimate prices: " + err.message });
   }
 });
 
@@ -256,13 +257,12 @@ app.get("/login", (req, res) => {
     jsFiles: ["login", "easterEgg"],
   });
 });
- 
+
 app.get("/verifyMFA", (req, res) => {
- 
   if (!req.session.pendingMFA) {
     return res.redirect("/login");
   }
- 
+
   res.render("verifyMFA", {
     cssFiles: ["style", "login"],
     jsFiles: [],
@@ -313,10 +313,10 @@ app.post("/loginSubmit", async (req, res) => {
   const validationResult = schema.validate({ email, password });
 
   if (validationResult.error != null) {
-    res.render("loginSubmit", { 
-      cssFiles: ["style", "login"], 
+    res.render("loginSubmit", {
+      cssFiles: ["style", "login"],
       jsFiles: ["easterEgg"],
-     });
+    });
     return;
   }
 
@@ -326,7 +326,10 @@ app.post("/loginSubmit", async (req, res) => {
     .toArray();
 
   if (result.length !== 1) {
-    res.render("loginSubmit", { cssFiles: ["style", "login"], jsFiles: ["easterEgg"] });
+    res.render("loginSubmit", {
+      cssFiles: ["style", "login"],
+      jsFiles: ["easterEgg"],
+    });
     return;
   }
 
@@ -338,9 +341,9 @@ app.post("/loginSubmit", async (req, res) => {
 
     res.redirect("/profile");
   } else {
-    res.render("loginSubmit", { 
-      cssFiles: ["style", "login"], 
-      jsFiles: ["easterEgg"]
+    res.render("loginSubmit", {
+      cssFiles: ["style", "login"],
+      jsFiles: ["easterEgg"],
     });
   }
 });
@@ -483,6 +486,87 @@ app.delete("/api/shoppingList/clear", async (req, res) => {
 
   await shoppingListCollection.deleteMany({ userEmail: req.session.email });
   res.json({ message: "Shopping list cleared." });
+});
+
+// Update a single shopping list entry's ingredients
+app.patch("/api/shoppingList/:id", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  const { ingredients, recipeName } = req.body;
+  await shoppingListCollection.updateOne(
+    { _id: new ObjectId(req.params.id), userEmail: req.session.email },
+    { $set: { ingredients, recipeName } },
+  );
+  res.json({ message: "Updated." });
+});
+
+// Delete a single shopping list entry
+app.delete("/api/shoppingList/:id", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  await shoppingListCollection.deleteOne({
+    _id: new ObjectId(req.params.id),
+    userEmail: req.session.email,
+  });
+  res.json({ message: "Deleted." });
+});
+
+// AI-powered store suggestions for shopping list
+// Body: { ingredients: string[], stores: [{ name, address, lat, lon, distKm, walkMin, driveMin }] }
+// Returns: { suggestions: [...stores sorted by AI score] }
+app.post("/api/store-suggestions", async (req, res) => {
+  const { ingredients, stores } = req.body;
+
+  if (!ingredients?.length || !stores?.length) {
+    return res.status(400).json({ error: "Missing ingredients or stores." });
+  }
+
+  const ingredientList = ingredients.join(", ");
+  const storeList = stores
+    .map(
+      (s, i) =>
+        `${i + 1}. "${s.name}" — ${s.address} (${s.distKm} km, ~${s.walkMin} min walk, ~${s.driveMin} min drive)`
+    )
+    .join("\n");
+
+  const prompt = `You are a grocery shopping assistant with expert knowledge of Canadian grocery store chains in British Columbia.
+
+A user needs to buy these ingredients: ${ingredientList}
+
+Here are the nearby grocery stores:
+${storeList}
+
+For each store, score it 0-100 on how likely it is to carry ALL or MOST of these ingredients. Consider:
+- Large full-service chains (Superstore, Save-On-Foods, Walmart Supercentre, Safeway, Loblaws): 85-98 for common ingredients
+- Specialty/ethnic grocers (T&T, H-Mart, Osaka, Persia Foods): 90+ for Asian/international ingredients, 50-70 for Western staples
+- Discount chains (No Frills, FreshCo): 70-85 for basics, may lack specialty items
+- Wholesale clubs (Costco, Wholesale Club): 80-92, wide variety but bulk only
+- Small independent grocers: 60-75
+- Convenience or dollar stores: 20-40
+
+Return ONLY a JSON array, no extra text, no markdown:
+[{"index":1,"score":92,"reason":"Full-service superstore, stocks everything"},{"index":2,"score":75,"reason":"Good basics, limited specialty items"},...]`;
+
+  try {
+    const result = await callGemini(prompt);
+    const clean = result.replace(/```json|```/g, "").trim();
+    const scored = JSON.parse(clean);
+
+    const suggestions = scored
+      .map((s) => {
+        const store = stores[s.index - 1];
+        if (!store) return null;
+        return { ...store, score: s.score, reason: s.reason };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+
+    res.json({ suggestions });
+  } catch (err) {
+    res.status(500).json({ error: "Could not generate suggestions: " + err.message });
+  }
 });
 
 app.get("/shoppingList", (req, res) => {

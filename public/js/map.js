@@ -510,6 +510,9 @@ function fetchGroceryStores(lon, lat) {
           // Mark this store as already placed to avoid re-adding it in relay mode
           addedStoreIds.add(store.properties.mapbox_id);
           groceryStoreLocations.push({ lat: storeLat, lon: storeLon });
+          if (typeof allScannedStoreData !== "undefined") {
+            allScannedStoreData.push({ name, address, lat: storeLat, lon: storeLon });
+          }
 
           // Create a unique ID for the details div so we can replace its
           // "Loading…" placeholder once the OSM fetch completes
@@ -1289,3 +1292,152 @@ customBtn.addEventListener("click", () => {
     enterCustomMode(); // Pin is not active place it
   }
 });
+// ─── AI Shopping Store Suggestions ───────────────────────────────────────────
+// Only activates when navigated here from /shoppingList via "Find Nearby Stores"
+
+// Global store data collected as markers are placed — reset on each new scan
+var allScannedStoreData = [];
+
+const _origFetchGroceryStores = fetchGroceryStores;
+window.fetchGroceryStores = function (lon, lat) {
+  allScannedStoreData = [];
+  return _origFetchGroceryStores(lon, lat);
+};
+
+(function initAIShopping() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("aiShopping")) return;
+
+  const ingredients = JSON.parse(
+    sessionStorage.getItem("aiShoppingIngredients") || "[]"
+  );
+  if (!ingredients.length) return;
+
+  // Reveal panel
+  const panel = document.getElementById("ai-shopping-panel");
+  panel.style.display = "flex";
+
+  // Show ingredient preview
+  const ingLabel = document.getElementById("ai-panel-ing-label");
+  const preview = ingredients.slice(0, 6).join(", ");
+  const more = ingredients.length > 6 ? ` +${ingredients.length - 6} more` : "";
+  ingLabel.textContent = "Ingredients: " + preview + more;
+
+  document.getElementById("ai-panel-close").addEventListener("click", function () {
+    panel.style.display = "none";
+  });
+
+  const suggestBtn = document.getElementById("ai-suggest-btn");
+  suggestBtn.addEventListener("click", runAISuggestion);
+
+  // Poll until the map scan has found at least one store, then unlock the button
+  function waitForStores() {
+    if (allScannedStoreData.length > 0) {
+      suggestBtn.disabled = false;
+      suggestBtn.textContent = "Suggest Best Stores (" + allScannedStoreData.length + " found)";
+    } else {
+      setTimeout(waitForStores, 1500);
+    }
+  }
+  waitForStores();
+
+  async function runAISuggestion() {
+    if (!lastKnownLat || !lastKnownLon) {
+      alert("Still waiting for your location — try again in a moment.");
+      return;
+    }
+
+    const resultsList = document.getElementById("ai-results-list");
+    resultsList.innerHTML =
+      '<div class="ai-loading-msg">Asking AI...<br><small>Analysing ' +
+      allScannedStoreData.length +
+      " stores nearby</small></div>";
+    suggestBtn.disabled = true;
+    suggestBtn.textContent = "Thinking…";
+
+    // Attach distance/time estimates before sending
+    const storesPayload = allScannedStoreData.map(function (s) {
+      const distKm = haversineKm(lastKnownLat, lastKnownLon, s.lat, s.lon);
+      const walkMin = Math.round((distKm / 5) * 60);
+      const driveMin = Math.max(1, Math.round((distKm / 30) * 60));
+      return {
+        name: s.name,
+        address: s.address,
+        lat: s.lat,
+        lon: s.lon,
+        distKm: +distKm.toFixed(2),
+        walkMin: walkMin,
+        driveMin: driveMin,
+      };
+    });
+
+    try {
+      const res = await fetch("/api/store-suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredients: ingredients, stores: storesPayload }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Server error");
+      renderSuggestions(data.suggestions);
+    } catch (err) {
+      resultsList.innerHTML =
+        '<div class="ai-loading-msg" style="color:#b91c1c">Error: ' + err.message + "</div>";
+    } finally {
+      suggestBtn.disabled = false;
+      suggestBtn.textContent = "Re-suggest";
+    }
+  }
+
+  function renderSuggestions(suggestions) {
+    const resultsList = document.getElementById("ai-results-list");
+    if (!suggestions || suggestions.length === 0) {
+      resultsList.innerHTML = '<div class="ai-loading-msg">No suggestions found.</div>';
+      return;
+    }
+
+    resultsList.innerHTML = suggestions
+      .slice(0, 5)
+      .map(function (s, i) {
+        const timeStr =
+          s.walkMin <= 12
+            ? s.walkMin + " min walk"
+            : s.driveMin + " min drive · " + s.distKm + " km";
+        return (
+          '<div class="ai-store-card" onclick="flyToStore(' +
+          s.lat +
+          "," +
+          s.lon +
+          ')" title="Click to find on map">' +
+          '<div><span class="ai-store-rank">#' +
+          (i + 1) +
+          '</span><span class="ai-store-name">' +
+          s.name +
+          "</span></div>" +
+          '<div class="ai-store-meta">' +
+          s.address +
+          " &nbsp;·&nbsp; " +
+          timeStr +
+          "</div>" +
+          '<div class="ai-score-bar-wrap"><div class="ai-score-bar" style="width:' +
+          s.score +
+          '%"></div></div>' +
+          '<div class="ai-store-reason">' +
+          s.reason +
+          "</div></div>"
+        );
+      })
+      .join("");
+  }
+})();
+
+// Fly the map camera to a store and try to open its popup
+function flyToStore(lat, lon) {
+  map.flyTo({ center: [lon, lat], zoom: 16, duration: 1200 });
+  currentMarkers.forEach(function (m) {
+    const ll = m.getLngLat();
+    if (Math.abs(ll.lat - lat) < 0.0001 && Math.abs(ll.lng - lon) < 0.0001) {
+      m.togglePopup();
+    }
+  });
+}
