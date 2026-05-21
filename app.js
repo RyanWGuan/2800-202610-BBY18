@@ -9,7 +9,9 @@ const nodemailer = require("nodemailer");
 const saltRounds = 12;
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -210,9 +212,9 @@ app.get("/api/recipe-price", async (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", {
+  res.render("logIn", {
     cssFiles: ["style", "login"],
-    jsFiles: ["login", "easterEgg"],
+    jsFiles: ["easterEgg"],
   });
 });
 
@@ -285,15 +287,21 @@ app.post("/loginSubmit", async (req, res) => {
     req.session.mfaName = result[0].name;
     req.session.mfaEmail = result[0].email;
     req.session.mfaPhone = result[0].phone || null;
+    await mergeSessionShoppingList(req);
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: result[0].email,
-      subject: "RecipeQuest Verification Code",
-      text: `Your verification code is: ${mfaCode}`,
-    });
+    try {
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: result[0].email,
+        subject: "RecipeQuest Verification Code",
+        text: `Your verification code is: ${mfaCode}`,
+      });
 
-    res.redirect("/verifyMFA");
+      res.redirect("/verifyMFA");
+    } catch (error) {
+      console.log("MFA EMAIL ERROR:", error);
+      res.send("Could not send verification email. Please try again.");
+    }
   } else {
     res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
   }
@@ -407,19 +415,27 @@ app.get("/map", (req, res) => {
 });
 
 app.post("/api/shoppingList/add", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
   const { recipeName, ingredients } = req.body;
+  const userEmail = req.session.email;
 
-  // Remove existing entries for this recipe first
-  await shoppingListCollection.deleteMany({ recipeName });
-
-  // Insert new ones
-  await shoppingListCollection.insertOne({ recipeName, ingredients });
+  await shoppingListCollection.deleteMany({ recipeName, userEmail });
+  await shoppingListCollection.insertOne({
+    recipeName,
+    ingredients,
+    userEmail,
+  });
 
   res.json({ message: "Added to shopping list!" });
 });
 
 app.get("/api/shoppingList", async (req, res) => {
-  const items = await shoppingListCollection.find().toArray();
+  if (!req.session.authenticated) return res.json([]);
+  const items = await shoppingListCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
   res.json(items);
 });
 
