@@ -28,7 +28,6 @@ const IS_LOGGED_IN = document.getElementById("isLoggedIn").value === "true";
 mapboxgl.accessToken = MAPBOX_TOKEN;
 
 // create the interactive map inside the div with id of "map".
-// it starts zoomed out at zoom: 2 centered on (0,0) until GPS kicks in.
 const map = new mapboxgl.Map({
   container: "map",
   style: "mapbox://styles/mapbox/streets-v12",
@@ -673,7 +672,7 @@ function renderRelayStores(collector) {
       <div class="map-popup-body">
         <div class="map-popup-header">
           <strong class="map-popup-name">${name}</strong>
-          <button class="map-popup-save-btn" onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'>Save</button>
+          <button class="map-popup-save-btn" onclick='saveLocation(this, ${JSON.stringify(name)}, ${JSON.stringify(address)})'>Save</button>
         </div>
         <p class="map-popup-address">${address}</p>
         <div id="${did}" class="store-details-loading">Loading details…</div>
@@ -782,10 +781,6 @@ function runRelay(lon, lat) {
     // Step 3: deduplicate stops that are too close together or cover identical stores
     const deduped50m   = deduplicateStops(expanded, lat, lon);
     const stopsToFetch = deduplicateByStoreOverlap(deduped50m, lat, lon);
-
-    console.log("Relay stops after dedup:", stopsToFetch.length,
-      "| bus:", stopsToFetch.filter((s) => s._transitType === "bus").length,
-      "| skytrain:", stopsToFetch.filter((s) => s._transitType === "skytrain").length);
 
     if (stopsToFetch.length === 0) { finishWithStops(); return; }
 
@@ -959,7 +954,6 @@ toggleBtn.addEventListener("click", () => {
 // listeners which caused fetchGroceryStores to fire twice (once with wrong
 // coordinates when a custom pin was active). Now one listener handles both cases.
 applyBtn.addEventListener("click", () => {
-  console.log("relay enabled:", relayEnabled, "| bus enabled:", busEnabled, "| skytrain enabled:", skytrainEnabled);
 
   // Read the new values from the panel inputs
   const val          = parseFloat(radiusInput.value);
@@ -989,8 +983,7 @@ applyBtn.addEventListener("click", () => {
 });
 
 
-// ─── First-Time Welcome Popup ─────────────────────────────────────────────────
-
+// First Time Welcome Popup 
 const mapPopup = document.getElementById("mapFirstTimePopup");
 const closeBtn = document.getElementById("closeMapPopup");
 
