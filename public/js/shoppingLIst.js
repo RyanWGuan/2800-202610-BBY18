@@ -29,7 +29,7 @@ async function loadShoppingList() {
     .join("");
 }
 
-function clearCompleted() {
+async function clearCompleted() {
   document
     .querySelectorAll('.ingredient-item input[type="checkbox"]:checked')
     .forEach(function (cb) {
@@ -41,6 +41,9 @@ function clearCompleted() {
   if (remaining.length === 0) {
     document.getElementById("shopping-list-container").innerHTML =
       "<p>Your shopping list is empty.</p>";
+
+    // Delete from MongoDB so it doesn't reappear on next visit
+    await fetch("/api/shoppingList/clear", { method: "DELETE" });
   }
 }
 
