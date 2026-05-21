@@ -161,6 +161,7 @@ function buildTags(meal) {
 
     if (saveRecipeBtn) {
         saveRecipeBtn.addEventListener("click", async () => {
+    
             const response = await fetch("/saveRecipe", {
                 method: "POST",
                 headers: {
@@ -174,6 +175,12 @@ function buildTags(meal) {
             });
     
             const result = await response.json();
+    
+            if (response.ok) {
+                saveRecipeBtn.innerText = "Saved";
+                saveRecipeBtn.style.backgroundColor = "red";
+                saveRecipeBtn.disabled = true;
+            }
     
             alert(result.message);
         });

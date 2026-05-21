@@ -370,8 +370,9 @@ function fetchGroceryStores(lon, lat) {
               <div class="map-popup-header">
                 <strong class="map-popup-name">${name}</strong>
                 ${IS_LOGGED_IN ? `
-                  <button class="map-popup-save-btn" onclick='saveLocation(${JSON.stringify(name)}, ${JSON.stringify(address)})'>
-                    Save
+                  <button class="map-popup-save-btn"
+                    onclick='saveLocation(this, ${JSON.stringify(name)}, ${JSON.stringify(address)})'>
+                  Save
                   </button>
                   ` : ""}
               </div>
@@ -606,7 +607,7 @@ function runRelay(lon, lat) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Function to save location
-async function saveLocation(name, address) {
+async function saveLocation(button, name, address) {
   const response = await fetch("/saveLocation", {
     method: "POST",
     headers: {
@@ -616,6 +617,13 @@ async function saveLocation(name, address) {
   });
 
   const result = await response.json();
+
+  if (response.ok) {
+    button.innerText = "Saved";
+    button.style.backgroundColor = "red";
+    button.disabled = true;
+  }
+
   alert(result.message);
 }
 
