@@ -1,3 +1,4 @@
+const IS_LOGGED_IN = document.getElementById("isLoggedIn").value === "true";
 const MEALDB_LOOKUP = "/api/meal/";
 
 // Pull meal ID from url
@@ -125,13 +126,15 @@ function buildTags(meal) {
           <h2>Ingredients</h2>
 
           <div class="recipe-action-buttons">
+            ${IS_LOGGED_IN ? `
             <button 
               class="save_recipe_button"
               id="save_recipe_button"
             >
-              Save
+            Save
           </button>
-          </div>
+           ` : ""}
+        </div>
         </div>
         <ul class="ingredient-list">${ingredientHTML}</ul>
       </section>
@@ -154,26 +157,27 @@ function buildTags(meal) {
         loadNutrition(btn.dataset.meal, btn.dataset.ingredients);
     });
 
-    
     const saveRecipeBtn = document.getElementById("save_recipe_button");
 
-    saveRecipeBtn.addEventListener("click", async () => {
-    const response = await fetch("/saveRecipe", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            id: meal.idMeal,
-            name: meal.strMeal,
-            image: meal.strMealThumb
-        })
-    });
-
-    const result = await response.json();
-
-      alert(result.message);
-    });
+    if (saveRecipeBtn) {
+        saveRecipeBtn.addEventListener("click", async () => {
+            const response = await fetch("/saveRecipe", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: meal.idMeal,
+                    name: meal.strMeal,
+                    image: meal.strMealThumb
+                })
+            });
+    
+            const result = await response.json();
+    
+            alert(result.message);
+        });
+    }
 }
  
   async function loadRecipeDetail() {
