@@ -203,7 +203,7 @@ app.get("/api/recipe-price", async (req, res) => {
     const data = await response.json();
     const recipe = data.results?.[0];
 
-    const BC_MARKUP = 1.20;
+    const BC_MARKUP = 1.2;
     const price = recipe?.pricePerServing
       ? ((recipe.pricePerServing / 100) * 1.3704 * BC_MARKUP).toFixed(2)
       : null;
@@ -247,15 +247,11 @@ app.post("/api/bc-price-estimate", async (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-
   res.render("login", {
-
     cssFiles: ["style", "login"],
 
     jsFiles: ["login"],
-
   });
-
 });
 
 app.get("/login", (req, res) => {
@@ -334,7 +330,6 @@ app.post("/loginSubmit", async (req, res) => {
     req.session.mfaName = result[0].name;
     req.session.mfaEmail = result[0].email;
     req.session.mfaPhone = result[0].phone || null;
-    await mergeSessionShoppingList(req);
 
     try {
       await transporter.sendMail({
@@ -484,6 +479,14 @@ app.get("/api/shoppingList", async (req, res) => {
     .find({ userEmail: req.session.email })
     .toArray();
   res.json(items);
+});
+
+app.delete("/api/shoppingList/clear", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  await shoppingListCollection.deleteMany({ userEmail: req.session.email });
+  res.json({ message: "Shopping list cleared." });
 });
 
 app.get("/shoppingList", (req, res) => {
