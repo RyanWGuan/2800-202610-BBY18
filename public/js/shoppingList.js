@@ -73,3 +73,21 @@ async function clearCompleted() {
 }
 
 loadShoppingList();
+
+function findNearbyStores() {
+  // Collect all visible ingredient labels from the shopping list
+  const labels = Array.from(
+    document.querySelectorAll(".ingredient-item label")
+  ).map((el) => el.textContent.trim()).filter(Boolean);
+
+  if (labels.length === 0) {
+    alert("Your shopping list is empty — add some recipes first!");
+    return;
+  }
+
+  // Stash ingredients for the map page to pick up
+  sessionStorage.setItem("aiShoppingIngredients", JSON.stringify(labels));
+
+  // Head to map with flag
+  window.location.href = "/map?aiShopping=1";
+}

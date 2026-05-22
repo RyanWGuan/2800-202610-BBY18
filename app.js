@@ -513,6 +513,62 @@ app.delete("/api/shoppingList/:id", async (req, res) => {
   res.json({ message: "Deleted." });
 });
 
+// AI-powered store suggestions for shopping list
+// Body: { ingredients: string[], stores: [{ name, address, lat, lon, distKm, walkMin, driveMin }] }
+// Returns: { suggestions: [...stores sorted by AI score] }
+app.post("/api/store-suggestions", async (req, res) => {
+  const { ingredients, stores } = req.body;
+
+  if (!ingredients?.length || !stores?.length) {
+    return res.status(400).json({ error: "Missing ingredients or stores." });
+  }
+
+  const ingredientList = ingredients.join(", ");
+  const storeList = stores
+    .map(
+      (s, i) =>
+        `${i + 1}. "${s.name}" — ${s.address} (${s.distKm} km, ~${s.walkMin} min walk, ~${s.driveMin} min drive)`
+    )
+    .join("\n");
+
+  const prompt = `You are a grocery shopping assistant with expert knowledge of Canadian grocery store chains in British Columbia.
+
+A user needs to buy these ingredients: ${ingredientList}
+
+Here are the nearby grocery stores:
+${storeList}
+
+For each store, score it 0-100 on how likely it is to carry ALL or MOST of these ingredients. Consider:
+- Large full-service chains (Superstore, Save-On-Foods, Walmart Supercentre, Safeway, Loblaws): 85-98 for common ingredients
+- Specialty/ethnic grocers (T&T, H-Mart, Osaka, Persia Foods): 90+ for Asian/international ingredients, 50-70 for Western staples
+- Discount chains (No Frills, FreshCo): 70-85 for basics, may lack specialty items
+- Wholesale clubs (Costco, Wholesale Club): 80-92, wide variety but bulk only
+- Small independent grocers: 60-75
+- Convenience or dollar stores: 20-40
+
+Return ONLY a JSON array, no extra text, no markdown:
+[{"index":1,"score":92,"reason":"Full-service superstore, stocks everything"},{"index":2,"score":75,"reason":"Good basics, limited specialty items"},...]`;
+
+  try {
+    const result = await callGemini(prompt);
+    const clean = result.replace(/```json|```/g, "").trim();
+    const scored = JSON.parse(clean);
+
+    const suggestions = scored
+      .map((s) => {
+        const store = stores[s.index - 1];
+        if (!store) return null;
+        return { ...store, score: s.score, reason: s.reason };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+
+    res.json({ suggestions });
+  } catch (err) {
+    res.status(500).json({ error: "Could not generate suggestions: " + err.message });
+  }
+});
+
 app.get("/shoppingList", (req, res) => {
   res.render("shoppingList", {
     title: "Ingredients",
