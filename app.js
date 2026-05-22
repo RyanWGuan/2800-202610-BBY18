@@ -11,6 +11,7 @@ const app = express();
 
 const Joi = require("joi");
 
+// MongoDB connection config from environment variables
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
@@ -20,6 +21,7 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 
 const { MongoClient } = require("mongodb");
 
+// Connect to MongoDB Atlas and set up collections
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`;
 const database = new MongoClient(atlasURI, {});
 const userCollection = database.db(mongodb_database).collection("users");
@@ -101,6 +103,7 @@ Reply with ONLY the recipe name, nothing else.`;
       );
       const searchData = await searchRes.json();
       if (searchData.meals?.length > 0) {
+        // Pick randomly from the top 5 results for variety
         const randomIndex = Math.floor(
           Math.random() * Math.min(searchData.meals.length, 5),
         );
@@ -134,6 +137,7 @@ Reply with ONLY the recipe name, nothing else.`;
 
 app.set("view engine", "ejs");
 
+// Configure MongoDB-backed session store
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
   crypto: {
@@ -141,6 +145,7 @@ var mongoStore = MongoStore.create({
   },
 });
 
+// Session middleware — sessions expire after 24 hours
 app.use(
   session({
     secret: node_session_secret,
@@ -155,6 +160,7 @@ app.use(
 
 app.use(express.static("public"));
 
+// Middleware to block unauthenticated users from protected routes
 function sessionValidation(req, res, next) {
   if (req.session.authenticated) {
     next();
@@ -183,6 +189,7 @@ app.get("/api/recipes", async (req, res) => {
   res.json(data.results);
 });
 
+// Fetch price-per-serving for a single recipe from Spoonacular, adjusted to BC CAD
 app.get("/api/recipe-price", async (req, res) => {
   const { name } = req.query;
   try {
@@ -192,6 +199,7 @@ app.get("/api/recipe-price", async (req, res) => {
     const data = await response.json();
     const recipe = data.results?.[0];
 
+    // Convert USD cents → CAD, then apply BC retail markup
     const BC_MARKUP = 1.2;
     const price = recipe?.pricePerServing
       ? ((recipe.pricePerServing / 100) * 1.3704 * BC_MARKUP).toFixed(2)
@@ -203,7 +211,6 @@ app.get("/api/recipe-price", async (req, res) => {
 });
 
 // Groq-powered BC ingredient cost estimate made with AI
-// Groq-powered BC ingredient cost estimate
 // Batch BC price estimate — prices multiple meals in a single Groq call.
 // Body: { meals: [{ id, name }, ...] }
 // Returns: { prices: { "<id>": 12.50, ... } }
@@ -214,6 +221,7 @@ app.post("/api/bc-price-estimate", async (req, res) => {
     return res.status(400).json({ error: "No meals provided." });
   }
 
+  // Format meal list for the prompt
   const list = meals
     .map((m, i) => `${i + 1}. id="${m.id}" name="${m.name}"`)
     .join("\n");
@@ -241,6 +249,7 @@ Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 de
 
   try {
     const result = await callGemini(prompt);
+    // Strip any markdown fences before parsing
     const clean = result.replace(/```json|```/g, "").trim();
     const prices = JSON.parse(clean);
     res.json({ prices });
@@ -258,6 +267,7 @@ app.get("/login", (req, res) => {
   });
 });
 
+// Guard: redirect to login if no MFA session is pending
 app.get("/verifyMFA", (req, res) => {
   if (!req.session.pendingMFA) {
     return res.redirect("/login");
@@ -280,16 +290,19 @@ app.get("/verifyMFA", (req, res) => {
   });
 });
 
+// Verify the MFA code and promote the session to fully authenticated
 app.post("/verifyMFA", async (req, res) => {
   const { code } = req.body;
 
   if (code === req.session.mfaCode) {
     req.session.authenticated = true;
 
+    // Promote pending MFA data into the live session
     req.session.name = req.session.mfaName;
     req.session.email = req.session.mfaEmail;
     req.session.phone = req.session.mfaPhone;
 
+    // Clean up temporary MFA fields
     delete req.session.pendingMFA;
     delete req.session.mfaCode;
     delete req.session.mfaName;
@@ -302,6 +315,7 @@ app.post("/verifyMFA", async (req, res) => {
   res.send("Invalid verification code.");
 });
 
+// Validate credentials and create a session on successful login
 app.post("/loginSubmit", async (req, res) => {
   const { email, password } = req.body;
 
@@ -325,6 +339,7 @@ app.post("/loginSubmit", async (req, res) => {
     .project({ name: 1, email: 1, password: 1, user_ype: 1, _id: 1 })
     .toArray();
 
+  // Reject if no matching user found
   if (result.length !== 1) {
     res.render("loginSubmit", {
       cssFiles: ["style", "login"],
@@ -341,6 +356,7 @@ app.post("/loginSubmit", async (req, res) => {
 
     res.redirect("/profile");
   } else {
+    // Wrong password — re-render the error page
     res.render("loginSubmit", {
       cssFiles: ["style", "login"],
       jsFiles: ["easterEgg"],
@@ -348,6 +364,7 @@ app.post("/loginSubmit", async (req, res) => {
   }
 });
 
+// Validate input, hash the password, and create a new user account
 app.post("/signupSubmit", async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -371,6 +388,7 @@ app.post("/signupSubmit", async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   await userCollection.insertOne({ name, email, password: hashedPassword });
 
+  // Log the new user in immediately after signup
   req.session.authenticated = true;
   req.session.name = name;
   req.session.email = email;
@@ -399,6 +417,7 @@ app.get("/miniGame", (req, res) => {
   });
 });
 
+// Destroy the session and clear the cookie on logout
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -410,6 +429,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Update a user's name, email, phone, or password — requires current password to confirm identity
 app.post("/updateUser", sessionValidation, async (req, res) => {
   const { field, value, currentPassword } = req.body;
   const oldEmail = req.session.email;
@@ -423,6 +443,7 @@ app.post("/updateUser", sessionValidation, async (req, res) => {
 
   let updateValue = value;
 
+  // Hash the new password before storing it
   if (field === "password") {
     if (value.length < 8) {
       return res.send("New password must be at least 8 characters.");
@@ -436,6 +457,7 @@ app.post("/updateUser", sessionValidation, async (req, res) => {
   try {
     await userCollection.updateOne({ email: oldEmail }, { $set: updateData });
 
+    // Keep the session in sync with the updated field
     if (field === "name") req.session.name = value;
     if (field === "email") req.session.email = value;
     if (field === "phone") req.session.phone = value;
@@ -455,6 +477,7 @@ app.get("/map", (req, res) => {
   });
 });
 
+// Add a recipe's ingredients to the user's shopping list, replacing any existing entry for that recipe
 app.post("/api/shoppingList/add", async (req, res) => {
   if (!req.session.authenticated)
     return res.status(401).json({ message: "Please log in first." });
@@ -472,6 +495,7 @@ app.post("/api/shoppingList/add", async (req, res) => {
   res.json({ message: "Added to shopping list!" });
 });
 
+// Return all shopping list items for the logged-in user
 app.get("/api/shoppingList", async (req, res) => {
   if (!req.session.authenticated) return res.json([]);
   const items = await shoppingListCollection
@@ -480,6 +504,7 @@ app.get("/api/shoppingList", async (req, res) => {
   res.json(items);
 });
 
+// Remove all shopping list entries for the logged-in user
 app.delete("/api/shoppingList/clear", async (req, res) => {
   if (!req.session.authenticated)
     return res.status(401).json({ message: "Please log in first." });
@@ -551,9 +576,11 @@ Return ONLY a JSON array, no extra text, no markdown:
 
   try {
     const result = await callGemini(prompt);
+    // Strip markdown fences and parse JSON
     const clean = result.replace(/```json|```/g, "").trim();
     const scored = JSON.parse(clean);
 
+    // Map scores back to store objects and sort by score descending
     const suggestions = scored
       .map((s) => {
         const store = stores[s.index - 1];
@@ -577,6 +604,7 @@ app.get("/shoppingList", (req, res) => {
   });
 });
 
+// Load saved locations for the logged-in user
 app.get("/savedLocations", async (req, res) => {
   const savedLocations = await savedLocationsCollection
     .find({ userEmail: req.session.email })
@@ -589,6 +617,7 @@ app.get("/savedLocations", async (req, res) => {
   });
 });
 
+// Redirect to login if not authenticated, otherwise load saved recipes
 app.get("/savedRecipes", async (req, res) => {
   if (!req.session.authenticated) {
     return res.redirect("/login");
@@ -613,6 +642,7 @@ app.get("/recipeDetails", (req, res) => {
   });
 });
 
+// Save a recipe to the user's collection — silently skips duplicates
 app.post("/saveRecipe", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({
@@ -645,6 +675,7 @@ app.post("/saveRecipe", async (req, res) => {
   });
 });
 
+// Save a store location to the user's collection — silently skips duplicates
 app.post("/saveLocation", async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({ message: "Please log in first." });
@@ -697,7 +728,7 @@ app.delete("/deleteSavedRecipe/:id", async (req, res) => {
   });
 });
 
-//AI generated for AI challenge
+// AI generated for AI challenge — proxies MealDB meal lookup to avoid CORS issues on the client
 app.get("/api/meal/:id", async (req, res) => {
   try {
     const response = await fetch(
@@ -710,6 +741,7 @@ app.get("/api/meal/:id", async (req, res) => {
   }
 });
 
+// Return the logged-in user's saved recipes as JSON — used by the recipe suggestion feature
 app.get("/api/savedRecipes", async (req, res) => {
   if (!req.session.authenticated) return res.json([]);
   const saved = await savedRecipesCollection
