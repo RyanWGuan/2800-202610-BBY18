@@ -1,0 +1,22 @@
+            <footer class="footer">
+                <div class="footer-container">
+                    <button type="button" class="button logo_button" onclick="window.location.href='/'">
+                        <img src="/images/leftArrow.png" alt="Back Button" class="back_icon">
+                    </button>
+
+                    <button type="button" class="button logo_button" id="pause-button-id"">
+                        <img src="/images/pause.png" alt="Pause" class="back_icon">
+                    </button>
+
+                    <button type="button" class="button logo_button" id="reset-button-id"">
+                        <img src="/images/reset.png" alt="Back Button" class="back_icon">
+                    </button>
+                </div>
+            </footer>
+            
+        </div>
+        <%(jsFiles || []).forEach(file => { %>
+        <script src="/js/<%= file%>.js"></script>
+    <% }) %>
+    </body>
+</html>

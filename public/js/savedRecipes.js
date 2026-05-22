@@ -1,3 +1,4 @@
+//Delete saved recipe from database
 async function deleteSavedRecipe(recipeId) {
 
     const response = await fetch(`/deleteSavedRecipe/${recipeId}`, {
@@ -8,5 +9,6 @@ async function deleteSavedRecipe(recipeId) {
 
     alert(result.message);
 
+    //Reload page after deleting recipe
     location.reload();
 }

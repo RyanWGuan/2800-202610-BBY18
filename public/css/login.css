@@ -19,23 +19,6 @@ body {
     grid-template-rows: 10vh 80vh 10vh;
 }
 
-.icon {
-    width: 40px;
-    height: auto;
-}
-
-.profile_button {
-    grid-row: 1 / span 1;
-    grid-column: 4 / span 1;
-    justify-self: center;
-    align-self: center;
-}
-
-.profile_icon {
-    width: 60px;
-    height: auto;
-}
-
 .button {
     background: transparent;
     border: none;
@@ -64,9 +47,13 @@ body {
     gap: 16px;
     width: 90vw;
     max-width: 390px;
-    background-color: rgb(227, 227, 227);
+    background-color: #4a8cee;
     padding: 32px 24px;
     border-radius: 8px;
+}
+
+#login_container > h2, #login_container > p{
+    color: white;
 }
 
 #signup_container {
@@ -84,6 +71,7 @@ body {
     align-self: center;
     margin-left: 2%;
     margin-top: 8px;
+    color: white;
 }
 
 .login_input {
@@ -111,7 +99,8 @@ body {
     height: 52px;
     cursor: pointer;
     border: none;
-    background-color: rgb(200, 200, 200);
+    background-color: #8cc63f;
+    color: white;
     border-radius: 4px;
     font-size: 16px;
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
@@ -124,45 +113,20 @@ body {
 .switch_text {
     text-align: center;
     font-size: 14px;
+    color: white;
 }
 
 .switch_link {
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 2px;
+    color: white;
 }
 
 .switch_link:hover {
-    color: #555;
+    color: rgb(230, 227, 227);
 }
 
-
-.popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.popup-content {
-    background-color: rgb(227, 227, 227);
-    padding: 32px 28px;
-    border-radius: 8px;
-    text-align: center;
-    max-width: 320px;
-    width: 90%;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.recipe_icon { width: 60px; height: auto; }
-.map_icon { width: 40px; height: auto; }
-.ingredients_icon { width: 60px; height: auto; }
 
 @media screen and (max-width: 600px) {
     .container {

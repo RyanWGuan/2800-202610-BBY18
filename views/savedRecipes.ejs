@@ -1,42 +1,59 @@
 <%- include("partials/header", { cssFiles: ["style", "recipe"] }) %>
 
 <main class="main">
+
+    <!-- Saved recipes container -->
     <div class="results" id="results">
 
+        <!-- Message when no saved recipes exist -->
         <% if (savedRecipes.length === 0) { %>
             <p>No saved recipes yet.</p>
         <% } %>
 
+        <!-- Loop through saved recipes -->
         <% savedRecipes.forEach((recipe) => { %>
+
+            <!-- Recipe card link -->
             <a href="/recipeDetails?id=<%= recipe.id %>" class="card-link">
+
                 <div class="card">
+
+                    <!-- Recipe image -->
                     <img 
                         src="<%= recipe.image %>" 
                         alt="<%= recipe.name %>" 
                         class="card-img"
                     />
 
+                    <!-- Recipe information -->
                     <div class="card-meta">
+
                         <h3 class="card-title"><%= recipe.name %></h3>
 
                         <div class="card-bottom">
+
+                            <!-- Recipe price -->
                             <span class="price-label">$10.49</span>
 
+                            <!-- Delete recipe button -->
                             <button 
                                 class="delete_recipe_button"
                                 onclick="event.preventDefault(); event.stopPropagation(); deleteSavedRecipe('<%= recipe._id %>')"
                             >
                                 Delete
                             </button>
+
                         </div>
                     </div>
                 </div>
             </a>
+
         <% }) %>
 
     </div>
 </main>
 
+<!-- Saved recipes javascript file -->
 <script src="/js/savedRecipes.js"></script>
 
 <%- include("partials/footer") %>

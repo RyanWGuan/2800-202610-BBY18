@@ -1,284 +1,396 @@
-*{
-    color: black;
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
+/* Universal typography resets enforcing standard dark text and fallback font structures */
+* {
+  color: black;
+  font-family:
+    "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
 
-html{
-    overflow-x: hidden;
-    overflow-y: hidden;
+/* Page rules suppressing horizontal body shifting while keeping normal vertical scrolling */
+html {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-body{
-    margin: 0%;
-    background-color: white;
+/* Margin normalization rule clearing out default device body spacing */
+body {
+  margin: 0%;
+  background-color: white;
 }
 
-.button{
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    justify-self: center;
-    align-self: center;
-    width: min-content;
-    height: min-content;
-    padding: 0%;
+/* Unstyled button layout reset clearing borders, backgrounds, and default inner padding */
+.button {
+  background: transparent;
+  border: none;
+  justify-self: center;
+  align-self: center;
+  width: min-content;
+  height: min-content;
+  padding: 0%;
 }
 
-.container{
+/* Main structural page frame splitting screen layout into three vertical grid panels */
+.container {
+  display: grid;
+  height: 100vh;
+  grid-template-rows: 10vh 80vh 10vh;
+}
+
+/* Standardized image size scaling constraints for general vector icons */
+.icon {
+  width: 40px;
+  height: auto;
+}
+
+/* Header background panel layout declaration */
+.header {
+  display: grid;
+  grid-row: 1 / span 1;
+  background-color: #015982;
+}
+
+/* Evenly spaced 4-column alignment bar running across the header viewport */
+.header_container {
+  display: grid;
+  width: 100vw;
+  height: 10vh;
+  grid-template-rows: 10vh;
+  grid-template-columns: 25vw 25vw 25vw 25vw;
+}
+
+/* Grid placement rules anchoring account targets into the far right top slot */
+.profile_button {
+  grid-row: 1 / span 1;
+  grid-column: 4 / span 1;
+  justify-self: center;
+  align-self: center;
+  cursor: pointer;
+}
+
+/* Profile image sizing lock keeping avatar sizing consistent */
+.profile_icon {
+  width: 60px;
+  height: auto;
+}
+
+/* Centered structural rule grouping core corporate badge visuals */
+.logo_icon {
+  width: 100px;
+  height: auto;
+  justify-self: center;
+  align-self: center;
+}
+
+/* Micro-interaction layout keyframes processing fine translation shifting rules */
+@keyframes softShake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px) rotate(-1deg);
+  }
+  40% {
+    transform: translateX(5px) rotate(1deg);
+  }
+  60% {
+    transform: translateX(-4px) rotate(-1deg);
+  }
+  80% {
+    transform: translateX(3px) rotate(1deg);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Shorthand animation property execution loop invoking layout translation shifts */
+.shake {
+  animation: softShake 0.4s ease-in-out;
+}
+
+/* Transition speed adjustments softening transform interaction switches */
+.logo-icon {
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+/* Display bounds handling for upper cooking link symbols */
+.recipe_icon {
+  width: 60px;
+  height: auto;
+}
+
+/* Display bounds handling for upper geolocation navigation links */
+.map_icon {
+  width: 60px;
+  height: auto;
+}
+
+/* Display bounds handling for upper components itemization shortcuts */
+.ingredients_icon {
+  width: 60px;
+  height: auto;
+}
+
+/* Footer background panel layout declaration */
+.footer {
+  display: grid;
+  grid-row: 3 / span 1;
+  background-color: #015982;
+}
+
+/* Bottom 3-column navigation routing strip spanning full width layouts */
+.footer-container {
+  display: grid;
+  width: 100vw;
+  height: 10vh;
+  grid-template-columns: 33.5vw 33vw 33.5vw;
+  grid-template-rows: 10vh;
+}
+
+/* Bottom action grid container targeted routing rules for recipes links */
+.recipe_button {
+  grid-row: 1 / span 1;
+  grid-column: 1 / span 1;
+  cursor: pointer;
+}
+
+/* Bottom action grid container targeted routing rules for mapping fields */
+.map_button {
+  grid-row: 1 / span 1;
+  grid-column: 2 / span 1;
+  cursor: pointer;
+}
+
+/* Bottom action grid container targeted routing rules for stock assets */
+.ingredients_button {
+  grid-row: 1 / span 1;
+  grid-column: 3 / span 1;
+  cursor: pointer;
+}
+
+/* Isolated content scroll window filling the central view field block */
+.main {
+  grid-row: 2 / span 1;
+  overflow-y: auto;
+}
+
+/* Three-column display catalog presenting saved kitchen items */
+.recipe_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 30px;
+}
+
+/* Square thumbnail cards carrying soft neutral background foundations */
+.recipe_card {
+  aspect-ratio: 1 / 1;
+  background-color: rgb(220, 220, 220);
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Split landscape display row dividing geographic targets and action properties */
+.location_card {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  background-color: rgb(158, 158, 158);
+  margin: 20px;
+  padding: 10px;
+}
+
+/* Inline inline button arrangement framework */
+.recipe-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Small dark cyan confirmation interaction target styling profiles */
+.save_recipe_button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background-color: #0b5f86;
+  color: white;
+  cursor: pointer;
+}
+
+/* Clean border masking rules wrapping user graphics inside item previews */
+.saved_recipe_image {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Red attention-color control rule warning of irreversible destructive database updates */
+.delete_recipe_button {
+  margin-top: 8px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background-color: #b91c1c;
+  color: white;
+  cursor: pointer;
+}
+
+/* Stacked alignment wrapper formatting dynamic element spacing layout */
+.card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Flexible top-to-bottom grid boxes spacing headers away from controls handles */
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Bottom layout block grouping text blocks inside dashboard grid items */
+.card-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* Fullscreen gray translucent barrier element rendering behind layout popups */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Floating informative alert dialog block framing warning notifications */
+.popup-content {
+  background-color: #4a8cee;
+  padding: 32px 28px;
+  border-radius: 6px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Bulk color overrides keeping type readable against rich overlay colors */
+.popup-content > h2,
+.popup-content > p,
+.popup-content > button {
+  color: white;
+}
+
+/* Flat green confirmation button target styles dismissing tracking notices */
+#closePopup,
+#closeSavedLocationsPopup {
+  background-color: #8cc63f;
+  border-radius: 6px;
+  border: none;
+}
+
+/* Responsive adjustment layer capturing phone interfaces smaller than 600px */
+@media screen and (max-width: 600px) {
+  /* Layout constraints enforcing three-tier architecture setups across minor screen sizes */
+  .container {
     display: grid;
     height: 100vh;
     grid-template-rows: 10vh 80vh 10vh;
-}
+  }
 
-.icon{
+  /* Icon sizing rules scaling visual parameters over thin screens */
+  .icon {
     width: 40px;
     height: auto;
-}
+  }
 
-.header{
+  /* Header mobile structural box adjustments */
+  .header {
     display: grid;
     grid-row: 1 / span 1;
-    background-color: #015982;
-}
+  }
 
-.header_container{
+  /* Four-column sizing normalization preventing element shifting inside mobile headers */
+  .header_container {
     display: grid;
     width: 100vw;
     height: 10vh;
     grid-template-rows: 10vh;
     grid-template-columns: 25vw 25vw 25vw 25vw;
-}
+  }
 
-.profile_button{
+  /* Center mobile anchor placement values for username profile slots */
+  .profile_button {
     grid-row: 1 / span 1;
     grid-column: 4 / span 1;
     justify-self: center;
     align-self: center;
-}
+  }
 
-.profile_icon{
+  /* Mobile scaling controls tracking active account image links */
+  .profile_icon {
     width: 60px;
     height: auto;
-}
+  }
 
-.logo_icon{
-    width: 100px;
-    height: auto;
-    justify-self: center;
-    align-self: center;
-}
-
-.recipe_icon{
+  /* Mobile scaling controls tracking food profile selection links */
+  .recipe_icon {
     width: 60px;
     height: auto;
-}
+  }
 
-.map_icon{
-    width: 40px;
-    height: auto;
-}
-
-.ingredients_icon{
+  /* Mobile scaling controls tracking geographic locator link anchors */
+  .map_icon {
     width: 60px;
     height: auto;
-}
+  }
 
-.footer{
+  /* Mobile scaling controls tracking generic logistics resource lists */
+  .ingredients_icon {
+    width: 60px;
+    height: auto;
+  }
+
+  /* Footer layout architecture initialization across mobile scopes */
+  .footer {
     display: grid;
     grid-row: 3 / span 1;
-    background-color: #015982;
-}
+  }
 
-.footer-container{
+  /* Precise three-column grid tracking navigation distribution across small devices */
+  .footer-container {
     display: grid;
     width: 100vw;
     height: 10vh;
     grid-template-columns: 33.5vw 33vw 33.5vw;
     grid-template-rows: 10vh;
-}
+  }
 
-.recipe_button{
+  /* First column mobile assignment properties for navigation panels */
+  .recipe_button {
     grid-row: 1 / span 1;
     grid-column: 1 / span 1;
-}
+  }
 
-.map_button{
+  /* Middle column mobile assignment properties for navigation panels */
+  .map_button {
     grid-row: 1 / span 1;
     grid-column: 2 / span 1;
-}
+  }
 
-.ingredients_button{
+  /* Final column mobile assignment properties for navigation panels */
+  .ingredients_button {
     grid-row: 1 / span 1;
     grid-column: 3 / span 1;
-}
-
-.main{
-    grid-row: 2 / span 1;
-    overflow-y: auto;
-}
-
-
-
-/* CSS for savedRecipes.html */
-
-.recipe_grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding: 30px;
-}
-
-.recipe_card {
-    aspect-ratio: 1 / 1;
-    background-color: rgb(220, 220, 220);
-    border: none;
-    border-radius: 8px;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-
-/* CSS for savedLocations.html */
-.location_card {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    background-color: rgb(158, 158, 158);
-    margin: 20px;
-    padding: 10px;
-}
-
-.recipe-action-buttons {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.save_recipe_button {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 6px;
-    background-color: #0b5f86;
-    color: white;
-    cursor: pointer;
-}
-
-.saved_recipe_image {
-    width: 100%;
-    border-radius: 8px;
-}
-
-.delete_recipe_button {
-    margin-top: 8px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 6px;
-    background-color: #b91c1c;
-    color: white;
-    cursor: pointer;
-}
-
-.card-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-
-/* ADD THESE */
-
-.card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.card-bottom {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-}
-
-/* For mobile */
- @media screen and (max-width: 600px)
-{
-    .container{
-        display: grid;
-        height: 100vh;
-        grid-template-rows: 10vh 80vh 10vh;
-    }
-
-    .icon{
-        width: 40px;
-        height: auto;
-    }
-
-    .header{
-        display: grid;
-        grid-row: 1 / span 1;
-    }
-
-    .header_container{
-        display: grid;
-        width: 100vw;
-        height: 10vh;
-        grid-template-rows: 10vh;
-        grid-template-columns: 25vw 25vw 25vw 25vw;
-    }
-
-    .profile_button{
-        grid-row: 1 / span 1;
-        grid-column: 4 / span 1;
-        justify-self: center;
-        align-self: center;
-    }
-
-    .profile_icon{
-        width: 60px;
-        height: auto;
-    }
-
-    .recipe_icon{
-        width: 60px;
-        height: auto;
-    }
-
-    .map_icon{
-        width: 60px;
-        height: auto;
-    }
-
-    .ingredients_icon{
-        width: 60px;
-        height: auto;
-    }
-
-    .footer{
-        display: grid;
-        grid-row: 3 / span 1;
-    }
-
-
-    .footer-container{
-        display: grid;
-        width: 100vw;
-        height: 10vh;
-        grid-template-columns: 33.5vw 33vw 33.5vw;
-        grid-template-rows: 10vh;
-    }
-
-    .recipe_button{
-        grid-row: 1 / span 1;
-        grid-column: 1 / span 1;
-    }
-
-    .map_button{
-        grid-row: 1 / span 1;
-        grid-column: 2 / span 1;
-    }
-
-    .ingredients_button{
-        grid-row: 1 / span 1;
-        grid-column: 3 / span 1;
-    }
+  }
 }

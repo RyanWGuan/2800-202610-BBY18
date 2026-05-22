@@ -11,23 +11,30 @@ const app = express();
 
 const Joi = require("joi");
 
+// MongoDB connection config from environment variables
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
-const mongodb_database = process.env.MONGODB_DATABASE;
+const mongodb_database = process.env.MONGODB_USER_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 
 const { MongoClient } = require("mongodb");
 
-const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/`;
+// Connect to MongoDB Atlas and set up collections
+const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`;
 const database = new MongoClient(atlasURI, {});
-<<<<<<< HEAD
 const userCollection = database.db(mongodb_database).collection("users");
-=======
-const userCollection = database.db(mongodb_database).collection('users');
-const savedRecipesCollection = database.db(mongodb_database).collection("savedRecipes");
->>>>>>> dev
+const shoppingListCollection = database
+  .db(mongodb_database)
+  .collection("shoppingList");
+const savedRecipesCollection = database
+  .db(mongodb_database)
+  .collection("savedRecipes");
+
+const savedLocationsCollection = database
+  .db(mongodb_database)
+  .collection("savedLocations");
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -35,18 +42,21 @@ app.use(express.static(__dirname + "/public"));
 
 // Shared Gemini fetch helper — no package needed, works in any Node version
 async function callGemini(prompt) {
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.GROQ_API_KEY}`
+  const response = await fetch(
+    "https://api.groq.com/openai/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1000,
+      }),
     },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 1000
-    })
-  });
+  );
   const data = await response.json();
   console.log("Groq raw response:", JSON.stringify(data));
   if (!response.ok) throw new Error(data.error?.message || "Groq error");
@@ -70,34 +80,47 @@ app.post("/api/nutrition", async (req, res) => {
   }
 });
 
-// Recipe suggestion — searches MealDB directly, no AI needed
+// Recipe suggestion — Uses AI to curate based on saved recipes, if user doesn't, uses MealDB's random query
 app.post("/api/recipe-suggest", async (req, res) => {
-  const { search } = req.body;
+  const { search, savedRecipeNames } = req.body;
 
   try {
-    // Search MealDB by name if provided, otherwise fetch a random one
+    let searchTerm = search?.trim() || "";
+
+    // If user has saved recipes, ask AI to suggest something based on them
+    if (!searchTerm && savedRecipeNames?.length > 0) {
+      const prompt = `A user enjoys these recipes: ${savedRecipeNames.join(", ")}.
+Suggest ONE recipe name they would likely enjoy that is different from those listed.
+Reply with ONLY the recipe name, nothing else.`;
+      searchTerm = (await callGemini(prompt)).trim();
+    }
+
     let meal = null;
 
-    if (search && search.trim()) {
-      const searchRes = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(search.trim())}`);
+    if (searchTerm) {
+      const searchRes = await fetch(
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(searchTerm)}`,
+      );
       const searchData = await searchRes.json();
-      if (searchData.meals && searchData.meals.length > 0) {
-        // Pick a random result from the matches so it's not always the same
-        const randomIndex = Math.floor(Math.random() * Math.min(searchData.meals.length, 5));
+      if (searchData.meals?.length > 0) {
+        // Pick randomly from the top 5 results for variety
+        const randomIndex = Math.floor(
+          Math.random() * Math.min(searchData.meals.length, 5),
+        );
         meal = searchData.meals[randomIndex];
       }
     }
 
-    // If no search term or no results, get a random meal from MealDB
+    // Fallback to random
     if (!meal) {
-      const randomRes = await fetch('https://www.themealdb.com/api/json/v1/1/random.php');
+      const randomRes = await fetch(
+        "https://www.themealdb.com/api/json/v1/1/random.php",
+      );
       const randomData = await randomRes.json();
       meal = randomData.meals?.[0];
     }
 
-    if (!meal) {
-      return res.status(404).json({ error: 'No recipe found.' });
-    }
+    if (!meal) return res.status(404).json({ error: "No recipe found." });
 
     res.json({
       found: true,
@@ -114,6 +137,7 @@ app.post("/api/recipe-suggest", async (req, res) => {
 
 app.set("view engine", "ejs");
 
+// Configure MongoDB-backed session store
 var mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}`,
   crypto: {
@@ -121,6 +145,7 @@ var mongoStore = MongoStore.create({
   },
 });
 
+// Session middleware — sessions expire after 24 hours
 app.use(
   session({
     secret: node_session_secret,
@@ -135,6 +160,7 @@ app.use(
 
 app.use(express.static("public"));
 
+// Middleware to block unauthenticated users from protected routes
 function sessionValidation(req, res, next) {
   if (req.session.authenticated) {
     next();
@@ -147,7 +173,7 @@ function sessionValidation(req, res, next) {
 app.get("/", (req, res) => {
   res.render("recipes", {
     cssFiles: ["style", "recipe"],
-    jsFiles: ["recipe"],
+    jsFiles: ["recipe", "easterEgg"],
   });
 });
 
@@ -163,13 +189,133 @@ app.get("/api/recipes", async (req, res) => {
   res.json(data.results);
 });
 
+// Fetch price-per-serving for a single recipe from Spoonacular, adjusted to BC CAD
+app.get("/api/recipe-price", async (req, res) => {
+  const { name } = req.query;
+  try {
+    const response = await fetch(
+      `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(name)}&number=1&addRecipeInformation=true&apiKey=${process.env.SPOONACULAR_KEY}`,
+    );
+    const data = await response.json();
+    const recipe = data.results?.[0];
+
+    // Convert USD cents → CAD, then apply BC retail markup
+    const BC_MARKUP = 1.2;
+    const price = recipe?.pricePerServing
+      ? ((recipe.pricePerServing / 100) * 1.3704 * BC_MARKUP).toFixed(2)
+      : null;
+    res.json({ price });
+  } catch (err) {
+    res.json({ price: null });
+  }
+});
+
+// Groq-powered BC ingredient cost estimate made with AI
+// Batch BC price estimate — prices multiple meals in a single Groq call.
+// Body: { meals: [{ id, name }, ...] }
+// Returns: { prices: { "<id>": 12.50, ... } }
+app.post("/api/bc-price-estimate", async (req, res) => {
+  const { meals } = req.body;
+
+  if (!meals?.length) {
+    return res.status(400).json({ error: "No meals provided." });
+  }
+
+  // Format meal list for the prompt
+  const list = meals
+    .map((m, i) => `${i + 1}. id="${m.id}" name="${m.name}"`)
+    .join("\n");
+
+  const prompt = `You are a Canadian grocery pricing assistant with expert knowledge of BC grocery store prices in 2024.
+ 
+For each recipe below, estimate the REALISTIC total cost in CAD to make ONE serving of that dish, as if you were buying all the ingredients at a BC grocery store (Save-On-Foods, Superstore, or Walmart Canada).
+ 
+Pricing guidelines:
+- Chicken breast: ~$3.50-4.50 per 150g serving
+- Ground beef: ~$3.00-4.00 per 150g serving
+- Fish/seafood: ~$4.00-7.00 per serving
+- Pork: ~$2.50-4.00 per serving
+- Most vegetarian dishes: ~$4.00-8.00 per serving
+- Pasta dishes with meat: ~$5.00-9.00 per serving
+- Most dishes should fall between $6 and $18 per serving
+- Include a proportional share of pantry staples (oil, spices, flour, etc.)
+- Do NOT return prices under $3.00 — even simple dishes cost at least $4-5 in BC
+ 
+Recipes:
+${list}
+ 
+Reply ONLY with a JSON object mapping each id to a numeric price rounded to 2 decimal places. No extra text, no markdown:
+{ "52772": 11.50, "52773": 8.00 }`;
+
+  try {
+    const result = await callGemini(prompt);
+    // Strip any markdown fences before parsing
+    const clean = result.replace(/```json|```/g, "").trim();
+    const prices = JSON.parse(clean);
+    res.json({ prices });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ error: "Could not estimate prices: " + err.message });
+  }
+});
+
 app.get("/login", (req, res) => {
-  res.render("login", {
+  res.render("logIn", {
     cssFiles: ["style", "login"],
-    jsFiles: ["login"],
+    jsFiles: ["login", "easterEgg"],
   });
 });
 
+// Guard: redirect to login if no MFA session is pending
+app.get("/verifyMFA", (req, res) => {
+  if (!req.session.pendingMFA) {
+    return res.redirect("/login");
+  }
+
+  res.render("verifyMFA", {
+    cssFiles: ["style", "login"],
+    jsFiles: [],
+  });
+});
+
+app.get("/verifyMFA", (req, res) => {
+  if (!req.session.pendingMFA) {
+    return res.redirect("/login");
+  }
+
+  res.render("verifyMFA", {
+    cssFiles: ["style", "login"],
+    jsFiles: ["easterEgg"],
+  });
+});
+
+// Verify the MFA code and promote the session to fully authenticated
+app.post("/verifyMFA", async (req, res) => {
+  const { code } = req.body;
+
+  if (code === req.session.mfaCode) {
+    req.session.authenticated = true;
+
+    // Promote pending MFA data into the live session
+    req.session.name = req.session.mfaName;
+    req.session.email = req.session.mfaEmail;
+    req.session.phone = req.session.mfaPhone;
+
+    // Clean up temporary MFA fields
+    delete req.session.pendingMFA;
+    delete req.session.mfaCode;
+    delete req.session.mfaName;
+    delete req.session.mfaEmail;
+    delete req.session.mfaPhone;
+
+    return res.redirect("/profile");
+  }
+
+  res.send("Invalid verification code.");
+});
+
+// Validate credentials and create a session on successful login
 app.post("/loginSubmit", async (req, res) => {
   const { email, password } = req.body;
 
@@ -179,18 +325,26 @@ app.post("/loginSubmit", async (req, res) => {
   });
 
   const validationResult = schema.validate({ email, password });
+
   if (validationResult.error != null) {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    res.render("loginSubmit", {
+      cssFiles: ["style", "login"],
+      jsFiles: ["easterEgg"],
+    });
     return;
   }
 
   const result = await userCollection
     .find({ email })
-    .project({ name: 1, email: 1, password: 1, user_type: 1, _id: 1 })
+    .project({ name: 1, email: 1, password: 1, user_ype: 1, _id: 1 })
     .toArray();
 
+  // Reject if no matching user found
   if (result.length !== 1) {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    res.render("loginSubmit", {
+      cssFiles: ["style", "login"],
+      jsFiles: ["easterEgg"],
+    });
     return;
   }
 
@@ -199,12 +353,18 @@ app.post("/loginSubmit", async (req, res) => {
     req.session.name = result[0].name;
     req.session.email = result[0].email;
     req.session.phone = result[0].phone || null;
+
     res.redirect("/profile");
   } else {
-    res.render("loginSubmit", { cssFiles: ["login"], jsFiles: [] });
+    // Wrong password — re-render the error page
+    res.render("loginSubmit", {
+      cssFiles: ["style", "login"],
+      jsFiles: ["easterEgg"],
+    });
   }
 });
 
+// Validate input, hash the password, and create a new user account
 app.post("/signupSubmit", async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -217,13 +377,18 @@ app.post("/signupSubmit", async (req, res) => {
   const validationResult = schema.validate({ name, email, password });
   if (validationResult.error != null) {
     const message = validationResult.error.details[0].message;
-    res.render("signupSubmit", { message, cssFiles: ["login"], jsFiles: [] });
+    res.render("signupSubmit", {
+      message,
+      cssFiles: ["login"],
+      jsFiles: ["easterEgg"],
+    });
     return;
   }
 
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   await userCollection.insertOne({ name, email, password: hashedPassword });
 
+  // Log the new user in immediately after signup
   req.session.authenticated = true;
   req.session.name = name;
   req.session.email = email;
@@ -241,10 +406,18 @@ app.get("/profile", sessionValidation, (req, res) => {
     },
 
     cssFiles: ["style", "profile"],
-    jsFiles: ["profile"],
+    jsFiles: ["profile", "easterEgg"],
   });
 });
 
+app.get("/miniGame", (req, res) => {
+  res.render("miniGame", {
+    cssFiles: ["style", "miniGame"],
+    jsFiles: ["miniGame"],
+  });
+});
+
+// Destroy the session and clear the cookie on logout
 app.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
@@ -256,6 +429,7 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Update a user's name, email, phone, or password — requires current password to confirm identity
 app.post("/updateUser", sessionValidation, async (req, res) => {
   const { field, value, currentPassword } = req.body;
   const oldEmail = req.session.email;
@@ -269,6 +443,7 @@ app.post("/updateUser", sessionValidation, async (req, res) => {
 
   let updateValue = value;
 
+  // Hash the new password before storing it
   if (field === "password") {
     if (value.length < 8) {
       return res.send("New password must be at least 8 characters.");
@@ -282,6 +457,7 @@ app.post("/updateUser", sessionValidation, async (req, res) => {
   try {
     await userCollection.updateOne({ email: oldEmail }, { $set: updateData });
 
+    // Keep the session in sync with the updated field
     if (field === "name") req.session.name = value;
     if (field === "email") req.session.email = value;
     if (field === "phone") req.session.phone = value;
@@ -295,81 +471,264 @@ app.post("/updateUser", sessionValidation, async (req, res) => {
 app.get("/map", (req, res) => {
   res.render("map", {
     cssFiles: ["style"],
-    jsFiles: ["map"],
+    jsFiles: ["map", "easterEgg"],
     mapboxToken: process.env.MAPBOX_TOKEN,
+    isLoggedIn: req.session.authenticated || false,
   });
+});
+
+// Add a recipe's ingredients to the user's shopping list, replacing any existing entry for that recipe
+app.post("/api/shoppingList/add", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  const { recipeName, ingredients } = req.body;
+  const userEmail = req.session.email;
+
+  await shoppingListCollection.deleteMany({ recipeName, userEmail });
+  await shoppingListCollection.insertOne({
+    recipeName,
+    ingredients,
+    userEmail,
+  });
+
+  res.json({ message: "Added to shopping list!" });
+});
+
+// Return all shopping list items for the logged-in user
+app.get("/api/shoppingList", async (req, res) => {
+  if (!req.session.authenticated) return res.json([]);
+  const items = await shoppingListCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
+  res.json(items);
+});
+
+// Remove all shopping list entries for the logged-in user
+app.delete("/api/shoppingList/clear", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  await shoppingListCollection.deleteMany({ userEmail: req.session.email });
+  res.json({ message: "Shopping list cleared." });
+});
+
+// Update a single shopping list entry's ingredients
+app.patch("/api/shoppingList/:id", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  const { ingredients, recipeName } = req.body;
+  await shoppingListCollection.updateOne(
+    { _id: new ObjectId(req.params.id), userEmail: req.session.email },
+    { $set: { ingredients, recipeName } },
+  );
+  res.json({ message: "Updated." });
+});
+
+// Delete a single shopping list entry
+app.delete("/api/shoppingList/:id", async (req, res) => {
+  if (!req.session.authenticated)
+    return res.status(401).json({ message: "Please log in first." });
+
+  await shoppingListCollection.deleteOne({
+    _id: new ObjectId(req.params.id),
+    userEmail: req.session.email,
+  });
+  res.json({ message: "Deleted." });
+});
+
+// AI-powered store suggestions for shopping list
+// Body: { ingredients: string[], stores: [{ name, address, lat, lon, distKm, walkMin, driveMin }] }
+// Returns: { suggestions: [...stores sorted by AI score] }
+app.post("/api/store-suggestions", async (req, res) => {
+  const { ingredients, stores } = req.body;
+
+  if (!ingredients?.length || !stores?.length) {
+    return res.status(400).json({ error: "Missing ingredients or stores." });
+  }
+
+  const ingredientList = ingredients.join(", ");
+  const storeList = stores
+    .map(
+      (s, i) =>
+        `${i + 1}. "${s.name}" — ${s.address} (${s.distKm} km, ~${s.walkMin} min walk, ~${s.driveMin} min drive)`
+    )
+    .join("\n");
+
+  const prompt = `You are a grocery shopping assistant with expert knowledge of Canadian grocery store chains in British Columbia.
+
+A user needs to buy these ingredients: ${ingredientList}
+
+Here are the nearby grocery stores:
+${storeList}
+
+For each store, score it 0-100 on how likely it is to carry ALL or MOST of these ingredients. Consider:
+- Large full-service chains (Superstore, Save-On-Foods, Walmart Supercentre, Safeway, Loblaws): 85-98 for common ingredients
+- Specialty/ethnic grocers (T&T, H-Mart, Osaka, Persia Foods): 90+ for Asian/international ingredients, 50-70 for Western staples
+- Discount chains (No Frills, FreshCo): 70-85 for basics, may lack specialty items
+- Wholesale clubs (Costco, Wholesale Club): 80-92, wide variety but bulk only
+- Small independent grocers: 60-75
+- Convenience or dollar stores: 20-40
+
+Return ONLY a JSON array, no extra text, no markdown:
+[{"index":1,"score":92,"reason":"Full-service superstore, stocks everything"},{"index":2,"score":75,"reason":"Good basics, limited specialty items"},...]`;
+
+  try {
+    const result = await callGemini(prompt);
+    // Strip markdown fences and parse JSON
+    const clean = result.replace(/```json|```/g, "").trim();
+    const scored = JSON.parse(clean);
+
+    // Map scores back to store objects and sort by score descending
+    const suggestions = scored
+      .map((s) => {
+        const store = stores[s.index - 1];
+        if (!store) return null;
+        return { ...store, score: s.score, reason: s.reason };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+
+    res.json({ suggestions });
+  } catch (err) {
+    res.status(500).json({ error: "Could not generate suggestions: " + err.message });
+  }
 });
 
 app.get("/shoppingList", (req, res) => {
   res.render("shoppingList", {
     title: "Ingredients",
     cssFiles: ["shoppingList", "style"],
-    jsFiles: [],
+    jsFiles: ["shoppingList", "easterEgg"],
   });
 });
 
-app.get("/savedLocations", (req, res) => {
+// Load saved locations for the logged-in user
+app.get("/savedLocations", async (req, res) => {
+  const savedLocations = await savedLocationsCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
+
   res.render("savedLocations", {
     cssFiles: ["style"],
-    jsFiles: ["savedLocations"],
+    jsFiles: ["savedLocations", "easterEgg"],
+    savedLocations: savedLocations,
   });
 });
 
+// Redirect to login if not authenticated, otherwise load saved recipes
 app.get("/savedRecipes", async (req, res) => {
+  if (!req.session.authenticated) {
+    return res.redirect("/login");
+  }
 
-    const savedRecipes = await savedRecipesCollection.find().toArray();
+  const savedRecipes = await savedRecipesCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
 
-    res.render("savedRecipes", {
-        cssFiles: ["style", "recipe"],
-        jsFiles: [],
-        savedRecipes: savedRecipes
-    });
+  res.render("savedRecipes", {
+    cssFiles: ["style", "recipe"],
+    jsFiles: ["easterEgg"],
+    savedRecipes: savedRecipes,
+  });
 });
 
 app.get("/recipeDetails", (req, res) => {
   res.render("recipeDetails", {
     cssFiles: ["style", "recipeDetails"],
-    jsFiles: ["recipeDetails"],
+    jsFiles: ["recipeDetails", "easterEgg"],
+    isLoggedIn: req.session.authenticated || false,
   });
 });
 
+// Save a recipe to the user's collection — silently skips duplicates
 app.post("/saveRecipe", async (req, res) => {
-
-    const { id, name, image } = req.body;
-
-    const existingRecipe = await savedRecipesCollection.findOne({ id });
-
-    if (existingRecipe) {
-        return res.json({
-            message: "Recipe already saved!"
-        });
-    }
-
-    await savedRecipesCollection.insertOne({
-        id,
-        name,
-        image
+  if (!req.session.authenticated) {
+    return res.status(401).json({
+      message: "Please log in first.",
     });
+  }
 
-    res.json({
-        message: "Recipe saved successfully!"
+  const { id, name, image } = req.body;
+
+  const existingRecipe = await savedRecipesCollection.findOne({
+    userEmail: req.session.email,
+    id: id,
+  });
+
+  if (existingRecipe) {
+    return res.json({
+      message: "Recipe already saved!",
     });
+  }
+
+  await savedRecipesCollection.insertOne({
+    userEmail: req.session.email,
+    id,
+    name,
+    image,
+  });
+
+  res.json({
+    message: "Recipe saved successfully!",
+  });
+});
+
+// Save a store location to the user's collection — silently skips duplicates
+app.post("/saveLocation", async (req, res) => {
+  if (!req.session.authenticated) {
+    return res.status(401).json({ message: "Please log in first." });
+  }
+
+  const { name, address } = req.body;
+
+  const existingLocation = await savedLocationsCollection.findOne({
+    userEmail: req.session.email,
+    name,
+    address,
+  });
+
+  if (existingLocation) {
+    return res.json({ message: "Location already saved!" });
+  }
+
+  await savedLocationsCollection.insertOne({
+    userEmail: req.session.email,
+    name,
+    address,
+  });
+
+  res.json({ message: "Location saved successfully!" });
+});
+
+app.delete("/deleteSavedLocation/:id", async (req, res) => {
+  await savedLocationsCollection.deleteOne({
+    _id: new ObjectId(req.params.id),
+    userEmail: req.session.email,
+  });
+
+  res.json({ message: "Location deleted successfully!" });
 });
 
 app.delete("/deleteSavedRecipe/:id", async (req, res) => {
-
-    const recipeId = req.params.id;
-
-    await savedRecipesCollection.deleteOne({
-        _id: new ObjectId(recipeId)
+  if (!req.session.authenticated) {
+    return res.status(401).json({
+      message: "Please log in first.",
     });
+  }
 
-    res.json({
-        message: "Recipe deleted successfully!"
-    });
+  await savedRecipesCollection.deleteOne({
+    _id: new ObjectId(req.params.id),
+    userEmail: req.session.email,
+  });
+
+  res.json({
+    message: "Recipe deleted successfully!",
+  });
 });
 
-//AI generated for AI challenge
+// AI generated for AI challenge — proxies MealDB meal lookup to avoid CORS issues on the client
 app.get("/api/meal/:id", async (req, res) => {
   try {
     const response = await fetch(
@@ -380,6 +739,15 @@ app.get("/api/meal/:id", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Return the logged-in user's saved recipes as JSON — used by the recipe suggestion feature
+app.get("/api/savedRecipes", async (req, res) => {
+  if (!req.session.authenticated) return res.json([]);
+  const saved = await savedRecipesCollection
+    .find({ userEmail: req.session.email })
+    .toArray();
+  res.json(saved);
 });
 
 // 404

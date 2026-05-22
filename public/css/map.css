@@ -57,8 +57,12 @@
 }
 
 #radius-content label {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #ccc;
+}
+
+/* Number input rows: label stacks above the input */
+#radius-content > div:not(.toggle-row) label {
   display: block;
   margin-bottom: 0.25em;
 }
@@ -83,25 +87,6 @@
   transition: background 0.2s;
 }
 
-/*First-time map popup*/
-.popup-overlay {
-  position: fixed;
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  justify-self: center;
-  z-index: 1000;
-  margin-top: 25%;
-}
-
-.popup-content {
-  background-color: rgb(233, 230, 230);
-  padding: 1em 1.5em;
-  border-radius: 0.375em;
-  text-align: center;
-}
-
 .popup-content h2 {
   margin: 0 0 0.5em 0;
   font-size: 1.1rem;
@@ -122,28 +107,35 @@
 
 .popup-content ul li {
   margin-bottom: 0.4em;
+  color: white;
 }
 
 #closeMapPopup {
-  padding: 0.5em 1.25em;
-  background: #4caf50;
-  color: #fff;
+  background-color: #8cc63f;
+  border-radius: 6px;
   border: none;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-/* transit toggle row */
-#transit-toggle-row {
+/* toggle rows — shared style for all three checkbox rows */
+.toggle-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-#transit-toggle {
-  width: 18px;
-  height: 18px;
+.toggle-row input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #4caf50;
+}
+
+.toggle-row label {
+  cursor: pointer;
+  line-height: 1.2;
+  user-select: none;
 }
 
 /* grocery + transit */
@@ -193,28 +185,7 @@
   display: none;
 }
 
-#relay-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-#relay-toggle {
-  width: 18px;
-  height: 18px;
-}
-
-/* Food bank toggle row */
-#foodbank-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#foodbank-toggle {
-  width: 18px;
-  height: 18px;
-}
 
 /* Food bank popup */
 .foodbank-popup .map-popup-link {
@@ -226,7 +197,51 @@
 }
 
 
-/* Custom scan location button */
+/* Store details (OSM hours / phone / website) */
+.store-details-loading {
+  font-size: 11px;
+  color: #888;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+.store-details {
+  margin-top: 8px;
+  border-top: 1px solid #e0e0e0;
+  padding-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.store-detail-row {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  align-items: baseline;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #555;
+  min-width: 42px;
+  flex-shrink: 0;
+}
+
+.detail-value {
+  color: #222;
+  word-break: break-word;
+}
+
+.detail-link {
+  color: #2e7d32;
+  text-decoration: none;
+}
+
+.detail-link:hover {
+  text-decoration: underline;
+}
 #custom-location-btn {
   position: fixed;
   bottom: 8rem;
@@ -247,4 +262,171 @@
   object-fit: contain;
   display: block;
   pointer-events: none;
+}
+
+/* Split relay marker (bus + skytrain both scan the same store)
+   Single div — same teardrop clip-path as the standard Mapbox pin (27x41 px).
+   linear-gradient splits left half yellow (bus) / right half purple (skytrain).
+   ::after draws the white inner circle. */
+.split-relay-marker {
+  position: relative;
+  width: 27px;
+  height: 41px;
+  clip-path: path('M13.5,0 C6.04,0 0,6.04 0,13.5 C0,22.5 13.5,41 13.5,41 C13.5,41 27,22.5 27,13.5 C27,6.04 20.96,0 13.5,0Z');
+  background: linear-gradient(to right, #FFD700 50%, #8B5CF6 50%);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+  cursor: pointer;
+}
+
+.split-relay-marker::after {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  background: white;
+  border-radius: 50%;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* AI Shopping Panel */
+#ai-shopping-panel {
+  position: fixed;
+  bottom: 80px;
+  left: 12px;
+  width: 300px;
+  max-height: 70vh;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
+#ai-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #015982;
+  color: #fff;
+  padding: 0.65rem 0.9rem;
+}
+
+#ai-panel-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+#ai-panel-close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+#ai-panel-close:hover { opacity: 1; }
+
+#ai-panel-ingredients-row {
+  padding: 0.55rem 0.9rem;
+  background: #f0f7fb;
+  border-bottom: 1px solid #d0e6f0;
+  font-size: 0.72rem;
+  color: #015982;
+  line-height: 1.4;
+  max-height: 70px;
+  overflow-y: auto;
+}
+
+#ai-suggest-btn {
+  margin: 0.7rem 0.9rem 0.4rem;
+  padding: 0.6rem 1rem;
+  background-color: #0b5f86;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#ai-suggest-btn:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+#ai-suggest-btn:not(:disabled):hover {
+  background-color: #015982;
+}
+
+#ai-results-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.4rem 0 0.6rem;
+}
+
+.ai-store-card {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid #e8e8e8;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.ai-store-card:last-child { border-bottom: none; }
+.ai-store-card:hover { background: #f0f7fb; }
+
+.ai-store-rank {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: #015982;
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-right: 5px;
+}
+
+.ai-store-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.ai-store-meta {
+  font-size: 0.72rem;
+  color: #555;
+  margin-top: 3px;
+}
+
+.ai-store-reason {
+  font-size: 0.72rem;
+  color: #444;
+  margin-top: 4px;
+}
+
+.ai-score-bar-wrap {
+  margin-top: 5px;
+  background: #ddd;
+  border-radius: 4px;
+  height: 5px;
+  overflow: hidden;
+}
+.ai-score-bar {
+  height: 100%;
+  border-radius: 4px;
+  background-color: #8cc63f;
+  transition: width 0.6s ease;
+}
+
+.ai-loading-msg {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #555;
 }

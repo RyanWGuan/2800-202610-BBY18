@@ -1,16 +1,14 @@
 /* AI ASSISTED CSS PAGE */
 
-html,
-body {
-  overflow-y: auto;
-}
-
+/* Main content area -- prevents horizontal overflow and sets white background */
 .main {
   background-color: white;
-  min-height: 80vh;
   width: 100vw;
+  padding-bottom: 1rem;
+  overflow-x: hidden;
 }
 
+/* Shopping list wrapper -- full width with consistent padding */
 .shopping-list {
   font-family: "Georgia", serif;
   width: 100%;
@@ -20,18 +18,22 @@ body {
   background: white;
 }
 
+/* Page title */
 .shopping-list h1 {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #1a1a1a;
   margin: 0 0 1.5rem;
+  box-sizing: border-box;
 }
 
+/* Groups ingredients under a single recipe */
 .recipe-group {
   margin-bottom: 2rem;
 }
 
+/* Recipe name label displayed above each ingredient group */
 .recipe-label {
   font-size: 0.75rem;
   font-weight: 600;
@@ -41,6 +43,7 @@ body {
   margin-bottom: 0.5rem;
 }
 
+/* Individual ingredient row with checkbox and label */
 .ingredient-item {
   display: flex;
   align-items: center;
@@ -53,16 +56,19 @@ body {
     padding-left 0.15s;
 }
 
+/* Remove bottom border from last ingredient in a group */
 .ingredient-item:last-child {
   border-bottom: none;
 }
 
+/* Highlight row on hover */
 .ingredient-item:hover {
   background: #ece9e1;
   border-radius: 6px;
   padding-left: 0.4rem;
 }
 
+/* Custom styled checkbox -- hides default and replaces with styled box */
 .ingredient-item input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
@@ -78,11 +84,13 @@ body {
     border-color 0.15s;
 }
 
+/* Checked state -- dark fill */
 .ingredient-item input[type="checkbox"]:checked {
   background: #2a2a2a;
   border-color: #2a2a2a;
 }
 
+/* Checkmark drawn with CSS borders */
 .ingredient-item input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
@@ -95,6 +103,7 @@ body {
   transform: rotate(-45deg);
 }
 
+/* Ingredient label text */
 .ingredient-item label {
   font-size: 1rem;
   color: #1a1a1a;
@@ -103,28 +112,55 @@ body {
   line-height: 1.4;
 }
 
+/* Strike through and grey out label when checkbox is checked */
 .ingredient-item input[type="checkbox"]:checked + label {
   color: #aaa;
   text-decoration: line-through;
 }
 
+/* Clear completed button -- removes checked ingredients */
 .clear-btn {
   display: block;
   width: calc(100% - 2rem);
   padding: 0.75rem;
-  background: #ddd;
+  background-color: #0b5f86;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #444;
+  color: white;
   cursor: pointer;
   transition:
     background 0.2s,
     color 0.2s;
 }
 
+/* Clear button hover state */
 .clear-btn:hover {
-  background: #c8c8c8;
-  color: #1a1a1a;
+  background: #0c78aa;
+  color: white;
+}
+
+/* AI powered nearby store suggestion button */
+.ai-store-btn {
+  display: block;
+  width: calc(100% - 2rem);
+  padding: 0.75rem;
+  background-color: #015982;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family:
+    "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 0.6rem;
+  transition: background 0.2s;
+}
+
+/* AI store button hover state */
+.ai-store-btn:hover {
+  background-color: #0b5f86;
 }
