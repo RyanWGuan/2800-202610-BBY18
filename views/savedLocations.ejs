@@ -1,24 +1,32 @@
 <%- include("partials/header", { cssFiles: ["style"] }) %>
 
 <main class="main">
+
+  <!-- Saved locations container -->
   <div id="savedLocationsContainer">
 
+    <!-- Message when no saved locations exist -->
     <% if (savedLocations.length === 0) { %>
       <p>No saved locations yet.</p>
     <% } %>
 
+    <!-- Loop through saved locations -->
     <% savedLocations.forEach((location) => { %>
       <div class="location_card">
+
+        <!-- Location information -->
         <div class="location_text">
           <h2><%= location.name %></h2>
           <p><%= location.address %></p>
 
+          <!-- Delete location button -->
           <button
             class="delete_button"
             onclick="deleteLocation('<%= location._id %>')"
           >
             Delete
           </button>
+
         </div>
       </div>
     <% }) %>
@@ -26,6 +34,7 @@
   </div>
 </main>
 
+<!-- First time saved locations popup -->
 <div id="savedLocationsPopup" style="display: none;" class="popup-overlay">
   <div class="popup-content">
     <h2>Saved Locations Page</h2>
@@ -34,6 +43,7 @@
   </div>
 </div>
 
+<!-- Saved locations javascript file -->
 <script src="/js/savedLocations.js"></script>
 
 <%- include("partials/footer") %>
