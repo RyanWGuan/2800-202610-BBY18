@@ -1,3 +1,4 @@
+/* Main overall layout container split into three distinct horizontal sections */
 .body_container{
     display: grid;
     width: 100vw;
@@ -5,6 +6,7 @@
     grid-template-rows: 40vh 30vh 10vh;
 }
 
+/* Four-row configuration grid used to show user profile details and change buttons */
 .edit_details{
     display: grid;
     width: 100vw;
@@ -13,6 +15,7 @@
     grid-template-rows: 10vh 10vh 10vh 10vh;
 }
 
+/* Centered blue button used to open text field modifications */
 .edit_button{
     width: 50%;
     height: 50%;
@@ -24,6 +27,7 @@
     border: none;
 }
 
+/* Red button background fallback styles */
 .signout{
     border-radius: 5px;
     border: none;
@@ -31,11 +35,13 @@
     color: white;
 }
 
+/* Text alignment positioning layout rules for labels next to inputs */
 .info{
     align-self: center;
     margin-left: 10%;
 }
 
+/* Display grid split into two rows to show saved content feed details */
 .saved_data{
     display: grid;
     height: 30vh;
@@ -44,10 +50,12 @@
     align-content: center;
 }
 
+/* Center items inside saved list blocks vertically */
 .saved_info{
     align-self: center;
 }
 
+/* Square dimension scaling block rule for saved graphic icons */
 .bookmark_icon{
     height: 45px;
     width: auto;
@@ -55,11 +63,13 @@
     justify-self: center;
 }
 
+/* Basic resizing constraint for structural navigation arrows */
 .arrow_icon{
     width: 30px;
     height: auto;
 }
 
+/* Core positioning overrides and dimension restrictions for sign-out button triggers */
 .signout{
     width: 50%;
     height: 50%;
@@ -67,7 +77,7 @@
     align-self: center;
 }
 
-/* Dark Overlay */
+/* Fullscreen dark translucent screen covering background layer */
 .modal-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -79,7 +89,7 @@
     z-index: 1000;
 }
 
-/* Modal Box */
+/* Center floating dialog interface panel configuration */
 .modal-content {
     background: #4a8cee;
     color: white;
@@ -88,14 +98,17 @@
     width: 440px;
 }
 
+/* Flex rows to cleanly push header elements away from close targets */
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+/* Standardized spacing clear rule for main inner text headers */
 .modal-header h2 { margin: 0; font-size: 24px; }
 
+/* Flat custom text button setups used to exit dialog boxes */
 .close-x {
     background: none; 
     border: none; 
@@ -104,19 +117,22 @@
     cursor: pointer;
 }
 
+/* Subtle secondary messaging descriptions beneath header titles */
 .modal-subtitle { 
     color: white; 
     margin: 8px 0 20px 0; 
     font-size: 14px; 
 }
 
+/* Direct color matching rules for standard dialog text structures */
 #fieldLabel, #modalTitle{
     color: white;
 }
 
-/* Inputs */
+/* Vertical whitespace spacer rows grouping label fields and input targets */
 .input-group { margin-bottom: 20px; }
 
+/* Capitalized small bold configurations used to title editable spaces */
 .input-group label {
     display: block;
     text-transform: uppercase;
@@ -126,6 +142,7 @@
     margin-bottom: 8px;
 }
 
+/* Full-width clean input text boxes containing flat padding offsets */
 .input-group input {
     width: 100%;
     padding: 10px;
@@ -136,9 +153,10 @@
     box-sizing: border-box;
 }
 
+/* Soft grey subtext color rule for formatting requirements */
 .input-hint { font-size: 12px; color: #b5bac1; margin-top: 4px; }
 
-/* Buttons */
+/* Right-aligned spacing box containing button execution sets */
 .modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -146,8 +164,10 @@
     margin-top: 28px;
 }
 
+/* Transparent background setup for non-destructive close actions */
 .btn-cancel { background: none; border: none; color: white; cursor: pointer; }
 
+/* Bright green action confirm trigger styling setup */
 .btn-done {
     background:  #8cc63f; 
     color: white;
