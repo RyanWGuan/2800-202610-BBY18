@@ -1,3 +1,4 @@
+/* Main play arena clipping any falling objects that drop beyond the game boundaries */
 #game-container{
     position: relative; 
     width: 100vw; 
@@ -5,6 +6,7 @@
     overflow: hidden;
 }
 
+/* Floating interface layer housing top-bar text above the moving gameplay objects */
 .header_container{
     position: absolute; 
     font-size: 20px; 
@@ -13,34 +15,40 @@
     font-family: sans-serif;
 }
 
+/* Standard color rule forcing text stats to display cleanly against dark boards */
 .stats{
     color: white;
 }
 
+/* Grid alignment positioning rules centering the countdown timer element */
 .time{
     grid-column: 1 / span 2;
     align-self: center;
     justify-self: center;
 }
 
+/* Grid alignment positioning rules centering the points total element */
 .score{
     grid-column: 3 / span 2;
     align-self: center;
     justify-self: center;
 }
 
+/* Spacing positioning rules pushing the remaining time clock to the upper left edge */
 #time-display{
     top: 15px; 
     left: 20px; 
     color: white; 
 }
 
+/* Spacing positioning rules pushing the current score counter to the upper right edge */
 #score-display{
     top: 15px; 
     right: 70px; 
     color: white; 
 }
 
+/* Fixed base alignment securing the player paddle to the baseline floor zone */
 .bowl_img{
     display: flex;
     position: absolute;
@@ -49,8 +57,8 @@
     bottom: 1%;
 }
 
+/* Basic resizing scale properties constraining exit navigation triggers */
 .back_icon{
     height: 50px;
     width: auto;
 }
-
